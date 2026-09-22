@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Psichoterapeutės svetainės klausimynas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+  :root {
+    --bg: #F4F6F3;
+    --surface: #FFFFFF;
+    --ink: #1B2A2C;
+    --muted: #5C6C6D;
+    --line: #D5DDD9;
+    --accent: #2B6F6B;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DDEBE8;
+    --focus: #9ED0C9;
+    --req: #B4462F;
+    --ok: #2E7D4F;
+    --shadow: 0 1px 2px rgba(27, 42, 44, .05), 0 10px 28px rgba(27, 42, 44, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111819;
+      --surface: #1A2324;
+      --ink: #E6EDEB;
+      --muted: #A3B4B1;
+      --line: #2E3B3C;
+      --accent: #6FC3BA;
+      --accent-ink: #0F1A1A;
+      --accent-soft: #1E3534;
+      --focus: #3F8A83;
+      --req: #E58C78;
+      --ok: #7BC99A;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111819;
+    --surface: #1A2324;
+    --ink: #E6EDEB;
+    --muted: #A3B4B1;
+    --line: #2E3B3C;
+    --accent: #6FC3BA;
+    --accent-ink: #0F1A1A;
+    --accent-soft: #1E3534;
+    --focus: #3F8A83;
+    --req: #E58C78;
+    --ok: #7BC99A;
+    --shadow: none;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    padding-inline: 16px;
+    padding-block: 0 72px;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1, h2, h3 {
+    font-family: Fraunces, Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+  }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); }
+
+  .top {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+  .top-in {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px 20px;
+    padding-block: 10px;
+    flex-wrap: wrap;
+  }
+  .top h1 { font-size: 19px; flex: 1 1 220px; }
+  .prog { display: flex; flex-direction: column; gap: 5px; flex: 1 1 200px; min-width: 0; }
+  .prog-text { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .intro {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 24px;
+    margin-block: 26px 8px;
+    box-shadow: var(--shadow);
+  }
+  .intro h2 { font-size: 30px; margin-bottom: 12px; }
+  .intro ul { margin: 0 0 12px; padding-left: 22px; }
+  .intro li { margin-bottom: 6px; }
+  .legend { color: var(--muted); font-size: 15px; margin: 0; }
+
+  .sec { margin-block: 44px 0; }
+  .sec-head { display: flex; gap: 14px; align-items: center; margin-bottom: 8px; }
+  .num {
+    flex: none; width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .sec h2 { font-size: 27px; }
+  .why { color: var(--muted); margin: 0 0 18px 50px; font-size: 16px; }
+  @media (max-width: 520px) { .why { margin-left: 0; } }
+
+  .q {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px 20px;
+    margin-bottom: 14px;
+  }
+  .lbl { display: block; font-weight: 700; font-size: 17px; margin-bottom: 4px; }
+  .qnum {
+    display: inline-block; min-width: 2.6em; margin-right: 6px; padding: 0 6px;
+    border-radius: 6px; text-align: center;
+    color: var(--muted); font-weight: 400; font-size: 14px; font-variant-numeric: tabular-nums;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .q.done .qnum { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .q.done .qnum::after { content: " ✓"; }
+  .req { color: var(--req); }
+  .hint { color: var(--muted); font-size: 15px; margin: 0 0 10px; }
+
+  input[type="text"], input[type="email"], input[type="tel"], textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  textarea { min-height: 112px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible, .opt:has(input:focus-visible) {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--focus);
+  }
+
+  .opts { display: flex; flex-direction: column; gap: 6px; }
+  .opt {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 8px;
+    cursor: pointer; background: var(--bg);
+  }
+  .opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .opt input { accent-color: var(--accent); width: 20px; height: 20px; margin: 3px 0 0; flex: none; }
+  .other { margin-top: 4px; }
+
+  .svc { margin: 8px 0 4px; padding: 14px; border: 1.5px dashed var(--line); border-radius: 10px; display: grid; gap: 10px; background: var(--surface); }
+  .svc .sub label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 4px; }
+  .svc textarea { min-height: 88px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .finish {
+    margin-top: 44px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 24px;
+    box-shadow: var(--shadow);
+  }
+  .finish h2 { font-size: 27px; margin-bottom: 8px; }
+  .finish-note { color: var(--muted); font-size: 15px; }
+  textarea.export {
+    min-height: 280px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    margin-block: 12px;
+  }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 16px;
+    border-radius: 999px; padding: 11px 20px;
+    border: 1.5px solid var(--accent);
+    background: var(--accent); color: var(--accent-ink);
+    cursor: pointer;
+  }
+  .btn.secondary { background: transparent; color: var(--accent); }
+  .btn.ghost { border-color: transparent; background: transparent; color: var(--muted); font-weight: 400; padding-inline: 10px; }
+  .btn.small { font-size: 14px; padding: 7px 14px; }
+  .saved { font-size: 13px; color: var(--muted); margin-top: 10px; min-height: 1.4em; }
+  .sent { font-size: 14px; color: var(--muted); }
+  .sent.ok { color: var(--ok); font-weight: 700; }
+  details.fallback { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; }
+  details.fallback summary { cursor: pointer; color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+  .clear-row { margin-top: 16px; }
+
+  footer.end { text-align: center; color: var(--muted); font-size: 14px; margin-top: 36px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 11px 18px; border-radius: 999px; font-size: 15px;
+    box-shadow: var(--shadow); max-width: calc(100% - 32px); text-align: center; z-index: 20;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <h1>Svetainės klausimynas</h1>
+    <div class="prog" aria-live="polite">
+      <div class="prog-text" id="prog-text">Atsakyta 0 iš 0</div>
+      <div class="bar"><i id="prog-bar"></i></div>
+    </div>
+    <button class="btn small" id="btn-finish" type="button">Baigti</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro" aria-labelledby="intro-h">
+    <h2 id="intro-h">Sveiki! Šis klausimynas padės sukurti Jūsų svetainę.</h2>
+    <p>Atsakymai taps svetainės tekstais, struktūra ir dizainu. Kuo daugiau parašysite savais žodžiais, tuo tiksliau svetainė atspindės Jus ir Jūsų darbą.</p>
+    <ul>
+      <li><strong>Rašykite laisvai.</strong> Nereikia tobulų sakinių, tekstus suredaguosime ir pritaikysime svetainei.</li>
+      <li><strong>Žvaigždute <span class="req">*</span> pažymėti klausimai būtini.</strong> Kitus galite praleisti arba parašyti „spręskite jūs“.</li>
+      <li><strong>Nebūtina užpildyti iš karto.</strong> Atsakymai automatiškai išsaugomi šiame įrenginyje, kol grįšite. Pildykite tame pačiame telefone ar kompiuteryje.</li>
+      <li id="intro-send"><strong>Užpildę spauskite „Baigti“</strong>, tada „Siųsti atsakymus“. Atsakymai atkeliaus tiesiai Dovydui, nieko kopijuoti nereikia.</li>
+    </ul>
+    <p class="legend">Užtruks apie 45–60 min. Nuotraukas, logotipą ir diplomų kopijas atsiųskite atskirai, žinute ar el. paštu.</p>
+  </section>
+
+  <div id="form"></div>
+
+  <section class="finish" id="baigti" aria-labelledby="finish-h">
+    <h2 id="finish-h">Baigti ir išsiųsti atsakymus</h2>
+    <p class="finish-note" id="finish-note"></p>
+    <div id="send-block">
+      <p>Paspaudus mygtuką atsakymai nukeliaus tiesiai Dovydui. Galite siųsti ir nebaigę: vėliau papildę spauskite dar kartą, gausime naujausią versiją.</p>
+      <div class="actions">
+        <button class="btn" id="btn-send" type="button">Siųsti atsakymus</button>
+        <span class="sent" id="sent-info"></span>
+      </div>
+    </div>
+    <details class="fallback" id="copy-block">
+      <summary id="copy-summary">Nepavyksta išsiųsti? Nukopijuokite atsakymus ir atsiųskite žinute</summary>
+      <p>Žemiau matote visus savo atsakymus vienu tekstu. Nukopijuokite jį ir nusiųskite žinute (Messenger, WhatsApp, el. paštu) tam, kas atsiuntė Jums šią nuorodą.</p>
+      <textarea class="export" id="export" readonly aria-label="Visi atsakymai vienu tekstu"></textarea>
+      <div class="actions">
+        <button class="btn secondary" id="btn-copy" type="button">Nukopijuoti atsakymus</button>
+      </div>
+    </details>
+    <div class="actions clear-row">
+      <button class="btn ghost" id="btn-clear" type="button">Ištrinti visus atsakymus</button>
+    </div>
+    <div class="saved" id="saved"></div>
+  </section>
+
+  <footer class="end">Klausimyną parengė Dovydas. Ačiū, kad skyrėte laiko.</footer>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="application/json" id="schema">
+{
+  "sections": [
+    {
+      "num": 1,
+      "id": "apie",
+      "title": "Apie Jus",
+      "why": "Iš šių atsakymų gims svetainės pradžia ir skiltis „Apie mane“. Tai svarbiausia dalis: žmogus per 10 sekundžių turi suprasti, kas Jūs esate ir ar galite jam padėti.",
+      "questions": [
+        { "id": "vardas", "type": "text", "required": true, "label": "Vardas ir pavardė", "hint": "Taip, kaip turi būti rašoma svetainėje ir logotipe.", "placeholder": "Vardenė Pavardenė" },
+        { "id": "titulas", "type": "text", "required": true, "label": "Profesinis titulas (kaip save pristatote)", "hint": "Pvz.: „Psichologė, porų ir šeimos psichoterapeutė“ arba „Medicinos psichologė“. Rašykite tik tai, ką turite teisę naudoti.", "placeholder": "Psichologė, šeimos psichoterapeutė" },
+        { "id": "kryptis", "type": "text", "label": "Terapijos kryptis ar metodas, kuriuo dirbate", "hint": "Pvz.: sisteminė šeimos terapija, psichodinaminė, kognityvinė elgesio (KET), geštalt, EMDR, dailės terapija. Galima kelias." },
+        { "id": "klientai", "type": "check", "required": true, "label": "Su kuo dirbate?", "hint": "Pažymėkite visus tinkamus variantus.", "options": ["Suaugusieji (individualiai)", "Poros", "Šeimos", "Vaikai", "Paaugliai", "Tėvai (tėvystės klausimai)", "Senjorai", "Organizacijos, komandos"], "other": true },
+        { "id": "temos", "type": "textarea", "required": true, "label": "Su kokiais sunkumais dažniausiai kreipiasi Jūsų klientai?", "hint": "Išvardinkite 5–10 temų: nerimas, santykių krizė, skyrybos, netektis, vaikų elgesio sunkumai, perdegimas ir pan. Iš to gims svetainės tekstai, kuriuose žmonės atpažins save." },
+        { "id": "apie", "type": "textarea", "required": true, "label": "Kaip prisistatytumėte naujam klientui?", "hint": "3–6 sakiniai laisva forma: kas Jūs, kuo tikite, kaip dirbate, kas Jums svarbu. Nereikia tobulinti, tekstą suredaguosime." },
+        { "id": "issiskiria", "type": "textarea", "label": "Kuo Jūsų darbas skiriasi nuo kitų specialistų?", "hint": "Patirtis, požiūris, kalbos, specializacija, papildomi metodai. Dėl ko žmonės renkasi būtent Jus?" },
+        { "id": "kalbos", "type": "check", "required": true, "label": "Kalbos, kuriomis konsultuojate", "options": ["Lietuvių", "Rusų", "Anglų"], "other": true }
+      ]
+    },
+    {
+      "num": 2,
+      "id": "paslaugos",
+      "title": "Paslaugos ir kainos",
+      "why": "Pavyzdinėje svetainėje kiekviena paslauga turi savo puslapį su aprašymu, trukme ir kaina. Taip padarysime ir Jums, todėl reikia informacijos apie kiekvieną paslaugą atskirai.",
+      "questions": [
+        { "id": "paslaugos", "type": "services", "required": true, "label": "Kokias paslaugas teikiate? Pažymėkite ir trumpai aprašykite kiekvieną", "hint": "Kiekvienai pažymėtai paslaugai atsiras laukeliai. Aprašyme parašykite, kam ji skirta ir ką padeda spręsti.", "options": ["Individualios konsultacijos suaugusiesiems", "Porų konsultacijos", "Šeimos konsultacijos", "Vaikų ir paauglių konsultacijos", "Konsultacijos tėvams (tėvystės klausimais)", "Grupinė terapija, grupės", "Supervizijos kolegoms", "Mokymai, seminarai, paskaitos"] },
+        { "id": "forma", "type": "radio", "required": true, "label": "Kaip vyksta konsultacijos?", "options": ["Tik gyvai kabinete", "Tik nuotoliniu būdu", "Gyvai ir nuotoliniu būdu"] },
+        { "id": "platforma", "type": "text", "label": "Jei konsultuojate nuotoliniu: kokią platformą naudojate?", "hint": "Zoom, Google Meet, Teams, Skype ar kita." },
+        { "id": "kainos_viesai", "type": "radio", "required": true, "label": "Ar kainas skelbti svetainėje?", "options": ["Taip, tikslias kainas", "Taip, bet tik „nuo…“", "Ne, kainas pasakysiu tik susisiekus"] },
+        { "id": "eiga", "type": "textarea", "label": "Kaip vyksta pirmoji konsultacija ir tolesnis darbas?", "hint": "Ką žmogui verta žinoti prieš ateinant: kaip vyksta pirmas susitikimas, kiek susitikimų paprastai reikia, kaip dažnai jie vyksta, ar sudaroma sutartis." },
+        { "id": "taisykles", "type": "textarea", "label": "Atšaukimo, perkėlimo ir apmokėjimo tvarka", "hint": "Pvz.: nemokamai atšaukti galima prieš 24 val.; mokama grynaisiais, pavedimu ar po konsultacijos. Parašykite ir tai, ar norite, kad ši tvarka būtų matoma svetainėje." },
+        { "id": "nemokamas", "type": "radio", "label": "Ar siūlote nemokamą pažintinį pokalbį (pvz., 15 min. skambutį)?", "options": ["Taip", "Ne", "Svarstau, patarkite"] }
+      ]
+    },
+    {
+      "num": 3,
+      "id": "kvalifikacija",
+      "title": "Išsilavinimas ir kvalifikacija",
+      "why": "Psichoterapijoje pasitikėjimą kuria kvalifikacija. Pavyzdinėje svetainėje tai pateikta chronologiniais sąrašais, kuriuos galima išskleisti. Surašykite viską, o mes atrinksime ir sutvarkysime.",
+      "questions": [
+        { "id": "issilavinimas", "type": "textarea", "required": true, "label": "Išsilavinimas (nuo naujausio iki seniausio)", "hint": "Kiekvienam įrašui: metai, įstaiga, miestas, įgytas laipsnis ar kvalifikacija. Pvz.: „2020–2025 m. Šeimos santykių institutas, Kaunas – porų ir šeimos psichoterapija“." },
+        { "id": "mokymai", "type": "textarea", "label": "Psichoterapijos mokymai, sertifikatai, podiplominės studijos", "hint": "Ilgesnės programos, suteikiančios teisę dirbti pasirinktu metodu. Jei dar mokotės, nurodykite planuojamą pabaigą." },
+        { "id": "kvalifikacija", "type": "textarea", "label": "Kvalifikacijos kėlimas: seminarai, stažuotės, konferencijos", "hint": "Tik svarbiausi įrašai (5–15). Metai, tema, lektorius ar įstaiga, trukmė valandomis, jei žinote." },
+        { "id": "narystes", "type": "textarea", "label": "Narystės profesinėse asociacijose, licencijos, registracijos", "hint": "Pvz.: Lietuvos psichologų sąjunga, psichoterapeutų draugijos, psichologo praktinės veiklos licencija ar registracija. Nurodykite, ar skelbti numerį." },
+        { "id": "supervizija", "type": "text", "label": "Ar turite nuolatinę superviziją ar intervizijos grupę?", "hint": "Klientams tai kokybės ženklas. Užtenka paminėti, be detalių." }
+      ]
+    },
+    {
+      "num": 4,
+      "id": "patirtis",
+      "title": "Profesinė patirtis",
+      "why": "Ši dalis atsako į klausimą „kodėl turėčiau Jumis pasitikėti“. Pavyzdinėje svetainėje tai įstaigų sąrašas ir projektinė veikla.",
+      "questions": [
+        { "id": "metai", "type": "text", "required": true, "label": "Nuo kada dirbate psichologinio konsultavimo srityje? Nuo kada privačiai?", "placeholder": "Pvz.: nuo 2006 m., privačiai nuo 2019 m." },
+        { "id": "darbovietes", "type": "textarea", "label": "Įstaigos ir organizacijos, kuriose dirbote ar dirbate", "hint": "Klinikos, mokyklos, socialinių paslaugų centrai, ligoninės, asociacijos. Metai nebūtini, bet praverstų." },
+        { "id": "dabar", "type": "text", "label": "Kur dirbate dabar, be privačios praktikos?", "hint": "Jei nenorite skelbti, taip ir parašykite." },
+        { "id": "projektai", "type": "textarea", "label": "Projektai, savanorystė, publikacijos, knygos, pranešimai, straipsniai, interviu žiniasklaidoje", "hint": "Viskas, kas rodo Jus kaip ekspertę. Nuorodos labai praverstų." }
+      ]
+    },
+    {
+      "num": 5,
+      "id": "kontaktai",
+      "title": "Kontaktai ir registracija",
+      "why": "Svetainės tikslas yra tai, kad žmogus lengvai susisiektų. Čia reikia tikslių duomenų, kurie bus skelbiami viešai.",
+      "questions": [
+        { "id": "telefonas", "type": "text", "input": "tel", "required": true, "label": "Telefono numeris (skelbiamas viešai)", "placeholder": "+370 600 00000" },
+        { "id": "epastas", "type": "text", "input": "email", "required": true, "label": "El. paštas (skelbiamas viešai, į jį ateis užklausos iš svetainės)", "placeholder": "vardas@pastas.lt" },
+        { "id": "adresas", "type": "textarea", "label": "Kabineto adresas, jei konsultuojate gyvai", "hint": "Parašykite ir kaip patekti: aukštas, durų kodas, parkavimas. Ar rodyti žemėlapį?" },
+        { "id": "laikas", "type": "text", "label": "Darbo laikas arba kada priimate klientus", "placeholder": "Pvz.: I–V 9:00–19:00, pagal išankstinę registraciją" },
+        { "id": "registracija", "type": "check", "required": true, "label": "Kaip norite, kad klientai registruotųsi?", "options": ["Skambučiu", "Žinute (SMS, WhatsApp, Viber, Messenger)", "El. paštu", "Užklausos forma svetainėje", "Internetiniu kalendoriumi (pvz., Calendly)"], "other": true },
+        { "id": "socialiniai", "type": "textarea", "label": "Socialiniai tinklai ir profiliai kitur", "hint": "Facebook, Instagram, LinkedIn, psichologai.lt ir pan. Įrašykite nuorodas. Jei neturite, parašykite „neturiu“." },
+        { "id": "atsakymas", "type": "text", "label": "Per kiek laiko paprastai atsakote į užklausas?", "hint": "Pvz., per 1 darbo dieną. Parašysime prie formos, kad žmonės žinotų, ko tikėtis." }
+      ]
+    },
+    {
+      "num": 6,
+      "id": "vizualas",
+      "title": "Nuotraukos, logotipas ir vizualas",
+      "why": "Portretinė nuotrauka yra svarbiausias svetainės elementas: ji kuria pasitikėjimą dar prieš pirmą skambutį. Pavyzdinėje svetainėje ji užima pusę pirmo ekrano.",
+      "questions": [
+        { "id": "nuotraukos", "type": "radio", "required": true, "label": "Ar turite profesionalių savo nuotraukų?", "options": ["Taip, turiu naujas (iki 2 metų)", "Turiu, bet senesnes", "Neturiu, reikės fotosesijos"] },
+        { "id": "kabinetas", "type": "radio", "label": "Ar galima nufotografuoti Jūsų kabinetą?", "options": ["Taip", "Ne", "Konsultuoju tik nuotoliniu"] },
+        { "id": "logotipas", "type": "radio", "label": "Logotipas", "options": ["Turiu logotipą (atsiųsiu failą)", "Neturiu, tegul logotipu būna mano vardas", "Norėčiau naujo logotipo"] },
+        { "id": "spalvos", "type": "check", "label": "Kokia nuotaika ir spalvos Jums artimos?", "hint": "Pažymėkite 1–2. Jei nesvarbu, palikite tuščią ir nuspręsime mes.", "options": ["Šiltos pastelinės (smėlio, persikų, rausva)", "Ramios žalios, šalavijo", "Mėlyna, jūros", "Neutrali balta ir pilka", "Tamsi, elegantiška", "Ryški ir energinga"], "other": true },
+        { "id": "vengti", "type": "text", "label": "Ko vizualiai norėtumėte išvengti?", "placeholder": "Pvz.: ryškių spalvų, nuotraukų iš fotobankų, per daug teksto" },
+        { "id": "pavyzdziai", "type": "textarea", "label": "Patinkantys puslapiai ir kas juose patinka", "hint": "Bet kokios srities, įrašykite nuorodas. Parašykite ir tai, kas seimospsichoterapija.lt Jums patinka ar nepatinka." },
+        { "id": "tonas", "type": "radio", "label": "Koks turėtų būti svetainės tekstų tonas?", "options": ["Šiltas ir asmeniškas („aš“ forma)", "Profesionalus ir santūrus", "Mišrus: šiltas, bet dalykiškas"] }
+      ]
+    },
+    {
+      "num": 7,
+      "id": "tikslai",
+      "title": "Svetainės tikslai ir turinys",
+      "why": "Kad svetainė ne tik gražiai atrodytų, bet ir dirbtų: atvestų žmones iš Google ir paskatintų registruotis.",
+      "questions": [
+        { "id": "tikslas", "type": "check", "required": true, "label": "Kas svarbiausia, ką svetainė turi padaryti?", "options": ["Kad žmonės registruotųsi konsultacijai", "Kad mane rastų per Google", "Kad būtų aišku, kuo galiu padėti", "Patvirtinti kvalifikaciją ir patikimumą", "Skelbti straipsnius ir naujienas"], "other": true },
+        { "id": "domenas", "type": "text", "required": true, "label": "Svetainės adresas (domenas)", "hint": "Jei jau turite, įrašykite. Jei ne, parašykite 2–3 norimus variantus, pvz., vardaspavarde.lt, seimospsichologe.lt." },
+        { "id": "esama", "type": "text", "label": "Ar turite esamą svetainę, hostingą arba el. paštą su savo domenu?", "hint": "Pvz., vardas@vardaspavarde.lt. Jei ne, parašykite „ne“." },
+        { "id": "kalbos_versijos", "type": "check", "required": true, "label": "Kokiomis kalbomis turi būti svetainė?", "options": ["Lietuvių", "Rusų", "Anglų"] },
+        { "id": "blogas", "type": "radio", "label": "Ar planuojate rašyti straipsnius ar naujienas svetainėje?", "options": ["Taip, reguliariai", "Kartais", "Ne"] },
+        { "id": "duk", "type": "textarea", "label": "Klausimai, kuriuos žmonės dažniausiai užduoda prieš registruodamiesi", "hint": "3–7 klausimai ir trumpi atsakymai. Pvz.: Ar konsultacijos konfidencialios? Ar reikia siuntimo? Ar galima ateiti vienam iš poros? Kaip pasiruošti pirmam susitikimui?" },
+        { "id": "atsiliepimai", "type": "radio", "label": "Klientų atsiliepimai", "hint": "Psichoterapijos etikoje atsiliepimai vertinami atsargiai. Jei abejojate, rinkitės „Nenoriu“.", "options": ["Turiu atsiliepimų, kuriuos galiu skelbti anonimiškai", "Neturiu", "Nenoriu skelbti atsiliepimų"] },
+        { "id": "seo", "type": "textarea", "label": "Kokiais žodžiais žmonės Jūsų ieškotų Google?", "hint": "Pvz.: „šeimos psichologė Klaipėdoje“, „porų terapija nuotoliniu“. Parašykite 3–8 frazes." }
+      ]
+    },
+    {
+      "num": 8,
+      "id": "teisiniai",
+      "title": "Teisiniai dalykai",
+      "why": "Svetainei reikės privatumo politikos ir teisingų rekvizitų. Tekstus paruošime mes, Jums užtenka pateikti faktus.",
+      "questions": [
+        { "id": "veikla", "type": "textarea", "label": "Veiklos forma ir rekvizitai", "hint": "Individuali veikla (pažymos numeris), MB ar VšĮ (pavadinimas, kodas, adresas). Nurodykite, kas turi būti matoma svetainėje." },
+        { "id": "analitika", "type": "radio", "label": "Ar norite matyti lankytojų statistiką (Google Analytics)?", "hint": "Nuo to priklauso, ar reikės slapukų sutikimo lango.", "options": ["Taip", "Ne", "Spręskite Jūs"] },
+        { "id": "konfidencialumas", "type": "textarea", "label": "Konfidencialumas ir etika", "hint": "Kokiu etikos kodeksu vadovaujatės, ką norite pasakyti klientams apie konfidencialumą ir duomenų saugojimą." }
+      ]
+    },
+    {
+      "num": 9,
+      "id": "pabaiga",
+      "title": "Pabaigai",
+      "why": "Keli klausimai, kurie apsaugo nuo nesusipratimų.",
+      "questions": [
+        { "id": "terminas", "type": "text", "label": "Iki kada norėtumėte turėti veikiančią svetainę?" },
+        { "id": "nenoriu", "type": "textarea", "label": "Ko svetainėje tikrai nenorite?" },
+        { "id": "kita", "type": "textarea", "label": "Kas dar svarbu, ko nepaklausėme?" }
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var SCHEMA = JSON.parse(document.getElementById('schema').textContent);
+  var KEY = 'psichoterapeute-klausimynas-v1';
+  var CLIENT_KEY = KEY + '-client';
+  var SENT_KEY = KEY + '-sent';
+  var KITA = '__kita';
+  var CONFIG = { url: 'https://duliyhqdnagjvbfnszyk.supabase.co', key: 'sb_publishable_C71UAo3vobvqt558tzKvmQ_2IizOTFs', form: 'psichoterapeute-v1' };
+  var canSend = CONFIG.url.indexOf('http') === 0 && !window.claude;
+  var lastCounts = { done: 0, reqDone: 0, reqTotal: 0 };
+  var UNANSWERED = '(neatsakyta)';
+  var state = {};
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) { var parsed = JSON.parse(raw); if (parsed && typeof parsed === 'object') state = parsed; }
+  } catch (e) { state = {}; }
+
+  var ALL = [];
+  SCHEMA.sections.forEach(function (sec) {
+    sec.questions.forEach(function (q, i) { ALL.push({ sec: sec, q: q, code: sec.num + '.' + (i + 1), box: null }); });
+  });
+
+  function h(tag, attrs) {
+    var n = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        var v = attrs[k];
+        if (v == null || v === false) return;
+        if (k === 'class') n.className = v;
+        else if (k === 'text') n.textContent = v;
+        else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), v);
+        else if (v === true) n.setAttribute(k, '');
+        else n.setAttribute(k, v);
+      });
+    }
+    for (var i = 2; i < arguments.length; i++) {
+      var kid = arguments[i];
+      if (kid == null) continue;
+      if (Array.isArray(kid)) kid.forEach(function (c) { if (c != null) n.append(c); });
+      else n.append(kid);
+    }
+    return n;
+  }
+
+  var progText, progBar, exportTa, finishNote, savedEl, toastEl;
+  var saveTimer = null;
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+        savedEl.textContent = 'Išsaugota šiame įrenginyje ' + new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }) + '.';
+      } catch (e) {
+        savedEl.textContent = 'Automatinis išsaugojimas šioje naršyklėje neveikia. Nukopijuokite atsakymus prieš uždarydami langą.';
+      }
+    }, 300);
+  }
+  function setVal(id, val) { state[id] = val; persist(); refresh(); }
+
+  function isAnswered(q) {
+    var v = state[q.id];
+    if (v == null) return false;
+    if (q.type === 'text' || q.type === 'textarea' || q.type === 'radio') return String(v).trim() !== '';
+    if (q.type === 'check') return (Array.isArray(v.sel) && v.sel.length > 0) || (typeof v.other === 'string' && v.other.trim() !== '');
+    if (q.type === 'services') return Array.isArray(v.sel) && v.sel.length > 0;
+    return false;
+  }
+
+  function textField(q) {
+    var inp = h('input', { type: q.input || 'text', id: 'in-' + q.id, placeholder: q.placeholder || '', autocomplete: 'off' });
+    inp.value = typeof state[q.id] === 'string' ? state[q.id] : '';
+    inp.addEventListener('input', function () { setVal(q.id, inp.value); });
+    return inp;
+  }
+  function areaField(q) {
+    var ta = h('textarea', { id: 'in-' + q.id, placeholder: q.placeholder || '' });
+    ta.value = typeof state[q.id] === 'string' ? state[q.id] : '';
+    ta.addEventListener('input', function () { setVal(q.id, ta.value); });
+    return ta;
+  }
+  function radioField(q) {
+    var wrap = h('div', { class: 'opts', role: 'radiogroup', 'aria-labelledby': 'lbl-' + q.id });
+    q.options.forEach(function (opt, i) {
+      var id = 'in-' + q.id + '-' + i;
+      var inp = h('input', { type: 'radio', name: 'r-' + q.id, id: id, value: opt });
+      inp.checked = state[q.id] === opt;
+      inp.addEventListener('change', function () { if (inp.checked) setVal(q.id, opt); });
+      wrap.append(h('label', { class: 'opt', for: id }, inp, h('span', { text: opt })));
+    });
+    return wrap;
+  }
+  function checkField(q) {
+    function cur() { var v = state[q.id]; return (v && typeof v === 'object' && Array.isArray(v.sel)) ? v : { sel: [], other: '' }; }
+    var wrap = h('div', { class: 'opts', role: 'group', 'aria-labelledby': 'lbl-' + q.id });
+    q.options.forEach(function (opt, i) {
+      var id = 'in-' + q.id + '-' + i;
+      var inp = h('input', { type: 'checkbox', id: id, value: opt });
+      inp.checked = cur().sel.indexOf(opt) !== -1;
+      inp.addEventListener('change', function () {
+        var v = cur();
+        var sel = v.sel.filter(function (x) { return x !== opt; });
+        if (inp.checked) sel.push(opt);
+        setVal(q.id, { sel: q.options.filter(function (o) { return sel.indexOf(o) !== -1; }), other: v.other || '' });
+      });
+      wrap.append(h('label', { class: 'opt', for: id }, inp, h('span', { text: opt })));
+    });
+    if (q.other) {
+      var oi = h('input', { type: 'text', id: 'in-' + q.id + '-other', placeholder: 'Kita (įrašykite)', 'aria-label': 'Kita' });
+      oi.value = cur().other || '';
+      oi.addEventListener('input', function () { var v = cur(); setVal(q.id, { sel: v.sel, other: oi.value }); });
+      wrap.append(h('div', { class: 'other' }, oi));
+    }
+    return wrap;
+  }
+  function servicesField(q) {
+    function cur() {
+      var v = state[q.id];
+      return (v && typeof v === 'object' && Array.isArray(v.sel)) ? { sel: v.sel, items: v.items || {} } : { sel: [], items: {} };
+    }
+    var keys = q.options.concat([KITA]);
+    var wrap = h('div', { class: 'opts', role: 'group', 'aria-labelledby': 'lbl-' + q.id });
+    keys.forEach(function (key, i) {
+      var isKita = key === KITA;
+      var base = 'in-' + q.id + '-' + i;
+      var inp = h('input', { type: 'checkbox', id: base });
+      inp.checked = cur().sel.indexOf(key) !== -1;
+      var card = h('div', { class: 'svc', id: 'svc-' + q.id + '-' + i });
+      card.hidden = !inp.checked;
+      function item() { return cur().items[key] || {}; }
+      function setItem(field, val) {
+        var v = cur();
+        var items = Object.assign({}, v.items);
+        var it = Object.assign({}, items[key] || {});
+        it[field] = val;
+        items[key] = it;
+        setVal(q.id, { sel: v.sel, items: items });
+      }
+      function sub(field, labelText, ph, area) {
+        var id = base + '-' + field;
+        var ctl = area ? h('textarea', { id: id, placeholder: ph }) : h('input', { type: 'text', id: id, placeholder: ph });
+        ctl.value = item()[field] || '';
+        ctl.addEventListener('input', function () { setItem(field, ctl.value); });
+        return h('div', { class: 'sub' }, h('label', { for: id, text: labelText }), ctl);
+      }
+      if (isKita) card.append(sub('name', 'Paslaugos pavadinimas', 'Pvz.: Dailės terapija', false));
+      card.append(sub('aprasymas', 'Kam skirta ir ką padeda spręsti (2–5 sakiniai)', '', true));
+      card.append(h('div', { class: 'grid2' }, sub('trukme', 'Trukmė', 'Pvz.: 50 min.', false), sub('kaina', 'Kaina', 'Pvz.: 60 €', false)));
+      inp.addEventListener('change', function () {
+        var v = cur();
+        var sel = v.sel.filter(function (x) { return x !== key; });
+        if (inp.checked) sel.push(key);
+        card.hidden = !inp.checked;
+        setVal(q.id, { sel: keys.filter(function (k) { return sel.indexOf(k) !== -1; }), items: v.items });
+      });
+      wrap.append(h('div', null, h('label', { class: 'opt', for: base }, inp, h('span', { text: isKita ? 'Kita paslauga (įrašysite pavadinimą)' : key })), card));
+    });
+    return wrap;
+  }
+
+  function renderQ(entry) {
+    var q = entry.q;
+    var simple = q.type === 'text' || q.type === 'textarea';
+    var box = h('div', { class: 'q', id: 'q-' + q.id });
+    var lbl = h(simple ? 'label' : 'div', { class: 'lbl', id: 'lbl-' + q.id, for: simple ? 'in-' + q.id : null },
+      h('span', { class: 'qnum', text: entry.code }), q.label,
+      q.required ? h('span', { class: 'req', text: ' *', title: 'Privalomas klausimas' }) : null);
+    box.append(lbl);
+    if (q.hint) box.append(h('p', { class: 'hint', text: q.hint }));
+    var ctl;
+    if (q.type === 'text') ctl = textField(q);
+    else if (q.type === 'textarea') ctl = areaField(q);
+    else if (q.type === 'radio') ctl = radioField(q);
+    else if (q.type === 'check') ctl = checkField(q);
+    else ctl = servicesField(q);
+    box.append(ctl);
+    entry.box = box;
+    return box;
+  }
+
+  function renderForm() {
+    var root = document.getElementById('form');
+    root.textContent = '';
+    SCHEMA.sections.forEach(function (sec) {
+      var s = h('section', { class: 'sec', id: 'sec-' + sec.num, 'aria-labelledby': 'sh-' + sec.num },
+        h('div', { class: 'sec-head' }, h('span', { class: 'num', text: String(sec.num), 'aria-hidden': 'true' }), h('h2', { id: 'sh-' + sec.num, text: sec.title })),
+        h('p', { class: 'why', text: sec.why }));
+      ALL.forEach(function (e) { if (e.sec === sec) s.append(renderQ(e)); });
+      root.append(s);
+    });
+  }
+
+  function fmtAnswer(q) {
+    var v = state[q.id];
+    if (!isAnswered(q)) return [UNANSWERED];
+    if (q.type === 'text' || q.type === 'textarea' || q.type === 'radio') return String(v).trim().split(/\r?\n/);
+    if (q.type === 'check') {
+      var parts = (v.sel || []).slice();
+      if (v.other && v.other.trim()) parts.push('Kita: ' + v.other.trim());
+      return [parts.join('; ')];
+    }
+    var lines = [];
+    (v.sel || []).forEach(function (key) {
+      var it = (v.items && v.items[key]) || {};
+      var name = key === KITA ? ((it.name || '').trim() || 'Kita paslauga') : key;
+      lines.push('• ' + name);
+      if ((it.aprasymas || '').trim()) lines.push('  Aprašymas: ' + it.aprasymas.trim().replace(/\s*\r?\n\s*/g, ' '));
+      var tk = [];
+      if ((it.trukme || '').trim()) tk.push('Trukmė: ' + it.trukme.trim());
+      if ((it.kaina || '').trim()) tk.push('Kaina: ' + it.kaina.trim());
+      if (tk.length) lines.push('  ' + tk.join(' | '));
+    });
+    return lines.length ? lines : [UNANSWERED];
+  }
+
+  function buildText(done, reqDone, reqTotal) {
+    var out = [
+      'SVETAINĖS KLAUSIMYNAS – ATSAKYMAI',
+      'Data: ' + new Date().toISOString().slice(0, 10),
+      'Atsakyta: ' + done + ' iš ' + ALL.length + ' klausimų (privalomi: ' + reqDone + ' iš ' + reqTotal + ')',
+      ''
+    ];
+    SCHEMA.sections.forEach(function (sec) {
+      out.push(sec.num + '. ' + sec.title.toUpperCase());
+      ALL.forEach(function (e) {
+        if (e.sec !== sec) return;
+        out.push(e.code + ' ' + e.q.label + (e.q.required ? ' *' : ''));
+        fmtAnswer(e.q).forEach(function (l) { out.push('    ' + l); });
+      });
+      out.push('');
+    });
+    return out.join('\n');
+  }
+
+  function refresh() {
+    var done = 0, reqDone = 0, reqTotal = 0;
+    ALL.forEach(function (e) {
+      var a = isAnswered(e.q);
+      if (a) done++;
+      if (e.q.required) { reqTotal++; if (a) reqDone++; }
+      if (e.box) e.box.classList.toggle('done', a);
+    });
+    lastCounts = { done: done, reqDone: reqDone, reqTotal: reqTotal };
+    progText.textContent = 'Atsakyta ' + done + ' iš ' + ALL.length + ' · privalomi ' + reqDone + ' iš ' + reqTotal;
+    progBar.style.width = Math.round(100 * done / ALL.length) + '%';
+    exportTa.value = buildText(done, reqDone, reqTotal);
+    finishNote.textContent = reqDone < reqTotal
+      ? 'Dar liko ' + (reqTotal - reqDone) + ' privalomi klausimai (pažymėti *). Galite siųsti ir dabar, trūkstamus paklausime vėliau.'
+      : 'Visi privalomi klausimai atsakyti. Ačiū!';
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 3800);
+  }
+
+  function copyAll() {
+    var text = exportTa.value;
+    var ok = function () { toast('Nukopijuota. Įklijuokite žinutėje ir išsiųskite.'); };
+    var fallback = function () {
+      try {
+        exportTa.focus(); exportTa.select();
+        if (document.execCommand('copy')) { ok(); return; }
+      } catch (e) { /* fall through */ }
+      toast('Nepavyko nukopijuoti automatiškai. Pažymėkite tekstą laukelyje ir nukopijuokite rankiniu būdu.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, fallback);
+    } else { fallback(); }
+  }
+
+  function clearAll() {
+    if (!window.confirm('Ištrinti visus atsakymus šiame įrenginyje? Šio veiksmo atšaukti negalima.')) return;
+    state = {};
+    try { localStorage.removeItem(KEY); localStorage.removeItem(SENT_KEY); } catch (e) { /* ignore */ }
+    renderForm();
+    refresh();
+    savedEl.textContent = '';
+    if (canSend) showSent();
+    toast('Atsakymai ištrinti.');
+    window.scrollTo(0, 0);
+  }
+
+  function clientId() {
+    try {
+      var c = localStorage.getItem(CLIENT_KEY);
+      if (!c) { c = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem(CLIENT_KEY, c); }
+      return c;
+    } catch (e) { return 'anon-' + Date.now().toString(36); }
+  }
+  function showSent() {
+    var info = document.getElementById('sent-info');
+    var when = null;
+    try { when = localStorage.getItem(SENT_KEY); } catch (e) { /* ignore */ }
+    if (when) { info.textContent = 'Išsiųsta ' + when + '. Papildę galite siųsti dar kartą.'; info.className = 'sent ok'; }
+    else { info.textContent = ''; info.className = 'sent'; }
+  }
+  function sendAll() {
+    var btn = document.getElementById('btn-send');
+    btn.disabled = true;
+    btn.textContent = 'Siunčiama…';
+    var payload = {
+      form: CONFIG.form,
+      client_id: clientId(),
+      respondent: (typeof state.vardas === 'string' ? state.vardas.trim().slice(0, 200) : '') || null,
+      answers: state,
+      export_text: exportTa.value,
+      answered: lastCounts.done,
+      required_answered: lastCounts.reqDone,
+      user_agent: (navigator.userAgent || '').slice(0, 300)
+    };
+    fetch(CONFIG.url + '/rest/v1/klausimynas_atsakymai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': CONFIG.key, 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var when = new Date().toLocaleString('lt-LT', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      try { localStorage.setItem(SENT_KEY, when); } catch (e) { /* ignore */ }
+      showSent();
+      toast('Atsakymai išsiųsti. Ačiū!');
+    }).catch(function () {
+      document.getElementById('copy-block').open = true;
+      toast('Nepavyko išsiųsti. Patikrinkite internetą arba nukopijuokite atsakymus ir atsiųskite žinute.');
+    }).then(function () { btn.disabled = false; btn.textContent = 'Siųsti atsakymus'; });
+  }
+  function setupSending() {
+    var sendBlock = document.getElementById('send-block');
+    var copyBlock = document.getElementById('copy-block');
+    var intro = document.getElementById('intro-send');
+    if (canSend) {
+      sendBlock.hidden = false;
+      document.getElementById('btn-send').addEventListener('click', sendAll);
+      showSent();
+    } else {
+      sendBlock.hidden = true;
+      copyBlock.open = true;
+      document.getElementById('copy-summary').textContent = 'Nukopijuokite atsakymus ir atsiųskite žinute';
+      if (intro) intro.textContent = 'Užpildę spauskite „Baigti“, tada „Nukopijuoti atsakymus“ ir nusiųskite tekstą žinute tam, kas atsiuntė Jums šią nuorodą.';
+    }
+  }
+
+  function init() {
+    progText = document.getElementById('prog-text');
+    progBar = document.getElementById('prog-bar');
+    exportTa = document.getElementById('export');
+    finishNote = document.getElementById('finish-note');
+    savedEl = document.getElementById('saved');
+    toastEl = document.getElementById('toast');
+    renderForm();
+    refresh();
+    document.getElementById('btn-copy').addEventListener('click', copyAll);
+    document.getElementById('btn-clear').addEventListener('click', clearAll);
+    setupSending();
+    document.getElementById('btn-finish').addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById('baigti').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+</body>
+</html>
