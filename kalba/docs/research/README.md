@@ -25,3 +25,8 @@ Retrieved: 2026-10-05
 ## Naudojimo ribos
 
 B1–B2 indeksas nėra vien B1 privaloma gramatika. Core Inventory, egzaminų specifikacijos ir learner-corpus EGP aprašo skirtingus dalykus; jų skirtumai bus išlaikyti. Pilni saugomi vadovėlių tekstai, užduotys ir mokami kursai nebus perspausdinti; bus pateiktos nuorodos ir glaustos aprėpties suvestinės. Nerasti turiniai nebus užpildyti išgalvotais skyriais.
+
+## Claude: aprėpties patikra (2026-10-05)
+Palyginta `bc-grammar.md` su `docs/syllabus.json`: kursas apima visas A1–A2 temas ir B1–B2 sąrašo temas,
+išskyrus *future perfect* ir *mixed conditionals*. Pagal English Grammar Profile jos priskirtos B2,
+todėl į B1 kursą sąmoningai neįtrauktos.
