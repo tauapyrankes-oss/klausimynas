@@ -63,6 +63,7 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             engine.prepare()
             try engine.start()
         }
+        applyOutputVolume()
     }
 
     private func info() -> [String: Any] {
@@ -234,9 +235,14 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         audioQueue.async { self.clearPlayback(); call.resolve() }
     }
     private func applyOutputVolume() {
-        // Voice processing can retain an audible minimum. App mute always silences PCM;
-        // an actual zero system volume must also silence our player.
-        output?.volume = speakerMuted || AVAudioSession.sharedInstance().outputVolume <= 0.001 ? 0 : 1
+        let session = AVAudioSession.sharedInstance()
+        let voiceRoute = echo && session.currentRoute.outputs.contains {
+            [.builtInSpeaker, .builtInReceiver, .bluetoothHFP].contains($0.portType)
+        }
+        // iPhone's voice route can stop at its first 1/16 volume step instead of zero.
+        // Treat that floor as silence; the next step restores the normal system volume.
+        let floor: Float = voiceRoute ? 1.0 / 16.0 + 0.0001 : 0.001
+        output?.volume = speakerMuted || session.outputVolume <= floor ? 0 : 1
     }
     @objc func mute(_ call: CAPPluginCall) {
         audioQueue.async {

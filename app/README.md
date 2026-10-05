@@ -50,3 +50,5 @@ iOS naudoja bridge, naršyklė ir Android išlaiko Web Audio kelią. Įvestis �
 24 kHz PCM16. Native garso variklis valdo savo sesiją; AppDelegate jos nekeičia kiekvieną kartą grįžus į app.
 Regresinė bridge patikra: `node kalba/tools/native-audio-test.mjs`. Galutinei garso kokybei ir mikrofonui
 patvirtinti vis tiek reikia realaus telefono bandymo, ne vien naršyklės testų.
+
+Emos garsiakalbio mygtukas nutildo išvestį nepriklausomai nuo iOS pokalbio garso minimumo. Native balso maršrute žemiausias 1/16 sistemos garso žingsnis taip pat nutildo Emą; padidinus garsą ji vėl girdima.
