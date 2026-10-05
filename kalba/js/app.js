@@ -1,5 +1,5 @@
 import { LiveSession, listLiveModels } from './live.js';
-import { MicRecorder, PcmPlayer } from './audio.js';
+import { MicRecorder, PcmPlayer, bytesToBase64 } from './audio.js';
 import { lessonPrompt, freeTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
 import * as store from './store.js';
 import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
@@ -1041,6 +1041,12 @@ function viewSettings() {
         <small>Ištrink laiką, jei priminimų nenori. Vakare (21:30) dar kartą primins, jei tą dieną nesimokei.</small></label>` : ''}
       <label class="field"><span>Garso efektai</span><select id="sfx">${opt('on', settings.sfx, 'Įjungti')}${opt('off', settings.sfx, 'Išjungti')}</select></label>
     </div>
+    <div class="card"><h3>🔧 Garso testas</h3>
+      <p class="small muted">Patikrina mikrofoną ir garsiakalbį tuo pačiu keliu, kuriuo kalba Ema. Jei kas nors neveikia – parašyk, ką čia rodo.</p>
+      <button class="btn secondary" id="audiotest">▶️ Pradėti testą (5 s)</button>
+      <div class="progressbar" style="margin-top:10px"><span id="miclevel" style="width:0%"></span></div>
+      <pre class="small" id="audio-out" style="white-space:pre-wrap;margin:8px 0 0"></pre>
+    </div>
     <div class="card"><h3>💾 Pažanga</h3>
       <p class="small muted">Pažanga saugoma telefone. Kartais pasidaryk atsarginę kopiją.</p>
       <div class="row wrap"><button class="btn secondary" id="export">⬇️ Eksportuoti</button>
@@ -1079,6 +1085,46 @@ function viewSettings() {
     } catch (e) {
       out.textContent = `Klaida: ${e.message}`;
     }
+  };
+  document.getElementById('audiotest').onclick = async () => {
+    const out = document.getElementById('audio-out');
+    const bar = document.getElementById('miclevel');
+    const lines = [];
+    const log = (t) => {
+      lines.push(t);
+      out.textContent = lines.join('\n');
+    };
+    const player = new PcmPlayer();
+    player.ensure();
+    log(`Garso kontekstas: ${player.ctx.sampleRate} Hz, būsena ${player.ctx.state}`);
+    let peak = 0;
+    let chunks = 0;
+    const mic = new MicRecorder({
+      onChunk: () => chunks++,
+      onLevel: (lvl) => {
+        peak = Math.max(peak, lvl);
+        bar.style.width = `${Math.min(100, lvl * 1200)}%`;
+      },
+    });
+    try {
+      await mic.start(player.ctx, { echo: settings.micMode !== 'headphones' });
+      const track = mic.stream.getAudioTracks()[0];
+      const st = track.getSettings ? track.getSettings() : {};
+      log(`Mikrofonas: ${track.label || 'įrenginys'}; ${st.sampleRate ? st.sampleRate + ' Hz, ' : ''}aido slopinimas ${st.echoCancellation}`);
+    } catch (e) {
+      log(`❌ Mikrofonas: ${e.name} – ${e.message}`);
+    }
+    log('🔊 Groju toną… turi girdėtis lygus 1 s pyptelėjimas (be traškesio)');
+    await player.ready;
+    const tone = new Int16Array(24000);
+    for (let i = 0; i < tone.length; i++) tone[i] = Math.round(Math.sin((2 * Math.PI * 440 * i) / 24000) * 0.4 * 32767 * Math.min(1, i / 2000, (tone.length - i) / 2000));
+    for (let o = 0; o < tone.length; o += 960) player.play(bytesToBase64(tone.slice(o, o + 960).buffer));
+    log('🎙️ Kalbėk ką nors 5 sekundes…');
+    await new Promise((r) => setTimeout(r, 5000));
+    mic.stop();
+    player.close();
+    bar.style.width = '0%';
+    log(peak > 0.01 ? `✅ Mikrofonas girdi (lygis ${peak.toFixed(3)}, ${chunks} gabaliukų)` : `❌ Iš mikrofono garso negauta (lygis ${peak.toFixed(4)}, ${chunks} gabaliukų)`);
   };
   document.getElementById('export').onclick = () => {
     const a = document.createElement('a');
