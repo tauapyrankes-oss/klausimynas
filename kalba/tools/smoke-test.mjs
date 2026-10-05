@@ -89,6 +89,16 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
   });
 });
 
+// Imituotas nepriklausomas vertintojas (REST).
+let judgeCalls = 0;
+await page.route('**/models/gemini-3.8-flash:generateContent*', async (route) => {
+  judgeCalls++;
+  const body = JSON.parse(route.request().postData() || '{}');
+  const promptText = body.contents[0].parts[0].text;
+  if (!/Learner: /.test(promptText) || !/exercise "/.test(promptText)) fail('vertintojas negavo pokalbio ar užduočių');
+  await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ passed: true, score: 84, target_attempts: 10, target_correct: 8, criteria: [{ criterion: 'am/is/are', met: true, evidence: "I'm a teacher" }], mistakes: [{ wrong: 'I live Kaunas', correct: 'I live in Kaunas', note_lt: 'Reikia „in“.' }], summary_lt: 'Gerai.', advice_lt: 'Daugiau klausimų.' }) }] } }] }) });
+});
+
 await page.goto(base);
 await page.waitForSelector('.node');
 const nodes = await page.locator('.node').count();
@@ -197,8 +207,15 @@ for (let k = 1; k < need + 1; k++) {
 }
 await page.fill('#txt', 'FINAL');
 await page.click('#send');
-await page.waitForSelector('.modal', { timeout: 10000 });
-if (!/8\/9 teisingai/.test(await page.locator('.modal').innerText())) fail('rezultate nėra tikslinės gramatikos statistikos');
+await page.waitForSelector('.modal', { timeout: 12000 }).catch(async () => {
+  console.log('SYS:', await page.locator('.bubble.sys').allInnerTexts(), 'judgeCalls', judgeCalls);
+  throw new Error('modal timeout');
+});
+const modalTxt = await page.locator('.modal').innerText();
+if (!/8\/10 teisingai/.test(modalTxt)) fail('rezultate nėra vertintojo statistikos');
+if (!/Nepriklausomas vertinimas .*išlaikyta/.test(modalTxt)) fail('rezultate nėra nepriklausomo vertinimo');
+if (judgeCalls !== 1) fail(`vertintojas kviestas ${judgeCalls} k.`);
+if (!/I live in Kaunas/.test(modalTxt)) fail('vertintojo klaidos nesujungtos');
 await shot('4-rezultatas');
 const setup = sent.find((m) => m.setup);
 if (!setup || setup.setup.model !== 'models/gemini-3.8-live') fail('setup be teisingo modelio');

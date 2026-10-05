@@ -1,4 +1,4 @@
-import { LiveSession, listLiveModels } from './live.js';
+import { LiveSession, listLiveModels, judgeLesson } from './live.js';
 import { MicRecorder, PcmPlayer, bytesToBase64 } from './audio.js';
 import { lessonPrompt, freeTalkPrompt, drillPrompt, guidedTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
 import * as store from './store.js';
@@ -518,6 +518,7 @@ function renderLessonTalk($el, x) {
       ),
     tools: [...TOOLS_LESSON, TOOL_EXERCISE, TOOL_THEORY, TOOL_SHOW],
     lesson: l,
+    level,
     prepared,
     minTurns: s.minLearnerTurns || 8,
     canAssess: true,
@@ -542,6 +543,7 @@ function showResult(x, r) {
       ${r.passed ? `<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>` : ''}
       <div class="score">${esc(r.score)}<span class="muted" style="font-size:18px"> / 100</span></div>
       <p>${esc(r.summary_lt || '')}</p>
+      ${r.judge ? `<p class="small" style="text-align:center">🧑‍⚖️ Nepriklausomas vertinimas${r.judge.error ? ': nepavyko (įskaitytas tik Emos vertinimas)' : ` (${esc(r.judge.model || 'Gemini')}): ${r.judge.passed ? 'išlaikyta' : 'dar ne'}`}</p>` : ''}
       ${r.attempts ? `<p class="small muted" style="text-align:center">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
       ${(r.criteria || []).length ? `<div class="criteria">${r.criteria.map((c) => `<div class="crit ${c.met ? 'ok' : 'no'}">${c.met ? '✅' : '◻️'} ${esc(c.criterion)}${c.evidence ? `<div class="small muted">„${esc(c.evidence)}“</div>` : ''}</div>`).join('')}</div>` : ''}
       ${(r.strengths_lt || []).length ? `<h3>👍 Sekėsi</h3><ul>${r.strengths_lt.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
@@ -665,6 +667,8 @@ function mountTalk($el, opts) {
   let resultShown = false;
   let userWantsStop = false;
   const transcriptLog = []; // paskutinės replikos – pamokai pratęsti nutrūkus ryšiui
+  const fullLog = []; // visas pokalbis – nepriklausomam vertintojui
+  const exLog = [];
   let stopped = false;
   let reconnecting = false;
 
@@ -703,6 +707,9 @@ function mountTalk($el, opts) {
     const last = transcriptLog[transcriptLog.length - 1];
     if (last && last.role === role) last.text += text;
     else transcriptLog.push({ role, text });
+    const lastF = fullLog[fullLog.length - 1];
+    if (lastF && lastF.role === role) lastF.text += text;
+    else fullLog.push({ role, text });
     if (transcriptLog.length > 40) transcriptLog.shift();
     saveResume();
   };
@@ -865,7 +872,8 @@ function mountTalk($el, opts) {
       }
       session = new LiveSession({
         apiKey: apiKey(),
-        model: settings.model,
+        // Egzaminams – modelis su gilesniu mąstymu (lėtesnis, bet tiksliau vertina).
+        model: opts.lesson && opts.lesson.type === 'checkpoint' && settings.model === 'gemini-3.8-live' ? 'gemini-3.8-live-extended-thinking' : settings.model,
         voice: settings.voice,
         systemInstruction: opts.prompt(),
         tools: opts.tools,
@@ -906,7 +914,7 @@ function mountTalk($el, opts) {
       bubbleRole = '';
       if (pendingResult) setTimeout(flushResult, 1500);
     });
-    s.addEventListener('tool-call', (e) => {
+    s.addEventListener('tool-call', async (e) => {
       const fc = e.detail;
       const args = fc.args || {};
       let response = { result: 'ok' };
@@ -942,6 +950,7 @@ function mountTalk($el, opts) {
               openExercise = null;
               if (q.type === 'write') {
                 writingDone = true;
+                fullLog.push({ role: 'app', text: `writing task "${q.q}" → learner wrote: ${r.given}` });
                 store.recordExercise(true);
                 saveResume();
                 session &&
@@ -952,6 +961,8 @@ function mountTalk($el, opts) {
               }
               exDone++;
               if (r.ok) exRight++;
+              exLog.push({ ok: r.ok, label, given: r.given, right: r.right });
+              fullLog.push({ role: 'app', text: `exercise "${label}" → ${r.ok ? 'CORRECT' : 'WRONG'} (answered: ${r.given || '-'})` });
               saveResume();
               store.recordExercise(r.ok);
               updateChips();
@@ -1002,11 +1013,47 @@ function mountTalk($el, opts) {
             criteria: Array.isArray(args.criteria) ? args.criteria : [],
           };
           if (r.passed && r.score < 60) r.passed = false;
+          // Nepriklausomas vertintojas (Gemini 3.8 Flash per REST) – pamoka užskaitoma tik sutikus abiem.
+          if (opts.mode !== 'practice' && opts.lesson && apiKey()) {
+            status('Vertinama…', '', 'thinking');
+            sys('🧑‍⚖️ Nepriklausomas vertinimas (viso pokalbio peržiūra)…');
+            try {
+              const v = await judgeLesson({
+                apiKey: apiKey(),
+                lesson: opts.lesson,
+                level: opts.level || { name: '' },
+                transcript: fullLog.map((t) => `${t.role === 'me' ? 'Learner' : t.role === 'app' ? '[app]' : 'Tutor'}: ${t.text.trim()}`).join('\n'),
+                exercises: exLog,
+                liveVerdict: { passed: r.passed, score: r.score, attempts, correct },
+                minTurns,
+              });
+              r.judge = v;
+              const agreed = !!v.passed;
+              r.passed = r.passed && agreed;
+              r.score = Math.round((r.score + Math.max(0, Math.min(100, Number(v.score) || 0))) / 2);
+              if (Array.isArray(v.criteria) && v.criteria.length) r.criteria = v.criteria;
+              if (v.target_attempts) {
+                r.attempts = v.target_attempts;
+                r.correct = Math.min(v.target_attempts, v.target_correct || 0);
+              }
+              const seen = new Set(r.mistakes.map((m) => norm(m.wrong)));
+              for (const m of v.mistakes || []) if (m && m.wrong && !seen.has(norm(m.wrong))) r.mistakes.push(m);
+              if (!r.advice_lt && v.advice_lt) r.advice_lt = v.advice_lt;
+              if (!agreed && v.summary_lt) r.summary_lt = `${r.summary_lt} Vertintojas: ${v.summary_lt}`.trim();
+            } catch (err) {
+              r.judge = { error: String(err.message || err) };
+            }
+          }
           if (r.passed) clearResume(opts.lesson && opts.lesson.id);
           pendingResult = opts.onResult(r);
-          sys(opts.mode === 'practice' ? '✅ Sesija baigta ir įrašyta.' : r.passed ? '✅ Ema įvertino: pamoka išmokta!' : '⏳ Ema įvertino: dar reikia pasipraktikuoti.');
-          response = { result: 'saved', passed: r.passed, score: r.score };
-          setTimeout(flushResult, 20000); // jei Ema nieko nebepasakytų
+          sys(opts.mode === 'practice' ? '✅ Sesija baigta ir įrašyta.' : r.passed ? '✅ Įvertinta: pamoka išmokta!' : '⏳ Įvertinta: dar reikia pasipraktikuoti.');
+          response = {
+            result: 'saved',
+            passed: r.passed,
+            score: r.score,
+            note: r.judge && !r.judge.error ? `An independent examiner reviewed the transcript and ${r.judge.passed ? 'agreed' : 'did NOT agree'} with a pass. Tell the learner the final result: ${r.passed ? 'PASSED' : 'NOT PASSED yet'}.` : undefined,
+          };
+          setTimeout(flushResult, 6000); // jei Ema nieko nebepasakytų
         } else {
           response = { result: 'already saved' };
         }
@@ -1220,7 +1267,7 @@ function viewSettings() {
       <label class="field"><span>Live modelis</span>
         <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
         <datalist id="models">${KNOWN_LIVE.map((m) => `<option value="${m}">`).join('')}</datalist>
-        <small>Rekomenduojama <b>gemini-3.8-live</b> (greičiausia). „extended-thinking“ – protingesnė, bet lėtesnė. „Rasti modelius“ parodys, kas prieinama tavo raktui.</small></label>
+        <small>Rekomenduojama <b>gemini-3.8-live</b> (greičiausia). „extended-thinking“ – protingesnė, bet lėtesnė. „Rasti modelius“ parodys, kas prieinama tavo raktui. Lygių egzaminams automatiškai naudojamas „extended-thinking“, o pamokos pabaigoje visą pokalbį dar kartą įvertina Gemini 3.8 Flash.</small></label>
       <div class="row wrap"><button class="btn secondary" id="find">🔎 Rasti modelius</button><span class="small muted" id="find-out"></span></div>
     </div>
     <div class="card"><h3>👩‍🏫 Mokytoja Ema</h3>

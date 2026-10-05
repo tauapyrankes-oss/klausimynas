@@ -7,7 +7,8 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 - `index.html` – karkasas; krauna `curriculum/*.js` (paprasti skriptai) ir `js/app.js` (ES modulis).
 - `curriculum/<lygis>.js` – kursas, schema: `docs/CURRICULUM_SCHEMA.md`. Pamokų tvarka = atrakinimo tvarka.
 - `js/app.js` – UI ir maršrutai (`#/path`, `#/lesson/<id>/<learn|quiz|talk>`, `#/talk`, `#/sprint`, `#/stats`, `#/settings`).
-- `js/live.js` – Gemini Live klientas + automatinis Live modelių radimas (`listLiveModels`, pirmenybė „3.8“).
+- `js/live.js` – Gemini Live klientas, Live modelių radimas (`listLiveModels`) ir nepriklausomas vertintojas
+  `judgeLesson` (Gemini 3.8 Flash per REST peržiūri visą pokalbį; pamoka užskaitoma tik sutikus abiem). Egzaminams – `gemini-3.8-live-extended-thinking`.
 - `js/audio.js`, `js/pcm-worklet.js` – mikrofonas 16 kHz PCM16 → API; grojimas 24 kHz PCM16.
 - `js/prompt.js` – Emos sistemos instrukcijos ir įrankiai: `complete_lesson` (vienintelis būdas
   pažymėti pamoką išmokta), `give_exercise` (užduotys ekrane, įskaitant rašymą), `show_theory`, `show_on_screen`.

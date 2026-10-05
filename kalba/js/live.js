@@ -167,3 +167,57 @@ export class LiveSession extends EventTarget {
     try { this.ws && this.ws.close(); } catch (_) {}
   }
 }
+
+// Nepriklausomas vertintojas: stiprus tekstinis modelis (ne Live) peržiūri visą pamokos pokalbį ir įvertina atskirai.
+// Pamoka užskaitoma tik tada, kai sutinka ir Ema (Live), ir vertintojas.
+export async function judgeLesson({ apiKey, model = 'gemini-3.8-flash', lesson, level, transcript, exercises, liveVerdict, minTurns }) {
+  const s = lesson.speaking || {};
+  const prompt = `You are a strict but fair CEFR examiner for English. A Lithuanian adult learner (level ${level.name}) just finished a voice lesson with an AI tutor.
+Lesson: ${lesson.titleEn}. Target: ${(lesson.grammar || {}).title || ''}.
+Success criteria (ALL must be met in the learner's OWN spontaneous sentences; repeating after the tutor does not count):
+${(s.successCriteria || []).map((c, i) => `${i + 1}. ${c}`).join('\n')}
+Minimum learner turns: ${minTurns}.
+
+Transcript (Learner lines are what the learner said; "[app]" lines are exercise results):
+${transcript}
+
+On-screen exercises: ${exercises.length} done, ${exercises.filter((e) => e.ok).length} correct.
+The tutor's own verdict: passed=${liveVerdict.passed}, score=${liveVerdict.score}, attempts=${liveVerdict.attempts}, correct=${liveVerdict.correct}.
+
+Judge independently from the transcript. Count every attempt by the learner to use the target language and how many were correct (or self-corrected after one hint). passed=true only if every criterion is met and accuracy is at least 75%. Be honest – a lenient pass hurts the learner. Lithuanian text fields must be in natural Lithuanian.`;
+  const schema = {
+    type: 'OBJECT',
+    properties: {
+      passed: { type: 'BOOLEAN' },
+      score: { type: 'INTEGER' },
+      target_attempts: { type: 'INTEGER' },
+      target_correct: { type: 'INTEGER' },
+      criteria: { type: 'ARRAY', items: { type: 'OBJECT', properties: { criterion: { type: 'STRING' }, met: { type: 'BOOLEAN' }, evidence: { type: 'STRING' } }, required: ['criterion', 'met'] } },
+      mistakes: { type: 'ARRAY', items: { type: 'OBJECT', properties: { wrong: { type: 'STRING' }, correct: { type: 'STRING' }, note_lt: { type: 'STRING' } }, required: ['wrong', 'correct'] } },
+      summary_lt: { type: 'STRING' },
+      advice_lt: { type: 'STRING' },
+    },
+    required: ['passed', 'score', 'target_attempts', 'target_correct', 'criteria', 'summary_lt'],
+  };
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 45000);
+  try {
+    const res = await fetch(`${API}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.2 },
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const text = (data.candidates?.[0]?.content?.parts || []).filter((p) => p.text && !p.thought).map((p) => p.text).join('');
+    const v = JSON.parse(text);
+    v.model = model;
+    return v;
+  } finally {
+    clearTimeout(t);
+  }
+}
