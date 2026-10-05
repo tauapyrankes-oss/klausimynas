@@ -1,0 +1,372 @@
+{
+  "viewport": "390x844",
+  "themes": 2,
+  "screens": 13,
+  "failures": [],
+  "results": [
+    {
+      "name": "home",
+      "title": "Pamokų kelias",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 765,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "lesson-speaking",
+      "title": "Ema kalba",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-listening",
+      "title": "Tavo eilė",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-exercise",
+      "title": "Užduotis pokalbyje",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-theory",
+      "title": "Teorijos kortelė",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-writing",
+      "title": "Rašymas Emai",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "result",
+      "title": "Pamokos rezultatas",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    },
+    {
+      "name": "sprint",
+      "title": "Žodžių sprintas",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    },
+    {
+      "name": "progress",
+      "title": "Pažanga",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 746,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "settings",
+      "title": "Nustatymai",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 948,
+        "clientHeight": 650
+      }
+    },
+    {
+      "name": "settings-connection",
+      "title": "Gemini ryšys",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 744,
+        "clientHeight": 650
+      }
+    },
+    {
+      "name": "locked",
+      "title": "Užrakinta pamoka",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 651,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "exam",
+      "title": "Lygio egzaminas",
+      "theme": "light",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    },
+    {
+      "name": "home",
+      "title": "Pamokų kelias",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 765,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "lesson-speaking",
+      "title": "Ema kalba",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-listening",
+      "title": "Tavo eilė",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-exercise",
+      "title": "Užduotis pokalbyje",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-theory",
+      "title": "Teorijos kortelė",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "lesson-writing",
+      "title": "Rašymas Emai",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 540,
+        "clientHeight": 540
+      }
+    },
+    {
+      "name": "result",
+      "title": "Pamokos rezultatas",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    },
+    {
+      "name": "sprint",
+      "title": "Žodžių sprintas",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    },
+    {
+      "name": "progress",
+      "title": "Pažanga",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 746,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "settings",
+      "title": "Nustatymai",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 948,
+        "clientHeight": 650
+      }
+    },
+    {
+      "name": "settings-connection",
+      "title": "Gemini ryšys",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 744,
+        "clientHeight": 650
+      }
+    },
+    {
+      "name": "locked",
+      "title": "Užrakinta pamoka",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 651,
+        "clientHeight": 651
+      }
+    },
+    {
+      "name": "exam",
+      "title": "Lygio egzaminas",
+      "theme": "dark",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "missing": [],
+      "shortButtons": [],
+      "content": {
+        "scrollHeight": 708,
+        "clientHeight": 708
+      }
+    }
+  ]
+}
