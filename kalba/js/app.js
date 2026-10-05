@@ -1370,18 +1370,16 @@ function viewSettings() {
   const opt = (v, cur, label) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(label || v)}</option>`;
   $view.innerHTML = `
     <section class="profile-row">${ema('idle', 69)}<div><h2>Tu ir Ema</h2><p>Lėtai, aiškiai, be skubėjimo.</p></div></section>
-    <div class="card settings"><h3>${icon('key')} Gemini ryšys</h3>
-      ${BUILTIN_KEY ? `<p class="small">Raktas jau įdiegtas programėlėje – nieko įvesti nereikia.</p>
-      <details><summary class="small muted">Naudoti kitą raktą</summary>` : `<p class="small">Nemokamą raktą gausi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>
-      → „Create API key“. Raktas saugomas tik šiame telefone.</p>`}
-      <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="${BUILTIN_KEY ? 'palik tuščią – naudojamas įdiegtas' : 'AIza…'}" autocomplete="off"></label>
-      ${BUILTIN_KEY ? '</details>' : ''}
+    ${BUILTIN_KEY ? '' : `<div class="card settings"><h3>${icon('key')} Gemini ryšys</h3>
+      <p class="small">Nemokamą raktą gausi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>
+      → „Create API key“. Raktas saugomas tik šiame telefone.</p>
+      <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="AIza…" autocomplete="off"></label>
       <label class="field"><span>Live modelis</span>
         <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
         <datalist id="models">${KNOWN_LIVE.map((m) => `<option value="${m}">`).join('')}</datalist>
-        <small>Rekomenduojama <b>gemini-3.8-live</b> (greičiausia). „extended-thinking“ – protingesnė, bet lėtesnė. „Rasti modelius“ parodys, kas prieinama tavo raktui. Lygių egzaminams automatiškai naudojamas „extended-thinking“, o pamokos pabaigoje visą pokalbį dar kartą įvertina Gemini 3.8 Flash.</small></label>
+        <small>Rekomenduojama <b>gemini-3.8-live</b>. Egzaminams automatiškai naudojamas „extended-thinking“, o pamokos pabaigoje pokalbį dar kartą įvertina Gemini 3.8 Flash.</small></label>
       <div class="row wrap"><button class="btn secondary" id="find">${icon('spark')} Rasti modelius</button><span class="small muted" id="find-out"></span></div>
-    </div>
+    </div>`}
     <div class="card settings"><h3>${icon('user')} Mokytoja Ema</h3>
       <label class="field"><span>Kaip į tave kreiptis (vardas)</span><input type="text" id="name" value="${esc(settings.name)}"></label>
       <label class="field"><span>Balsas</span><select id="voice">${voices.map((v) => opt(v, settings.voice)).join('')}</select></label>
@@ -1411,7 +1409,10 @@ function viewSettings() {
       <button class="btn bad" id="reset">Ištrinti pažangą</button></div>
     </div>
     <p class="tiny muted" style="text-align:center;margin-top:16px">${icon('shield', 'xs')} Pažanga ir raktas saugomi tik šiame telefone · ${ALL.length} pamokos nuo A1+ iki B1</p>`;
-  const bind = (id, key) => (document.getElementById(id).onchange = (e) => store.saveSettings({ [key]: e.target.value.trim() }));
+  const bind = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) el.onchange = (e) => store.saveSettings({ [key]: e.target.value.trim() });
+  };
   bind('key', 'apiKey');
   bind('model', 'model');
   bind('name', 'name');
@@ -1426,7 +1427,8 @@ function viewSettings() {
     store.saveSettings({ reminder: rem.value || 'off' });
     syncNative();
   };
-  document.getElementById('find').onclick = async () => {
+  const findBtn = document.getElementById('find');
+  if (findBtn) findBtn.onclick = async () => {
     const out = document.getElementById('find-out');
     store.saveSettings({ apiKey: document.getElementById('key').value.trim() });
     const key = apiKey();
