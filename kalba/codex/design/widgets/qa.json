@@ -1,0 +1,108 @@
+{
+  "nativeCompiled": false,
+  "lightDirection": true,
+  "source": "HTML mockups",
+  "errors": [],
+  "results": [
+    {
+      "name": "small-ready",
+      "title": "Mažas · pradėti",
+      "width": 170,
+      "height": 170,
+      "overflow": false
+    },
+    {
+      "name": "small-done",
+      "title": "Mažas · diena įveikta",
+      "width": 170,
+      "height": 170,
+      "overflow": false
+    },
+    {
+      "name": "small-first",
+      "title": "Mažas · pirmoji pamoka",
+      "width": 170,
+      "height": 170,
+      "overflow": false
+    },
+    {
+      "name": "medium-ready",
+      "title": "Vidutinis · kita pamoka",
+      "width": 362,
+      "height": 170,
+      "overflow": false
+    },
+    {
+      "name": "medium-done",
+      "title": "Vidutinis · diena įveikta",
+      "width": 362,
+      "height": 170,
+      "overflow": false
+    },
+    {
+      "name": "accessory-circular",
+      "title": "Užrakinimo ekranas · apskritimas",
+      "width": 64,
+      "height": 64,
+      "overflow": false
+    },
+    {
+      "name": "accessory-rectangular",
+      "title": "Užrakinimo ekranas · stačiakampis",
+      "width": 172,
+      "height": 64,
+      "overflow": false
+    },
+    {
+      "name": "live-speaking",
+      "title": "Live Activity · Ema kalba",
+      "width": 362,
+      "height": 160,
+      "overflow": false
+    },
+    {
+      "name": "live-listening",
+      "title": "Live Activity · tavo eilė",
+      "width": 362,
+      "height": 160,
+      "overflow": false
+    },
+    {
+      "name": "live-exercise",
+      "title": "Live Activity · užduotis",
+      "width": 362,
+      "height": 160,
+      "overflow": false
+    },
+    {
+      "name": "live-completed",
+      "title": "Live Activity · išmokta",
+      "width": 362,
+      "height": 160,
+      "overflow": false
+    },
+    {
+      "name": "island-compact",
+      "title": "Dynamic Island · kompaktiška",
+      "width": 238,
+      "height": 40,
+      "overflow": false
+    },
+    {
+      "name": "island-minimal",
+      "title": "Dynamic Island · minimali",
+      "width": 40,
+      "height": 40,
+      "overflow": false
+    },
+    {
+      "name": "island-expanded",
+      "title": "Dynamic Island · išskleista",
+      "width": 362,
+      "height": 160,
+      "overflow": false
+    }
+  ],
+  "reducedMotionPassed": true,
+  "pausePassed": true
+}

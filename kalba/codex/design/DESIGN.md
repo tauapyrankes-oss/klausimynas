@@ -1,6 +1,6 @@
 # Dizaino sistema: „Po truputį“
 
-Pasiūlymas vartotojo patvirtinimui. Mokytis kalbėti su Ema kasdien, aiškiai matant kitą žingsnį. Režimas: Operate. Suaugusi lietuvė, A1+ → B1; telefonu mokosi dieną ar vakare. Profesionali tipografija ir rami struktūra, žaismingumas — Emos gestuose, kelyje ir mokymosi grįžtamajame ryšyje.
+Šviesus variantas patvirtintas 2026-10-05; tamsus variantas atmestas. Tamsūs lentelės tokenai yra archyviniai ir neįgyvendinami. Mokytis kalbėti su Ema kasdien, aiškiai matant kitą žingsnį. Režimas: Operate. Suaugusi lietuvė, A1+ → B1; telefonu mokosi dieną ar vakare. Profesionali tipografija ir rami struktūra, žaismingumas — Emos gestuose, kelyje ir mokymosi grįžtamajame ryšyje.
 
 ## Spalvos
 

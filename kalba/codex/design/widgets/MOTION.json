@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "approvedAppAppearance": "light",
+  "widgetLoops": false,
+  "activityLoops": false,
+  "activityAudioMeter": false,
+  "nativeStatus": "design_only_not_compiled",
+  "recipes": [
+    {"surface":"widget","trigger":"streak changes after a real learning result","durationMs":250,"effect":"numericText","reduceMotion":"instant value"},
+    {"surface":"widget","trigger":"doneToday becomes true from existing progress","durationMs":220,"effect":"static Ema pose and status crossfade","reduceMotion":"instant pose and text"},
+    {"surface":"activity","trigger":"actual session phase changes","durationMs":200,"effect":"status crossfade","reduceMotion":"instant status"},
+    {"surface":"activity","trigger":"learnerTurns increases from real input","durationMs":250,"effect":"numericText","reduceMotion":"instant count"},
+    {"surface":"app","trigger":"button press","durationMs":120,"effect":"2px press depth","reduceMotion":"color only"},
+    {"surface":"app","trigger":"give_exercise displays valid task","durationMs":220,"effect":"4px settle and opacity","reduceMotion":"instant task"},
+    {"surface":"app","trigger":"checked answer is wrong","durationMs":180,"effect":"one gentle horizontal nudge plus explanation","reduceMotion":"explanation and color only"},
+    {"surface":"app","trigger":"complete_lesson passes every app gate","durationMs":600,"effect":"one confetti burst and happy Ema","reduceMotion":"static happy Ema and success text"}
+  ],
+  "prototypeSequence": ["speaking","listening","exercise","completed"],
+  "assets": "assets/ema-{idle,wave,listening,talking,thinking,happy,encourage}.png",
+  "sourceAssets": "kalba/assets/ema/*.svg"
+}
