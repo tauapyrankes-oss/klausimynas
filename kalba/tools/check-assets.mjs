@@ -16,11 +16,11 @@ const browser=await chromium.launch();
 try{
  const page=await browser.newPage({viewport:{width:390,height:844}});
  await page.goto(base);await page.waitForSelector('.sprint-cta .ema img');
- let image=page.locator('.sprint-cta .ema img');await image.evaluate(async img=>{await img.decode();});
+ let image=page.locator('.sprint-cta .ema img').first();await image.evaluate(async img=>{await img.decode();});
  if(!await image.evaluate(img=>img.naturalWidth>0))throw Error('Home Ema not rendered');
 
  await page.goto(base+'#/talk');await page.waitForSelector('.ema[data-ema="wave"] img');
- image=page.locator('.ema[data-ema="wave"] img');await image.evaluate(async img=>{await img.decode();});
+ image=page.locator('.ema[data-ema="wave"] img').first();await image.evaluate(async img=>{await img.decode();});
  if(!await image.evaluate(img=>img.naturalWidth>0))throw Error('Wave Ema not rendered');
 
  const gallery=await browser.newPage({viewport:{width:1260,height:930}});

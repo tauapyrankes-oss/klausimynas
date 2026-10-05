@@ -87,10 +87,16 @@ const PACE = {
 };
 
 const LT_HELP = {
-  much: 'Use Lithuanian freely for explanations, instructions and whenever the learner looks lost; keep practice itself in English.',
-  some: 'Use Lithuanian only for short grammar explanations, for translating a key word, or when the learner is stuck or asks. Otherwise speak English.',
-  little: 'Speak English almost all the time. Use Lithuanian only if the learner explicitly asks or is completely lost.',
+  much: `LANGUAGE – SPEAK LITHUANIAN AS YOUR MAIN LANGUAGE. The learner is a beginner and does not understand long English speech.
+  Speak LITHUANIAN for: greetings, explaining what we do, grammar explanations, instructions for every task, feedback, praise and encouragement.
+  Use ENGLISH only for the language being practised: model words and sentences, the English questions the learner must answer, and role-play lines.
+  Pattern: Lithuanian instruction → short English model/question → (if needed) Lithuanian meaning. Example: "Dabar paklausiu tavęs apie savaitgalį. What did you do on Saturday? – Ką veikei šeštadienį?"
+  Never speak more than one English sentence in a row without checking understanding.`,
+  some: `LANGUAGE – MIX LITHUANIAN AND ENGLISH. Give grammar explanations, task instructions and corrections in Lithuanian; run the conversation and role-plays in simple English.
+  If the learner seems lost or answers in Lithuanian, switch to Lithuanian for that moment, then go back to English.`,
+  little: 'LANGUAGE – mostly English (simple and clear). Use Lithuanian only for a short grammar explanation, when the learner is clearly lost, or when asked.',
 };
+const AUTO_LT = { a1plus: 'much', a2: 'much', a2plus: 'some', b1: 'little' };
 
 function common(settings, level, memory) {
   const name = settings.name ? `The learner's name is ${settings.name}.` : '';
@@ -104,7 +110,7 @@ function common(settings, level, memory) {
 
 HOW YOU TEACH
 - ${PACE[settings.pace] || PACE.slow}
-- ${LT_HELP[settings.ltHelp] || LT_HELP.some}
+- ${LT_HELP[settings.ltHelp === 'auto' || !LT_HELP[settings.ltHelp] ? AUTO_LT[level.id] || 'some' : settings.ltHelp]}
 - The learner must talk more than you: keep your turns short (1-3 sentences), ask one question at a time, then wait.
 - Grade your language to the learner's level: high-frequency words, short sentences. Slightly above their level is fine.
 - Correct errors in the target grammar of the lesson every time, other errors only if they block understanding or repeat. Correct with a quick recast or a prompt ("Almost! Yesterday I ...?"), then let the learner say the correct sentence again. Never more than one correction per turn.
@@ -172,7 +178,7 @@ ${isCheckpoint
 3. Use at least 6 exercises in total, mixing prepared ones and your own, all types (choice, input, order, listen, match); give 2-3 of them a time limit (seconds: 20-45).
    Include a WRITING part (give_exercise type "write"): ${level.id === 'b1' ? 'an email or a short story of 80-100 words (min_words 80), like B1 Preliminary Writing' : level.id === 'a2plus' ? 'a message or short story of 50-70 words (min_words 50)' : 'a short message/note of 25-35 words (min_words 25), like A2 Key Writing'}.
 4. Finish with the speaking tasks above (no explanations during the exam, only repeat or rephrase).`
-    : `1. Greet warmly; in 1-2 sentences (simple English + a short Lithuanian line) say what we learn today.
+    : `1. Greet warmly and in 1-2 sentences say what we learn today (in the language mix defined above).
 2. Discover the rule: ask 1-2 easy questions that make the learner try the new structure. Then call show_theory (part "rule" or "table") and explain it in 2-3 short sentences (Lithuanian allowed). Later use show_theory for "examples", "pitfalls" or "vocab" when useful.
 3. Main part – repeat this cycle 4-6 times:
    a) 2-4 short conversational exchanges where the learner must use the target grammar/vocabulary in their own sentences;

@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   voice: 'Kore',
   micMode: 'auto', // auto | headphones | tap
   pace: 'slow', // slow | normal
-  ltHelp: 'some', // much | some | little
+  ltHelp: 'auto', // auto (pagal lygį) | much | some | little
   name: '',
   sfx: 'on',
   reminder: '19:00', // tik native programėlėje
@@ -36,6 +36,12 @@ function emptyProgress() {
 }
 
 export const settings = { ...DEFAULT_SETTINGS, ...read(SETTINGS_KEY, {}) };
+// Migracija v2: anksčiau numatytasis „some“ būdavo išsaugomas kartu su raktu – pereiname į „auto“ (pagal lygį).
+if (!settings.v2) {
+  if (settings.ltHelp === 'some') settings.ltHelp = 'auto';
+  settings.v2 = true;
+  write(SETTINGS_KEY, settings);
+}
 export function saveSettings(patch) {
   Object.assign(settings, patch);
   write(SETTINGS_KEY, settings);
