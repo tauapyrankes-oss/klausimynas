@@ -172,7 +172,7 @@
         { en: "arrive – arrived", lt: "atvykti" }
       ],
       phrases: [
-        { en: "What did you do at the weekend? (klausimas – kitoje pamokoje)", lt: "Ką veikei savaitgalį?" },
+        { en: "It was a busy weekend.", lt: "Savaitgalis buvo įtemptas." },
         { en: "On Saturday morning I…", lt: "Šeštadienio rytą aš…" },
         { en: "First I…, then I…", lt: "Pirmiausia…, paskui…" },
         { en: "After that, we…", lt: "Po to mes…" },
@@ -608,7 +608,7 @@
       ],
       reading: {
         title: "Marija Gimbutienė: from Lithuania to California",
-        text: "Marija Gimbutienė was born in Vilnius in 1921. Her parents were doctors, and there were always books and music in their house. She grew up in Kaunas and went to school there.\n\nAfter school, Marija studied archaeology and languages at university in Kaunas and Vilnius. In 1941 she married Jurgis Gimbutas. Life was very hard during the war, and in 1944 the young family left Lithuania. They lived in Germany for a few years, and Marija finished her doctorate there.\n\nIn 1949 they moved to the USA. At first Marija didn't have a university job, so she worked as a translator at Harvard and studied at night. Later she became a professor at the University of California in Los Angeles.\n\nMarija travelled a lot and worked on many excavations in Europe. She wrote more than twenty books about the first people of Europe and their goddesses. She became famous all over the world. She died in Los Angeles in 1994, but she was buried in Kaunas.",
+        text: "Marija Gimbutienė was born in Vilnius in 1921. Her parents were doctors, and there were always books and music in their house. When she was ten, the family moved to Kaunas, and she went to school there.\n\nAfter school, Marija studied archaeology and languages at university in Kaunas and Vilnius. In 1941 she married Jurgis Gimbutas. Life was very hard during the war, and in 1944 the young family left Lithuania. They lived in Germany for a few years, and Marija finished her doctorate there.\n\nIn 1949 they moved to the USA. At first Marija didn't have a university job, so she worked as a translator at Harvard University. Later she became a professor at the University of California in Los Angeles.\n\nMarija travelled a lot and worked on many excavations in Europe. She wrote more than twenty books about the first people of Europe and their goddesses. She became famous all over the world. She died in Los Angeles in 1994, but she was buried in Kaunas.",
         glossary: [
           { en: "archaeology", lt: "archeologija" },
           { en: "during the war", lt: "karo metu" },
@@ -619,8 +619,8 @@
           { en: "was buried", lt: "buvo palaidota" }
         ],
         questions: [
-          { type: "choice", q: "Where did Marija grow up?", options: ["In Vilnius", "In Kaunas", "In Los Angeles"], answer: 1,
-            explain: "„She grew up in Kaunas and went to school there.“ Gimė Vilniuje, bet užaugo Kaune." },
+          { type: "choice", q: "Where did Marija go to school?", options: ["In Vilnius", "In Kaunas", "In Los Angeles"], answer: 1,
+            explain: "„When she was ten, the family moved to Kaunas, and she went to school there.“ Gimė Vilniuje, o mokėsi Kaune." },
           { type: "choice", q: "Why did she work as a translator?", options: ["She loved languages more than archaeology.", "She didn't have a university job at first.", "She lived in Germany."], answer: 1,
             explain: "„At first Marija didn't have a university job, so she worked as a translator.“" },
           { type: "input", q: "In which year did the family move to the USA?", answer: ["1949", "in 1949"],
@@ -650,7 +650,7 @@
         tasks: [
           "Ask the learner to retell Marija Gimbutienė's life in 5–6 sentences in the right order, using first / then / later / finally.",
           "Ask 2 opinion questions: What was the most surprising part of her life? Why do you think she was buried in Kaunas?",
-          "Interview the learner about their life: Where were you born? Where did you grow up? What did you do after school? When did you get your first job? Did you ever move to another city?",
+          "Interview the learner about their life: Where were you born? Where did you grow up? What did you do after school? When did you get your first job? Did you move to another city later?",
           "Ask the learner to tell the life story of a grandparent or another person they admire (at least 6 events).",
           "Ask the learner to ask you 3 questions about 'your' life story."
         ],
