@@ -1,0 +1,2441 @@
+{
+ "sources": [
+  {
+   "id": "bc-grammar-a1a2",
+   "title": "British Council LearnEnglish – A1–A2 grammar",
+   "url": "https://learnenglish.britishcouncil.org/free-resources/grammar/a1-a2"
+  },
+  {
+   "id": "bc-grammar-b1b2",
+   "title": "British Council LearnEnglish – B1–B2 grammar",
+   "url": "https://learnenglish.britishcouncil.org/grammar/b1-b2-grammar"
+  },
+  {
+   "id": "core-inventory",
+   "title": "British Council / EAQUALS Core Inventory for General English (2011)",
+   "url": "https://www.eaquals.org/wp-content/uploads/EAQUALS_British_Council_Core_Curriculum_April2011.pdf"
+  },
+  {
+   "id": "egp",
+   "title": "English Profile – English Grammar Profile (Cambridge Learner Corpus); overview: O'Keeffe & Mark",
+   "url": "https://spraakbanken.gu.se/sites/default/files/2023/Geraldine_grammar_GothenburgApril2023_2.pdf"
+  },
+  {
+   "id": "a2-key",
+   "title": "Cambridge English A2 Key – exam format (Speaking Parts 1–2)",
+   "url": "https://cambridgeenglish.org/exams-and-tests/key/exam-format"
+  },
+  {
+   "id": "a2-key-topics",
+   "title": "Cambridge A2 Key vocabulary list – topic areas",
+   "url": "https://open-exam-prep.com/study-guides/cambridge-a2-key-schools/grammar-vocabulary/core-lexical-domains"
+  },
+  {
+   "id": "b1-preliminary",
+   "title": "Cambridge B1 Preliminary – Speaking (Parts 1–4) and teacher guide for assessing speaking",
+   "url": "https://www.cambridgeenglish.org/Images/735390-b1-preliminary-teacher-guide-assessing-speaking.pdf"
+  },
+  {
+   "id": "oxford-3000",
+   "title": "Oxford 3000 and 5000 (CEFR-levelled word lists)",
+   "url": "https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000"
+  },
+  {
+   "id": "english-file",
+   "title": "English File 4th ed. Pre-intermediate / Intermediate – Teacher's Guides (contents)",
+   "url": "https://languageadvisor.net/wp-content/uploads/2021/09/English_File_4th_edition_Pre_Intermediate_TG.pdf"
+  },
+  {
+   "id": "empower",
+   "title": "Cambridge Empower A2 Elementary – contents",
+   "url": "https://assets.cambridge.org/97811074/66487/frontmatter/9781107466487_frontmatter.pdf"
+  },
+  {
+   "id": "speakout",
+   "title": "Speakout 2nd ed. – course structure (Pearson)",
+   "url": "https://pearson.com/en-au/media/2551210/9781292120164.pdf"
+  },
+  {
+   "id": "headway",
+   "title": "Headway 5th ed. Elementary (OUP) – course description",
+   "url": "https://oup.com.pk/headway-elementary-teachers-guide.html"
+  },
+  {
+   "id": "lt-coda-voicing",
+   "title": "The coda voicing contrast in Lithuanian learners' English (Verbum, VU)",
+   "url": "https://www.journals.vu.lt/verbum/article/view/12609"
+  },
+  {
+   "id": "lt-grammar-errors",
+   "title": "Lietuviams būdingos gramatinės anglų kalbos klaidos (Kalbotyra, VU)",
+   "url": "https://www.journals.vu.lt/kalbotyra/article/view/20511"
+  },
+  {
+   "id": "lt-negative-transfer",
+   "title": "Negative transfer in Lithuanian students' writing in English (Studies about Languages, KTU/VDU)",
+   "url": "https://ejournals.vdu.lt/index.php/SM/article/view/4357"
+  },
+  {
+   "id": "lt-th-fronting",
+   "title": "J. Wells, 'Fings to come' – Lithuanian th → f substitution (Lifuania)",
+   "url": "https://www.englishspeechservices.com/?p=8082"
+  },
+  {
+   "id": "esl-lounge-functions",
+   "title": "ESL Lounge – Functional language for B1 Intermediate",
+   "url": "https://www.esl-lounge.com/student/reference/functional-language-b1-intermediate.php"
+  },
+  {
+   "id": "kcl-can-do",
+   "title": "CEFR can-do statements (King's College London Language Centre)",
+   "url": "https://www.kcl.ac.uk/language-centre/assets/can-do-statements-cefr.pdf"
+  }
+ ],
+ "levels": [
+  {
+   "id": "a1plus",
+   "name": "A1+",
+   "title": "Pradmenų įtvirtinimas",
+   "description": "Įtvirtinsi A1 pagrindus: prisistatyti, papasakoti apie kasdienybę, namus ir laisvalaikį, apsipirkti ir užsisakyti. Pabaigoje – trumpas egzaminas pagal A2 Key kalbėjimo pirmąją dalį.",
+   "units": [
+    {
+     "id": "a1plus-u01",
+     "title": "Žmonės ir aš",
+     "titleEn": "People and me",
+     "topic": "Personal identification, family, nationalities, jobs",
+     "lessons": [
+      {
+       "id": "a1plus-u01-l01",
+       "kind": "grammar",
+       "title": "Veiksmažodis „to be“ ir įvardžiai",
+       "titleEn": "To be + subject pronouns + possessive adjectives",
+       "focus": "Present of 'be' (am/is/are) in positive, negative (isn't/aren't) and questions with short answers; subject pronouns; possessive adjectives my/your/his/her/its/our/their; L1 trap: never drop 'be' or the subject (*I teacher, *Is cold).",
+       "canDo": "Galiu prisistatyti ir paklausti kito žmogaus vardo, kilmės, amžiaus ir darbo.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "core-inventory",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l02",
+       "kind": "vocabulary",
+       "title": "Šalys, tautybės, profesijos ir skaičiai",
+       "titleEn": "Countries, nationalities, jobs, numbers",
+       "focus": "Countries and nationality adjectives (Lithuania/Lithuanian, Poland/Polish…), 25 common jobs with a/an (an engineer, a nurse), numbers 1–100, ages, the alphabet and spelling names/emails (at, dot).",
+       "canDo": "Galiu pasakyti, iš kur esu ir kuo dirbu, ir paraidžiui padiktuoti savo vardą bei el. paštą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l03",
+       "kind": "functional",
+       "title": "Pasisveikinimas ir susipažinimas",
+       "titleEn": "Greetings and introductions",
+       "focus": "Hello/Hi, Nice to meet you, How are you? – Fine, thanks; introducing others (This is…); formal vs informal greetings; asking for repetition and spelling: Sorry? Can you say that again? How do you spell that?",
+       "canDo": "Galiu pasisveikinti, pristatyti kitą žmogų ir paprašyti pakartoti, jei nesupratau.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "headway"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l04",
+       "kind": "grammar",
+       "title": "„Have got“ ir savybinis 's",
+       "titleEn": "Have got / has got + possessive 's",
+       "focus": "have got/has got (+ – ?) for family and possessions; possessive 's and s' (my sister's car, my parents' house); whose? L1 trap: *the car of my sister.",
+       "canDo": "Galiu papasakoti apie savo šeimą ir ką turiu.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l05",
+       "kind": "vocabulary",
+       "title": "Šeima ir išvaizda",
+       "titleEn": "Family and describing people",
+       "focus": "Family members (parents, husband/wife, cousin, in-laws), describing appearance: tall/short, slim, long/short/curly hair, beard, glasses; word order with adjectives (She has long dark hair); look like.",
+       "canDo": "Galiu trumpai apibūdinti savo šeimos narius ir jų išvaizdą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l06",
+       "kind": "pronunciation",
+       "title": "Garsai „th“ /θ ð/ ir /w/–/v/",
+       "titleEn": "th /θ ð/ and /w/ vs /v/",
+       "focus": "Dental fricatives /θ/ (three, think, Thursday) and /ð/ (this, mother, they) – avoid /t d s f/ substitutions; /w/ (we, where, wife) vs /v/ (very, live, seven) minimal pairs: west/vest, wine/vine.",
+       "canDo": "Galiu aiškiai ištarti „th“ ir atskirti /w/ nuo /v/ kasdieniuose žodžiuose.",
+       "sources": [
+        "lt-th-fronting",
+        "lt-coda-voicing"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l07",
+       "kind": "skills",
+       "title": "Pokalbis apie mane (A2 Key 1 dalis)",
+       "titleEn": "Talking about yourself – interview",
+       "focus": "Short reading: three personal profiles; comprehension questions; then A2 Key Speaking Part 1-style interview: name, where you live, who you live with, job; giving an extra sentence of detail (because/and).",
+       "canDo": "Galiu atsakyti į asmeninius klausimus ir pridėti vieną papildomą detalę.",
+       "sources": [
+        "a2-key",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u01-l08",
+       "kind": "review",
+       "title": "Kartojimas: žmonės ir aš",
+       "titleEn": "Review: People and me",
+       "focus": "Mixed review: be, have got, possessives, family/jobs/countries vocabulary, greeting dialogue, th and w/v sounds; mini role-play meeting a new colleague.",
+       "canDo": "Galiu laisvai prisistatyti ir papasakoti apie savo šeimą.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a1plus-u02",
+     "title": "Kasdienybė",
+     "titleEn": "Daily life",
+     "topic": "Daily routines, time, work and free time habits",
+     "lessons": [
+      {
+       "id": "a1plus-u02-l01",
+       "kind": "grammar",
+       "title": "Esamasis paprastasis laikas: teiginiai",
+       "titleEn": "Present simple – positive",
+       "focus": "Present simple affirmative for routines and facts; third person -s/-es spelling (works, watches, goes, studies); has; L1 trap: forgetting -s with he/she/it.",
+       "canDo": "Galiu papasakoti apie savo ir kitų žmonių įprastą dieną.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l02",
+       "kind": "grammar",
+       "title": "Esamasis paprastasis: neiginiai ir klausimai",
+       "titleEn": "Present simple – negatives and questions",
+       "focus": "do/does + base form in questions and negatives (don't/doesn't), short answers (Yes, I do), wh-questions (Where do you work? What time does she get up?); L1 trap: *You like coffee? *He don't.",
+       "canDo": "Galiu paklausti apie kito žmogaus įpročius ir atsakyti trumpais atsakymais.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l03",
+       "kind": "vocabulary",
+       "title": "Dienotvarkė, laikas ir laiko prielinksniai",
+       "titleEn": "Daily routine, telling the time, at/on/in",
+       "focus": "Routine collocations (get up, have breakfast, go to work, get home, go to bed), telling the time (quarter past, half past, twenty to), days, months, at/on/in with time (at 7, on Monday, in July, in the morning, at the weekend).",
+       "canDo": "Galiu pasakyti, kada ką nors darau, ir teisingai vartoti at/on/in.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l04",
+       "kind": "grammar",
+       "title": "Dažnumo prieveiksmiai",
+       "titleEn": "Adverbs of frequency",
+       "focus": "always/usually/often/sometimes/hardly ever/never – position (before main verb, after be); How often…? once/twice a week, every day; L1 trap: *I go always.",
+       "canDo": "Galiu pasakyti, kaip dažnai ką nors darau.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l05",
+       "kind": "functional",
+       "title": "Susitarimas dėl susitikimo",
+       "titleEn": "Making simple arrangements",
+       "focus": "Asking about time and availability: What time is it? Are you free on Friday? Let's meet at… What about 6? That's fine / Sorry, I can't; days and times in arrangements; saying goodbye (See you on…).",
+       "canDo": "Galiu susitarti dėl susitikimo laiko ir vietos.",
+       "sources": [
+        "core-inventory",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l06",
+       "kind": "pronunciation",
+       "title": "Galūnė -s ir skardieji priebalsiai gale",
+       "titleEn": "-s endings and final voiced consonants",
+       "focus": "Three pronunciations of -s/-es: /s/ (works), /z/ (plays, goes), /ɪz/ (watches); keeping final voiced consonants and vowel length (bag vs back, dog vs dock, has /hæz/) – Lithuanian final devoicing.",
+       "canDo": "Galiu teisingai ištarti trečiojo asmens galūnę ir žodžių galą.",
+       "sources": [
+        "lt-coda-voicing"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l07",
+       "kind": "skills",
+       "title": "Vienos dienos istorija",
+       "titleEn": "A day in the life – reading and talking",
+       "focus": "Graded text 'A day in the life of a bus driver/nurse'; true/false and wh-questions; comparing with your own day; sequencing with first, then, after that.",
+       "canDo": "Galiu suprasti trumpą tekstą apie kasdienybę ir palyginti jį su savo diena.",
+       "sources": [
+        "a2-key",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u02-l08",
+       "kind": "review",
+       "title": "Kartojimas: kasdienybė",
+       "titleEn": "Review: Daily life",
+       "focus": "Present simple +/–/?, frequency adverbs, time prepositions, routine vocabulary, arranging to meet; role-play: interviewing a colleague about their week.",
+       "canDo": "Galiu sklandžiai papasakoti apie savo savaitę.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a1plus-u03",
+     "title": "Namai ir miestas",
+     "titleEn": "Home and town",
+     "topic": "House and home, places in town, neighbourhood",
+     "lessons": [
+      {
+       "id": "a1plus-u03-l01",
+       "kind": "grammar",
+       "title": "There is / there are ir artikeliai",
+       "titleEn": "There is / there are + a/an/the/some/any",
+       "focus": "there is/are (+ – ?), Is there a…? How many… are there?; a/an vs some/any with plurals; first mention a → then the; L1 trap: Lithuanian has no articles – *There is big park.",
+       "canDo": "Galiu pasakyti, kas yra mano namuose ir rajone.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l02",
+       "kind": "vocabulary",
+       "title": "Kambariai, baldai ir vietos prielinksniai",
+       "titleEn": "Rooms, furniture, prepositions of place",
+       "focus": "Rooms and furniture (living room, wardrobe, shelf, sofa, fridge), prepositions in/on/under/next to/between/opposite/in front of/behind; flat vs house, floor (on the third floor).",
+       "canDo": "Galiu apibūdinti savo butą ir pasakyti, kur kas yra.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "headway"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l03",
+       "kind": "grammar",
+       "title": "Can / can't: gebėjimas ir leidimas",
+       "titleEn": "Can / can't – ability and permission",
+       "focus": "can/can't for ability, possibility and permission (+ – ?), short answers; Can I park here? Can you swim?; pronunciation of can /kən/ vs can't /kɑːnt/.",
+       "canDo": "Galiu pasakyti, ką moku ir ko nemoku, ir paprašyti leidimo.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l04",
+       "kind": "vocabulary",
+       "title": "Vietos mieste ir apibūdinimas",
+       "titleEn": "Places in town and adjectives",
+       "focus": "Places (post office, chemist's, bank, supermarket, station, library), adjectives to describe places: quiet/noisy, clean/dirty, modern/old, safe/dangerous, beautiful; very/quite/really.",
+       "canDo": "Galiu papasakoti, kas yra mano mieste ir koks jis.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l05",
+       "kind": "functional",
+       "title": "Kaip nueiti? Kelio klausimas",
+       "titleEn": "Asking for and giving directions",
+       "focus": "Excuse me, is there a… near here? How do I get to…? Go straight on, turn left/right, take the second street on the left, it's on the corner, it's opposite…; checking: So I turn left at the bank?",
+       "canDo": "Galiu paklausti kelio ir suprasti paprastus nurodymus.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "headway"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l06",
+       "kind": "grammar",
+       "title": "Liepiamoji nuosaka ir this/that/these/those",
+       "titleEn": "Imperatives and demonstratives",
+       "focus": "Imperatives (+ and Don't…) for instructions and signs; this/that/these/those for near/far, singular/plural; one/ones.",
+       "canDo": "Galiu duoti paprastus nurodymus ir parodyti daiktus.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l07",
+       "kind": "skills",
+       "title": "Mano namai ir kaimynystė",
+       "titleEn": "My home and neighbourhood",
+       "focus": "Graded text: two people describe their neighbourhoods; matching and gap questions; describing a simple picture of a street (There is…, On the left…); talking about what you like in your area.",
+       "canDo": "Galiu apibūdinti savo rajoną ir paprastą paveikslėlį.",
+       "sources": [
+        "a2-key",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "a1plus-u03-l08",
+       "kind": "review",
+       "title": "Kartojimas: namai ir miestas",
+       "titleEn": "Review: Home and town",
+       "focus": "there is/are, articles, can, imperatives, demonstratives, home and town vocabulary, directions; role-play: showing a friend round your flat and explaining how to get to the shop.",
+       "canDo": "Galiu laisvai papasakoti apie savo namus ir miestą.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a1plus-u04",
+     "title": "Maistas, apsipirkimas ir laisvalaikis",
+     "titleEn": "Food, shopping and free time",
+     "topic": "Food and drink, shopping, clothes, hobbies",
+     "lessons": [
+      {
+       "id": "a1plus-u04-l01",
+       "kind": "grammar",
+       "title": "Skaičiuojami ir neskaičiuojami daiktavardžiai",
+       "titleEn": "Countable/uncountable, some/any, how much/many",
+       "focus": "Countable vs uncountable nouns (apple/bread/water/money), some/any, How much/How many…? a lot of; containers: a bottle of, a packet of, a kilo of; L1 trap: *breads, *informations.",
+       "canDo": "Galiu pasakyti, ko reikia nupirkti, ir paklausti apie kiekį.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l02",
+       "kind": "vocabulary",
+       "title": "Maistas, gėrimai ir kainos",
+       "titleEn": "Food, drink and prices",
+       "focus": "Common food and drink (vegetables, fruit, meat, fish, dairy), meals, prices (£4.50, €12.99), How much is it/are they?; I'm hungry/thirsty.",
+       "canDo": "Galiu kalbėti apie mėgstamą maistą ir pasakyti kainas.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l03",
+       "kind": "functional",
+       "title": "Kavinėje: užsisakymas",
+       "titleEn": "Ordering in a café",
+       "focus": "Can I have…? I'd like… Could I have…? Anything else? Eat in or take away? Here you are; asking for the bill; polite would like vs want.",
+       "canDo": "Galiu mandagiai užsisakyti kavinėje ir susimokėti.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "headway"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l04",
+       "kind": "grammar",
+       "title": "Like/love/hate + -ing ir objekto įvardžiai",
+       "titleEn": "Like + -ing and object pronouns",
+       "focus": "like/love/enjoy/don't mind/hate + -ing; would like + to (difference from like); object pronouns me/you/him/her/it/us/them.",
+       "canDo": "Galiu pasakyti, ką mėgstu ir ko nemėgstu daryti.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l05",
+       "kind": "functional",
+       "title": "Parduotuvėje: drabužiai",
+       "titleEn": "Shopping for clothes",
+       "focus": "Clothes and colours; Can I help you? I'm just looking. Have you got this in a medium/in blue? Can I try it on? Where are the changing rooms? It's too big. I'll take it.",
+       "canDo": "Galiu nusipirkti drabužį: paklausti dydžio, spalvos, pasimatuoti ir sumokėti.",
+       "sources": [
+        "core-inventory",
+        "a2-key-topics",
+        "empower"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l06",
+       "kind": "grammar",
+       "title": "Esamasis eigos laikas",
+       "titleEn": "Present continuous – now and around now",
+       "focus": "am/is/are + -ing (+ – ?), spelling (making, sitting); now vs usually – contrast with present simple; describing what people are doing in a picture.",
+       "canDo": "Galiu pasakyti, ką darau dabar, ir apibūdinti, ką daro žmonės paveikslėlyje.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l07",
+       "kind": "pronunciation",
+       "title": "Ilgieji ir trumpieji balsiai",
+       "titleEn": "Long and short vowels",
+       "focus": "/ɪ/ vs /iː/ (ship/sheep, live/leave, it/eat), /ʊ/ vs /uː/ (full/fool, look/Luke), /e/ vs /æ/ (bed/bad, men/man); vowel length is meaning-bearing in English.",
+       "canDo": "Galiu atskirti ir ištarti ilguosius bei trumpuosius anglų kalbos balsius.",
+       "sources": [
+        "lt-coda-voicing",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a1plus-u04-l08",
+       "kind": "review",
+       "title": "Kartojimas: maistas, apsipirkimas, laisvalaikis",
+       "titleEn": "Review: Food, shopping and free time",
+       "focus": "Countable/uncountable, like + -ing, present simple vs continuous, food and clothes vocabulary; role-play: café order + clothes shop.",
+       "canDo": "Galiu susitvarkyti kasdienėse pirkimo situacijose.",
+       "sources": [
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a1plus-u04-exam",
+       "kind": "checkpoint",
+       "title": "A1+ lygio egzaminas",
+       "titleEn": "A1+ level checkpoint",
+       "focus": "Speaking exam modelled on A2 Key Speaking Part 1 (personal interview: name, home, family, routine, free time, extended 'Tell me something about…' answer) plus a short role-play (ordering/asking directions) and a simple picture description with there is / present continuous.",
+       "canDo": "Galiu įrodyti, kad esu pasiruošusi A2 lygiui: atsakau į asmeninius klausimus ir susitvarkau paprastose situacijose.",
+       "sources": [
+        "a2-key",
+        "kcl-can-do"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a2",
+   "name": "A2",
+   "title": "Kasdienis bendravimas",
+   "description": "Išmoksi pasakoti apie praeitį, keliones ir planus, lyginti, užsisakyti restorane, pasikalbėti su gydytoju ir darbe. Pabaigoje – pilnas A2 Key kalbėjimo egzamino modelis.",
+   "units": [
+    {
+     "id": "a2-u01",
+     "title": "Praeitis ir gyvenimo istorijos",
+     "titleEn": "The past and life stories",
+     "topic": "Life events, biographies, last weekend",
+     "lessons": [
+      {
+       "id": "a2-u01-l01",
+       "kind": "grammar",
+       "title": "Was / were ir there was / were",
+       "titleEn": "Past of be: was/were, there was/were",
+       "focus": "was/were (+ – ?), short answers, there was/were; born: I was born in…; past time expressions yesterday, last week, in 2010, ago.",
+       "canDo": "Galiu pasakyti, kur ir kada buvau, ir kur gimiau.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2-u01-l02",
+       "kind": "grammar",
+       "title": "Būtasis paprastasis: taisyklingieji veiksmažodžiai",
+       "titleEn": "Past simple – regular verbs",
+       "focus": "Past simple affirmative of regular verbs, spelling (stopped, studied, lived); time expressions; talking about last weekend.",
+       "canDo": "Galiu papasakoti, ką veikiau praėjusį savaitgalį.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a2-u01-l03",
+       "kind": "grammar",
+       "title": "Būtasis paprastasis: netaisyklingieji veiksmažodžiai",
+       "titleEn": "Past simple – irregular verbs",
+       "focus": "40 high-frequency irregular verbs (went, had, got, made, saw, took, bought, came, left, met, said, told…), learning strategies; narrating a simple sequence.",
+       "canDo": "Galiu papasakoti apie praeities įvykius vartodama dažniausius netaisyklinguosius veiksmažodžius.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u01-l04",
+       "kind": "grammar",
+       "title": "Būtasis paprastasis: klausimai ir neiginiai",
+       "titleEn": "Past simple – questions and negatives",
+       "focus": "did/didn't + base form; wh-questions in the past (Where did you go? What did you do? Who did you meet?); L1 trap: *Did you went? *I didn't saw.",
+       "canDo": "Galiu paklausti kito žmogaus apie jo praeitį ir atsakyti.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2-u01-l05",
+       "kind": "pronunciation",
+       "title": "Galūnė -ed",
+       "titleEn": "-ed endings",
+       "focus": "Three pronunciations of -ed: /t/ (worked), /d/ (lived), /ɪd/ (wanted, needed) – not adding an extra syllable; linking -ed to next word.",
+       "canDo": "Galiu teisingai ištarti taisyklingųjų veiksmažodžių būtojo laiko formas.",
+       "sources": [
+        "english-file",
+        "lt-coda-voicing"
+       ]
+      },
+      {
+       "id": "a2-u01-l06",
+       "kind": "skills",
+       "title": "Gyvenimo istorija",
+       "titleEn": "A life story",
+       "focus": "Graded biography of a famous Lithuanian/international person; ordering events, life-event collocations (grow up, leave school, get a job, get married, have children, move to, retire); sequencing first, then, after that, finally; telling your own life story.",
+       "canDo": "Galiu papasakoti trumpą savo ar kito žmogaus gyvenimo istoriją.",
+       "sources": [
+        "a2-key",
+        "oxford-3000",
+        "empower"
+       ]
+      },
+      {
+       "id": "a2-u01-l07",
+       "kind": "review",
+       "title": "Kartojimas: praeitis",
+       "titleEn": "Review: The past",
+       "focus": "Past simple of be and full verbs (+ – ?), irregular verbs, -ed pronunciation, life events; interview game 'Find out about my last holiday'.",
+       "canDo": "Galiu laisvai kalbėti apie savo praeitį.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2-u02",
+     "title": "Atostogos ir kelionės",
+     "titleEn": "Holidays and travel",
+     "topic": "Travel and holidays, transport, weather",
+     "lessons": [
+      {
+       "id": "a2-u02-l01",
+       "kind": "vocabulary",
+       "title": "Transportas, atostogos ir orai",
+       "titleEn": "Transport, holidays and weather",
+       "focus": "Transport (by bus/train/car/plane, on foot), travel verbs (catch/miss a bus, get on/off, take a taxi), holiday collocations: go camping/sightseeing, stay in a hotel, book a flight, pack, rent a car; weather (sunny, rainy, windy, cloudy, foggy, storm, degrees), What's the weather like?",
+       "canDo": "Galiu papasakoti, kaip keliauju, ką veikiu atostogose ir kokie buvo orai.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u02-l02",
+       "kind": "grammar",
+       "title": "Būtasis eigos laikas",
+       "titleEn": "Past continuous vs past simple",
+       "focus": "was/were + -ing for background and interrupted actions; when/while; past continuous vs past simple in stories (I was walking to the station when it started to rain).",
+       "canDo": "Galiu papasakoti, kas vyko tam tikru momentu praeityje ir kas tai nutraukė.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u02-l03",
+       "kind": "functional",
+       "title": "Stotyje ir oro uoste",
+       "titleEn": "At the station and airport",
+       "focus": "Buying tickets: A return to…, please. Single or return? What time is the next train? Which platform? Is this seat free? Check-in, boarding pass, gate, delayed; understanding announcements.",
+       "canDo": "Galiu nusipirkti bilietą ir susigaudyti stotyje ar oro uoste.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "a2-key-topics"
+       ]
+      },
+      {
+       "id": "a2-u02-l04",
+       "kind": "functional",
+       "title": "Viešbutyje: rezervacija ir registracija",
+       "titleEn": "At the hotel – booking and checking in",
+       "focus": "I'd like to book a double room for two nights. Does it include breakfast? I have a reservation. What time is check-out? Could I have the Wi-Fi password? Spelling and dates on the phone.",
+       "canDo": "Galiu užsisakyti kambarį ir užsiregistruoti viešbutyje.",
+       "sources": [
+        "core-inventory",
+        "headway"
+       ]
+      },
+      {
+       "id": "a2-u02-l05",
+       "kind": "skills",
+       "title": "Atostogų istorija ir nuotrauka",
+       "titleEn": "A holiday story and photo",
+       "focus": "Graded text: a holiday that went wrong; comprehension; telling a holiday story with past simple/continuous; describing a holiday photo (In this picture…, The people are…).",
+       "canDo": "Galiu papasakoti apie atostogas ir apibūdinti atostogų nuotrauką.",
+       "sources": [
+        "a2-key",
+        "b1-preliminary",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u02-l06",
+       "kind": "pronunciation",
+       "title": "Žodžio kirtis",
+       "titleEn": "Word stress",
+       "focus": "Stress in 2–3 syllable words (HOliday, hoTEL, aIRport, toMORrow, BREAKfast), weak unstressed syllables; Lithuanian stress habits vs English stress-timing.",
+       "canDo": "Galiu teisingai kirčiuoti dažnus dviejų ir trijų skiemenų žodžius.",
+       "sources": [
+        "lt-th-fronting",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u02-l07",
+       "kind": "review",
+       "title": "Kartojimas: kelionės",
+       "titleEn": "Review: Holidays and travel",
+       "focus": "Past continuous vs past simple, travel and weather vocabulary, station and hotel dialogues; role-play: arriving in a new city.",
+       "canDo": "Galiu susitvarkyti kelionėje ir papasakoti apie ją.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2-u03",
+     "title": "Miestai ir vietos",
+     "titleEn": "Cities and places",
+     "topic": "Places and buildings, comparing places, public transport",
+     "lessons": [
+      {
+       "id": "a2-u03-l01",
+       "kind": "grammar",
+       "title": "Būdvardžių aukštesnysis laipsnis",
+       "titleEn": "Comparative adjectives",
+       "focus": "-er/more + than, irregular (better, worse, further), (not) as… as; much/a bit + comparative; L1 trap: *more bigger; pronunciation: schwa and weak 'than' /ðən/, 'as' /əz/.",
+       "canDo": "Galiu palyginti du miestus, daiktus ar žmones.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u03-l02",
+       "kind": "grammar",
+       "title": "Būdvardžių aukščiausiasis laipsnis",
+       "titleEn": "Superlative adjectives",
+       "focus": "the -est/the most, irregular (the best, the worst), in/of after superlatives (the biggest city in Lithuania), + present perfect ever preview (the best film I've ever seen) as a chunk.",
+       "canDo": "Galiu pasakyti, kas yra didžiausias, geriausias ar įdomiausias.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a2-u03-l03",
+       "kind": "grammar",
+       "title": "Artikeliai: a/an, the ir be artikelio",
+       "titleEn": "Articles – a/an, the, zero article",
+       "focus": "Use of a/an (one of many), the (unique/known/again), zero article with general plurals and uncountables (I like dogs), with cities/countries/streets vs the + rivers, seas, the UK/USA, the city centre; Lithuanian learners' #1 error.",
+       "canDo": "Galiu teisingiau vartoti artikelius kalbėdama apie vietas.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2-u03-l04",
+       "kind": "vocabulary",
+       "title": "Miestas: pastatai ir paslaugos",
+       "titleEn": "City buildings, services and adjectives",
+       "focus": "Buildings and services (museum, castle, square, shopping centre, town hall, petrol station, hospital), city adjectives (crowded, lively, historic, expensive, polluted), compound nouns (bus stop, car park).",
+       "canDo": "Galiu apibūdinti miestą ir jo lankytinas vietas.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics"
+       ]
+      },
+      {
+       "id": "a2-u03-l05",
+       "kind": "functional",
+       "title": "Viešasis transportas ir kelio aiškinimas",
+       "titleEn": "Public transport and detailed directions",
+       "focus": "Which bus goes to…? Where do I change? How long does it take? It takes about 20 minutes; giving multi-step directions with landmarks; checking and clarifying (Did you say…?).",
+       "canDo": "Galiu paklausti apie viešąjį transportą ir paaiškinti kelią turistui.",
+       "sources": [
+        "core-inventory",
+        "empower"
+       ]
+      },
+      {
+       "id": "a2-u03-l06",
+       "kind": "skills",
+       "title": "Du miestai: tinklaraštis ir diskusija",
+       "titleEn": "Two cities – blog and discussion",
+       "focus": "Graded travel blog comparing Vilnius and another European city; comprehension; A2 Key Part 2 style discussion: which place is better for a weekend and why (Do you like…? Which do you prefer? Why?).",
+       "canDo": "Galiu perskaityti trumpą kelionių tinklaraštį ir pasakyti, kurį miestą renkuosi ir kodėl.",
+       "sources": [
+        "a2-key",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2-u03-l07",
+       "kind": "review",
+       "title": "Kartojimas: miestai",
+       "titleEn": "Review: Cities and places",
+       "focus": "Comparatives, superlatives, articles, city vocabulary, transport questions; task: recommend your town to a visitor.",
+       "canDo": "Galiu palyginti vietas ir rekomenduoti, ką aplankyti.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2-u04",
+     "title": "Planai ir laisvalaikis",
+     "titleEn": "Plans and free time",
+     "topic": "Entertainment, sport, leisure, invitations",
+     "lessons": [
+      {
+       "id": "a2-u04-l01",
+       "kind": "grammar",
+       "title": "Going to: planai ir ketinimai",
+       "titleEn": "Going to – plans and intentions",
+       "focus": "be going to + verb for plans/intentions (+ – ?), time expressions (tonight, next weekend, in two weeks); predictions from present evidence (Look at the sky – it's going to rain).",
+       "canDo": "Galiu papasakoti apie savo planus ir ketinimus.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u04-l02",
+       "kind": "grammar",
+       "title": "Esamasis eigos laikas ateities susitarimams",
+       "titleEn": "Present continuous for arrangements",
+       "focus": "Present continuous for fixed future arrangements (I'm meeting Tom on Friday); contrast with going to; present simple for timetables (The film starts at 8).",
+       "canDo": "Galiu pasakyti, ką jau esu suplanavusi ir susitarusi.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a2-u04-l03",
+       "kind": "vocabulary",
+       "title": "Laisvalaikis ir sportas",
+       "titleEn": "Leisure activities and sport",
+       "focus": "play/go/do + sport (play tennis, go swimming, do yoga), entertainment (concert, exhibition, match, theatre), hobbies; adjectives: exciting, relaxing, boring.",
+       "canDo": "Galiu papasakoti apie savo laisvalaikį ir pomėgius.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u04-l04",
+       "kind": "functional",
+       "title": "Kvietimai ir pasiūlymai",
+       "titleEn": "Invitations and suggestions",
+       "focus": "Would you like to…? Do you fancy…? Shall we…? Why don't we…? How about -ing? Accepting (I'd love to) and declining politely with a reason (I'm afraid I can't – I'm working); fixing details.",
+       "canDo": "Galiu pakviesti, priimti ar mandagiai atsisakyti kvietimo.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "a2-u04-l05",
+       "kind": "grammar",
+       "title": "Will: spontaniški sprendimai, pasiūlymai, pažadai",
+       "titleEn": "Will – decisions, offers, promises",
+       "focus": "will/won't for instant decisions (I'll have the soup), offers (I'll help you), promises (I'll call you); Shall I…?; will vs going to.",
+       "canDo": "Galiu pasiūlyti pagalbą, pažadėti ir priimti sprendimą pokalbio metu.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u04-l06",
+       "kind": "pronunciation",
+       "title": "Sutrumpinimai ir greitoji kalba",
+       "titleEn": "Contractions and connected speech",
+       "focus": "I'll, won't /wəʊnt/ vs want, gonna/going to /gənə/, wanna in informal speech, I'd like, Let's; hearing contractions in fast speech.",
+       "canDo": "Galiu ištarti ir išgirsti sutrumpintas formas greitoje kalboje.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u04-l07",
+       "kind": "skills",
+       "title": "Savaitgalio planas (A2 Key 2 dalis)",
+       "titleEn": "Planning a weekend – A2 Key Part 2",
+       "focus": "A2 Key Speaking Part 2: discussing 5 picture prompts of weekend activities (Do you like…? Which is more fun?), giving reasons, then follow-up questions; listening-style text: friends planning a weekend.",
+       "canDo": "Galiu aptarti laisvalaikio pasirinkimus, pasakyti, kas man patinka, ir paaiškinti kodėl.",
+       "sources": [
+        "a2-key"
+       ]
+      },
+      {
+       "id": "a2-u04-l08",
+       "kind": "review",
+       "title": "Kartojimas: planai",
+       "titleEn": "Review: Plans and free time",
+       "focus": "going to, present continuous for future, will, leisure vocabulary, invitations; role-play: organising a birthday evening.",
+       "canDo": "Galiu suplanuoti renginį su draugu.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2-u05",
+     "title": "Maistas ir sveikata",
+     "titleEn": "Food and health",
+     "topic": "Food and drink, restaurants, body and health",
+     "lessons": [
+      {
+       "id": "a2-u05-l01",
+       "kind": "vocabulary",
+       "title": "Maisto gaminimas ir receptai",
+       "titleEn": "Cooking and recipes",
+       "focus": "Cooking verbs (boil, fry, bake, chop, mix, add), food adjectives (spicy, sweet, fresh, raw), describing a dish; sequencing a recipe with imperatives.",
+       "canDo": "Galiu papasakoti, kaip pagaminti savo mėgstamą patiekalą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics"
+       ]
+      },
+      {
+       "id": "a2-u05-l02",
+       "kind": "grammar",
+       "title": "Kiekybės žodžiai",
+       "titleEn": "Quantifiers",
+       "focus": "much/many/a lot of, a few/a little, too much/too many, (not) enough + noun; any/no; L1 trap: *a lot of informations, *much people.",
+       "canDo": "Galiu tiksliai pasakyti, kiek ko valgau, perku ar turiu.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u05-l03",
+       "kind": "functional",
+       "title": "Restorane",
+       "titleEn": "At a restaurant",
+       "focus": "Booking a table by phone; Are you ready to order? I'll have… Could we have…? What do you recommend? Is it spicy? Problems (This isn't what I ordered), asking for the bill, Can we pay separately?",
+       "canDo": "Galiu užsisakyti stalelį, patiekalus ir išspręsti paprastą problemą restorane.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "headway"
+       ]
+      },
+      {
+       "id": "a2-u05-l04",
+       "kind": "vocabulary",
+       "title": "Kūnas ir sveikatos problemos",
+       "titleEn": "Body and health problems",
+       "focus": "Parts of the body; I've got a headache/a cold/a sore throat/a temperature/a cough; My back hurts; I feel sick/tired/dizzy; medicine, tablets, pharmacy.",
+       "canDo": "Galiu pasakyti, kas man skauda ir kaip jaučiuosi.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics"
+       ]
+      },
+      {
+       "id": "a2-u05-l05",
+       "kind": "grammar",
+       "title": "Should / shouldn't: patarimai",
+       "titleEn": "Should for advice",
+       "focus": "should/shouldn't + base form; Should I…? What should I do?; You should see a doctor; weaker/stronger advice: Maybe you should…; ought to (receptive).",
+       "canDo": "Galiu duoti ir paprašyti paprasto patarimo.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u05-l06",
+       "kind": "functional",
+       "title": "Pas gydytoją ir vaistinėje",
+       "titleEn": "At the doctor's and the pharmacy",
+       "focus": "Making an appointment; What's the matter? How long have you had it? (chunk); describing symptoms; understanding instructions (Take one tablet three times a day); asking the pharmacist for something for a cough.",
+       "canDo": "Galiu užsiregistruoti pas gydytoją, apibūdinti simptomus ir suprasti nurodymus.",
+       "sources": [
+        "core-inventory",
+        "empower",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "a2-u05-l07",
+       "kind": "skills",
+       "title": "Sveika gyvensena",
+       "titleEn": "Healthy lifestyle – reading and discussion",
+       "focus": "Graded article 'Five habits of healthy people'; comprehension and vocabulary; discussion of your own diet and habits using quantifiers and should.",
+       "canDo": "Galiu suprasti trumpą straipsnį apie sveikatą ir pasidalinti savo įpročiais.",
+       "sources": [
+        "a2-key",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2-u05-l08",
+       "kind": "review",
+       "title": "Kartojimas: maistas ir sveikata",
+       "titleEn": "Review: Food and health",
+       "focus": "Quantifiers, should, cooking and health vocabulary, restaurant and doctor role-plays.",
+       "canDo": "Galiu susitvarkyti restorane ir pas gydytoją.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2-u06",
+     "title": "Darbas ir mokslai",
+     "titleEn": "Work and study",
+     "topic": "Jobs, workplace, school and study, phone calls",
+     "lessons": [
+      {
+       "id": "a2-u06-l01",
+       "kind": "vocabulary",
+       "title": "Darbai ir darbo vieta",
+       "titleEn": "Jobs and the workplace",
+       "focus": "Jobs and workplaces, work collocations (work in an office/from home, work for a company, be in charge of, earn, full-time/part-time, shift, boss, colleague, customer).",
+       "canDo": "Galiu papasakoti apie savo darbą: kur dirbu ir ką darau.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2-u06-l02",
+       "kind": "grammar",
+       "title": "Have to, must, mustn't",
+       "titleEn": "Obligation – have to, must, don't have to, mustn't",
+       "focus": "have to/don't have to (necessity vs no necessity), must/mustn't (rules, prohibition), had to in the past; contrast don't have to vs mustn't (L1 trap: 'nereikia' vs 'negalima').",
+       "canDo": "Galiu paaiškinti darbo taisykles ir ką privalau ar nebūtina daryti.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2-u06-l03",
+       "kind": "grammar",
+       "title": "Prieveiksmiai ir būdvardžiai",
+       "titleEn": "Adverbs of manner vs adjectives",
+       "focus": "Adjective vs adverb (careful/carefully, good/well, fast/fast, hard/hard), position; L1 trap: *He speaks English good. *drive careful.",
+       "canDo": "Galiu apibūdinti, kaip žmonės atlieka darbą.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2-u06-l04",
+       "kind": "grammar",
+       "title": "Veiksmažodis + to ar -ing",
+       "titleEn": "Verb + to-infinitive or -ing (basic)",
+       "focus": "want/need/hope/decide/would like + to; enjoy/finish/mind/like + -ing; infinitive of purpose (I went to the bank to get money); L1 trap: *for to get, *I want that you…",
+       "canDo": "Galiu pasakyti, ko noriu, ką planuoju ir kodėl ką nors darau.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2-u06-l05",
+       "kind": "functional",
+       "title": "Telefono pokalbiai",
+       "titleEn": "Phone calls",
+       "focus": "Hello, this is… Can I speak to…? I'm calling about… He's not available – can I take a message? Could you ask her to call me back? Spelling and numbers; Sorry, it's a bad line.",
+       "canDo": "Galiu paskambinti, paprašyti pakviesti žmogų ir palikti žinutę.",
+       "sources": [
+        "core-inventory",
+        "headway",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "a2-u06-l06",
+       "kind": "skills",
+       "title": "Darbo skelbimas ir mokymasis",
+       "titleEn": "A job advert and studying",
+       "focus": "Graded job advert and an email about a course; school/study vocabulary (subject, exam, pass/fail, course, degree); talking about your education and job requirements.",
+       "canDo": "Galiu suprasti darbo skelbimą ir papasakoti apie savo išsilavinimą.",
+       "sources": [
+        "a2-key",
+        "oxford-3000"
+       ]
+      },
+      {
+       "id": "a2-u06-l07",
+       "kind": "review",
+       "title": "Kartojimas: darbas ir mokslai",
+       "titleEn": "Review: Work and study",
+       "focus": "Obligation modals, adverbs, verb + to/-ing, work vocabulary, phone calls; role-play: calling a company about a job.",
+       "canDo": "Galiu kalbėti apie darbą ir susitvarkyti telefonu.",
+       "sources": [
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2-u06-exam",
+       "kind": "checkpoint",
+       "title": "A2 lygio egzaminas",
+       "titleEn": "A2 level checkpoint",
+       "focus": "Full A2 Key Speaking model: Part 1 interview (daily life, past weekend, plans) with a 'Tell me something about…' extended answer; Part 2 picture-based discussion of 5 options with reasons and follow-up questions; plus a functional role-play (restaurant / doctor / station).",
+       "canDo": "Galiu išlaikyti A2 Key kalbėjimo dalies modelį: kalbu apie save, praeitį ir planus, lyginu ir argumentuoju.",
+       "sources": [
+        "a2-key",
+        "kcl-can-do"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a2plus",
+   "name": "A2+",
+   "title": "Patirtys ir nuomonės",
+   "description": "Išmoksi kalbėti apie patirtį (Present Perfect), pokyčius, pirkinius, technologijas ir žmones, sąlygas ir prognozes, pateikti nuomonę ir mandagiai prašyti. Pabaigoje – A2 Key / B1 Preliminary pereinamasis egzaminas.",
+   "units": [
+    {
+     "id": "a2plus-u01",
+     "title": "Patirtys",
+     "titleEn": "Experiences",
+     "topic": "Personal experiences, achievements, news",
+     "lessons": [
+      {
+       "id": "a2plus-u01-l01",
+       "kind": "grammar",
+       "title": "Present Perfect: patirtis (ever/never)",
+       "titleEn": "Present perfect for experience",
+       "focus": "have/has + past participle; Have you ever…? I've never…; past participles of common irregular verbs; been vs gone; L1 trap: Lithuanian uses past tense – *Did you ever see…?",
+       "canDo": "Galiu paklausti apie kito žmogaus patirtį ir papasakoti apie savo.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l02",
+       "kind": "grammar",
+       "title": "Present Perfect ar Past Simple?",
+       "titleEn": "Present perfect vs past simple",
+       "focus": "Experience (present perfect) → details (past simple): Have you ever been to Italy? – Yes, I went there in 2019; finished time expressions (yesterday, ago, in 2019) block present perfect.",
+       "canDo": "Galiu pradėti pokalbį apie patirtį ir papasakoti detales tinkamu laiku.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l03",
+       "kind": "grammar",
+       "title": "Just, already, yet",
+       "titleEn": "Present perfect with just, already, yet",
+       "focus": "Recent events and news: I've just finished; Have you done it yet? I haven't… yet; I've already…; position of the adverbs; British vs American usage (receptive).",
+       "canDo": "Galiu pranešti naujienas ir pasakyti, ką jau padariau ar dar ne.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l04",
+       "kind": "vocabulary",
+       "title": "Patirtys ir pasiekimai",
+       "titleEn": "Experiences and achievements",
+       "focus": "Collocations: win a prize, pass a test, break a bone, run a marathon, meet someone famous, try (new food), learn to…; -ed/-ing adjectives for reacting (amazing, terrifying, embarrassed).",
+       "canDo": "Galiu įvairiais žodžiais apibūdinti savo patirtis ir jausmus.",
+       "sources": [
+        "oxford-3000",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l05",
+       "kind": "functional",
+       "title": "Naujienos ir reakcijos",
+       "titleEn": "Catching up – giving news and reacting",
+       "focus": "How have you been? What have you been up to? Guess what! Reacting: Really? That's great! Congratulations! Oh no, I'm sorry to hear that. Lucky you!; showing interest with follow-up questions.",
+       "canDo": "Galiu pasidalinti naujienomis su draugu ir tinkamai reaguoti į jo naujienas.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l06",
+       "kind": "pronunciation",
+       "title": "Silpnosios formos: have / has",
+       "titleEn": "Weak forms and contractions of have/has",
+       "focus": "I've, she's (= has), haven't, weak /həv/ in questions (Have you ever /həvjuː/…?), linking; hearing 's = is vs has.",
+       "canDo": "Galiu natūraliai ištarti Present Perfect sakinius.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l07",
+       "kind": "skills",
+       "title": "„Ką būtina patirti“ sąrašas",
+       "titleEn": "Bucket list – reading and speaking",
+       "focus": "Graded text about people's bucket lists; comprehension; speaking: your own top 5 experiences you have had / want to have, with reasons.",
+       "canDo": "Galiu papasakoti apie svarbiausias savo patirtis ir svajones.",
+       "sources": [
+        "speakout",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "a2plus-u01-l08",
+       "kind": "review",
+       "title": "Kartojimas: patirtys",
+       "titleEn": "Review: Experiences",
+       "focus": "Present perfect vs past simple, just/already/yet, experience vocabulary, giving news; 'Find someone who has…' conversation.",
+       "canDo": "Galiu laisvai kalbėti apie patirtis.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2plus-u02",
+     "title": "Namai ir pokyčiai",
+     "titleEn": "Homes and changes",
+     "topic": "House and home, changes in life, requests",
+     "lessons": [
+      {
+       "id": "a2plus-u02-l01",
+       "kind": "grammar",
+       "title": "Present Perfect su for / since",
+       "titleEn": "Present perfect with for and since; How long…?",
+       "focus": "Unfinished states: How long have you lived/worked/known…? for + period, since + point; L1 trap: *I live here for 5 years, *since 5 years.",
+       "canDo": "Galiu pasakyti, kiek laiko gyvenu, dirbu ar pažįstu žmogų.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l02",
+       "kind": "grammar",
+       "title": "Used to",
+       "titleEn": "Used to – past habits and states",
+       "focus": "used to/didn't use to/Did you use to…? for past habits and states vs now; talking about how your life/town has changed.",
+       "canDo": "Galiu papasakoti, kaip gyvenau anksčiau ir kas pasikeitė.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l03",
+       "kind": "vocabulary",
+       "title": "Būstas ir buities darbai",
+       "titleEn": "Housing and household chores",
+       "focus": "Types of home (detached house, block of flats, studio), renting (rent, landlord, tenant, deposit, bills), make vs do (make the bed, do the washing-up, do the shopping, make dinner).",
+       "canDo": "Galiu apibūdinti savo būstą ir buities darbus.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l04",
+       "kind": "functional",
+       "title": "Mandagūs prašymai ir leidimas",
+       "titleEn": "Polite requests and asking permission",
+       "focus": "Can/Could you…? Would you mind -ing? Do you mind if I…? Is it OK if I…? Could I possibly…?; replying: Sure, go ahead / I'm afraid not; register: polite vs direct (Lithuanian directness).",
+       "canDo": "Galiu mandagiai paprašyti paslaugos ar leidimo ir į tai atsakyti.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "empower"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l05",
+       "kind": "grammar",
+       "title": "Apibrėžiamieji šalutiniai sakiniai",
+       "titleEn": "Defining relative clauses",
+       "focus": "who/which/that/where for people, things, places (a person who…, a place where…); defining words and paraphrasing when you don't know a word (It's a thing which you use to…).",
+       "canDo": "Galiu paaiškinti žodį, kurio nežinau, apibūdindama jį kitais žodžiais.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l06",
+       "kind": "pronunciation",
+       "title": "Balsiai /ʌ/, /æ/, /ɑː/",
+       "titleEn": "Vowels /ʌ/, /æ/, /ɑː/",
+       "focus": "cup/cap/carp, much/match, hut/hat/heart, come/calm; avoiding Lithuanian 'a' for all three.",
+       "canDo": "Galiu atskirti panašius anglų kalbos balsius.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l07",
+       "kind": "skills",
+       "title": "Būsto apibūdinimas (B1 2 dalis įžanga)",
+       "titleEn": "Describing a picture of a home",
+       "focus": "Introduction to B1 Preliminary Part 2: describing a photo of a room/home for one minute: where, who, what they're doing, what you think (I can see…, In the background…, It looks like…); short text about tiny houses.",
+       "canDo": "Galiu apie minutę apibūdinti nuotrauką su namų scena.",
+       "sources": [
+        "b1-preliminary",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2plus-u02-l08",
+       "kind": "review",
+       "title": "Kartojimas: namai ir pokyčiai",
+       "titleEn": "Review: Homes and changes",
+       "focus": "for/since, used to, relative clauses, housing vocabulary, polite requests; role-play: talking to a landlord.",
+       "canDo": "Galiu kalbėti apie būstą ir mandagiai išspręsti buitinius klausimus.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2plus-u03",
+     "title": "Pirkiniai ir pinigai",
+     "titleEn": "Shopping and money",
+     "topic": "Shopping, money, services, complaints",
+     "lessons": [
+      {
+       "id": "a2plus-u03-l01",
+       "kind": "vocabulary",
+       "title": "Pinigai ir parduotuvės",
+       "titleEn": "Money and shops",
+       "focus": "Money verbs: spend, save, waste, lend, borrow, owe, earn, afford, pay by card/in cash, refund, receipt, discount, sale; types of shops and online shopping.",
+       "canDo": "Galiu kalbėti apie pinigus, išlaidas ir apsipirkimą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l02",
+       "kind": "grammar",
+       "title": "Too / enough",
+       "titleEn": "Too and enough",
+       "focus": "too + adjective, (not) + adjective + enough, enough + noun, too much/too many; It's too expensive for me / not big enough.",
+       "canDo": "Galiu paaiškinti, kodėl daiktas netinka.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l03",
+       "kind": "grammar",
+       "title": "Nežymimieji įvardžiai",
+       "titleEn": "Indefinite pronouns",
+       "focus": "something/anything/nothing, somebody/anyone/nobody, somewhere/everywhere/nowhere; single negation in English (I didn't buy anything – not *I didn't buy nothing; Lithuanian double negation).",
+       "canDo": "Galiu vartoti „kažkas“, „niekas“, „visur“ be dvigubo neigimo.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l04",
+       "kind": "functional",
+       "title": "Grąžinimas ir skundas parduotuvėje",
+       "titleEn": "Returning goods and complaining",
+       "focus": "I'd like to return this. It doesn't work / It's damaged / It's the wrong size. Can I have a refund / exchange it? Have you got the receipt? Polite but firm complaints: I'm afraid there's a problem with…",
+       "canDo": "Galiu grąžinti prekę ir mandagiai pasiskųsti.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "empower"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l05",
+       "kind": "grammar",
+       "title": "Pirmoji sąlyga",
+       "titleEn": "First conditional",
+       "focus": "if + present simple, will/won't/might; when/as soon as/unless; L1 trap: *If it will rain…",
+       "canDo": "Galiu kalbėti apie realias galimybes ir jų pasekmes.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l06",
+       "kind": "pronunciation",
+       "title": "Klausimų intonacija",
+       "titleEn": "Intonation in questions",
+       "focus": "Rising intonation in yes/no questions, falling in wh-questions, polite rise in requests; flat Lithuanian-style intonation can sound rude or bored.",
+       "canDo": "Galiu klausti su natūralia ir mandagia intonacija.",
+       "sources": [
+        "lt-th-fronting",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l07",
+       "kind": "skills",
+       "title": "Apsipirkimas internetu",
+       "titleEn": "Online shopping – reading and discussion",
+       "focus": "Graded article on online vs high-street shopping; pros and cons; expressing preferences (I prefer… because…, I'd rather…); A2 Key Part 2 style comparison of shopping options.",
+       "canDo": "Galiu palyginti apsipirkimo būdus ir pasakyti savo nuomonę.",
+       "sources": [
+        "a2-key",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2plus-u03-l08",
+       "kind": "review",
+       "title": "Kartojimas: pirkiniai ir pinigai",
+       "titleEn": "Review: Shopping and money",
+       "focus": "too/enough, indefinite pronouns, first conditional, money vocabulary, complaints; role-play: returning a faulty phone.",
+       "canDo": "Galiu susitvarkyti su pirkiniais ir pinigais susijusiose situacijose.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2plus-u04",
+     "title": "Technologijos ir bendravimas",
+     "titleEn": "Technology and communication",
+     "topic": "Technology, internet, phones, predictions",
+     "lessons": [
+      {
+       "id": "a2plus-u04-l01",
+       "kind": "vocabulary",
+       "title": "Technologijos ir frazeologiniai veiksmažodžiai",
+       "titleEn": "Technology and phrasal verbs",
+       "focus": "Devices and actions: charge, download, install, log in/out, turn on/off, plug in, set up, back up, delete, post, share, search; phrasal verbs with objects (turn it off).",
+       "canDo": "Galiu papasakoti, kaip naudojuosi technologijomis.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l02",
+       "kind": "grammar",
+       "title": "Nulinė sąlyga",
+       "titleEn": "Zero conditional",
+       "focus": "if/when + present simple, present simple for general truths and instructions (If you press this button, it turns off); contrast with first conditional.",
+       "canDo": "Galiu paaiškinti, kaip kas veikia.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l03",
+       "kind": "grammar",
+       "title": "Spėjimai: will, might, may",
+       "titleEn": "Predictions – will, might, may, probably",
+       "focus": "will/won't for predictions, might/may for possibility, probably/definitely/certainly position (will probably / probably won't); I think…/I don't think… will.",
+       "canDo": "Galiu pasakyti, kas, mano manymu, įvyks ateityje, ir kiek tuo esu tikra.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l04",
+       "kind": "grammar",
+       "title": "Could, be able to: gebėjimas praeityje",
+       "titleEn": "Ability – could, be able to",
+       "focus": "could/couldn't for past ability, was able to for single achievements, will be able to, have been able to; managed to.",
+       "canDo": "Galiu pasakyti, ką galėjau ar sugebėjau padaryti praeityje ir ateityje.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l05",
+       "kind": "functional",
+       "title": "Telefonu ir internetu: supratimo tikrinimas",
+       "titleEn": "Checking understanding and clarifying",
+       "focus": "Sorry, I didn't catch that. Could you speak more slowly? Do you mean…? What does … mean? Let me check: …; spelling emails and URLs; dealing with tech support.",
+       "canDo": "Galiu pasitikslinti, ar teisingai supratau, ir paprašyti paaiškinti.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l06",
+       "kind": "pronunciation",
+       "title": "Žodžių sujungimas",
+       "titleEn": "Linking sounds",
+       "focus": "Consonant–vowel linking (turn_it_off, log_in), linking r, avoiding glottal stops between words; reducing choppy syllable-by-syllable speech.",
+       "canDo": "Galiu sklandžiau sujungti žodžius kalboje.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l07",
+       "kind": "skills",
+       "title": "Ekrano laikas: nuomonė",
+       "titleEn": "Screen time – reading and opinion",
+       "focus": "Graded article on screen time and social media; comprehension; giving opinion with reasons: I think…, In my opinion…, because…, for example…",
+       "canDo": "Galiu suprasti straipsnį apie technologijas ir išreikšti nuomonę su argumentais.",
+       "sources": [
+        "b1-preliminary",
+        "speakout"
+       ]
+      },
+      {
+       "id": "a2plus-u04-l08",
+       "kind": "review",
+       "title": "Kartojimas: technologijos",
+       "titleEn": "Review: Technology and communication",
+       "focus": "Zero/first conditional, predictions, ability, tech vocabulary, clarifying; role-play: calling tech support.",
+       "canDo": "Galiu kalbėti apie technologijas ir išspręsti nesusipratimus.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "a2plus-u05",
+     "title": "Žmonės ir santykiai",
+     "titleEn": "People and relationships",
+     "topic": "Personality, friendship, opinions, storytelling",
+     "lessons": [
+      {
+       "id": "a2plus-u05-l01",
+       "kind": "grammar",
+       "title": "Klausimai: veiksnio klausimai ir prielinksniai gale",
+       "titleEn": "Question forms – subject questions",
+       "focus": "Review of question word order with auxiliaries; subject vs object questions (Who called you? vs Who did you call?); questions ending with prepositions (Who are you talking to? What is it about?).",
+       "canDo": "Galiu sklandžiai klausinėti įvairiais klausimų tipais.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l02",
+       "kind": "vocabulary",
+       "title": "Charakteris ir jausmai",
+       "titleEn": "Personality and feelings",
+       "focus": "Personality adjectives (friendly, generous, shy, honest, lazy, reliable, selfish, easy-going) and opposites with un-/dis-; -ed/-ing adjectives (bored/boring, interested/interesting).",
+       "canDo": "Galiu apibūdinti žmonių charakterį ir savo jausmus.",
+       "sources": [
+        "oxford-3000",
+        "english-file",
+        "bc-grammar-a1a2"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l03",
+       "kind": "grammar",
+       "title": "Veiksmažodžių modeliai",
+       "titleEn": "Verb patterns",
+       "focus": "verb + to (decide, promise, refuse, forget, try), verb + -ing (enjoy, avoid, keep, finish, can't stand), verb + object + to (ask/tell/want someone to); make/let + object + base form.",
+       "canDo": "Galiu teisingai jungti veiksmažodžius pasakodama apie žmones.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l04",
+       "kind": "functional",
+       "title": "Nuomonė, sutikimas ir nesutikimas",
+       "titleEn": "Opinions, agreeing and disagreeing",
+       "focus": "I think / I don't think…, In my opinion…, I agree / I'm not sure about that, I see what you mean, but…, Me too / Me neither, So do I / Neither do I; polite softeners.",
+       "canDo": "Galiu pasakyti nuomonę ir mandagiai sutikti ar nesutikti.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l05",
+       "kind": "grammar",
+       "title": "Savybiniai ir sangrąžiniai įvardžiai",
+       "titleEn": "Possessive and reflexive pronouns",
+       "focus": "mine/yours/his/hers/ours/theirs, a friend of mine; myself/yourself… (enjoy yourself, by myself) vs each other; L1 trap: Lithuanian 'savo' (*I met with my friend his wife).",
+       "canDo": "Galiu tiksliai pasakyti, kieno daiktas, ir vartoti „save“ bei „vienas kitą“.",
+       "sources": [
+        "bc-grammar-a1a2",
+        "egp",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l06",
+       "kind": "pronunciation",
+       "title": "Sakinio kirtis ir ritmas",
+       "titleEn": "Sentence stress and rhythm",
+       "focus": "Content vs function words, stress-timed rhythm, contrastive stress for emphasis (I said TUESDAY, not Thursday); English sounds less monotone than syllable-by-syllable.",
+       "canDo": "Galiu kalbėti natūralesniu anglišku ritmu.",
+       "sources": [
+        "lt-th-fronting",
+        "english-file"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l07",
+       "kind": "skills",
+       "title": "Kaip susipažinome: istorija",
+       "titleEn": "How we met – storytelling",
+       "focus": "Graded story about how two friends met; retelling with past simple/continuous and linkers (when, while, suddenly, in the end); telling your own 'how I met my best friend' story.",
+       "canDo": "Galiu papasakoti nuoseklią istoriją apie žmones savo gyvenime.",
+       "sources": [
+        "speakout",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "a2plus-u05-l08",
+       "kind": "review",
+       "title": "Kartojimas: žmonės ir santykiai",
+       "titleEn": "Review: People and relationships",
+       "focus": "Question forms, verb patterns, pronouns, personality vocabulary, opinions; discussion: what makes a good friend.",
+       "canDo": "Galiu kalbėti apie žmones ir išreikšti nuomonę.",
+       "sources": [
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "a2plus-u05-exam",
+       "kind": "checkpoint",
+       "title": "A2+ lygio egzaminas",
+       "titleEn": "A2+ level checkpoint",
+       "focus": "Bridge exam: A2 Key Part 1 interview with extended answers + B1 Preliminary Part 2 photo description (1 minute) + Part 3-style collaborative task (make suggestions, agree/disagree, decide) on a familiar topic; checks present perfect, conditionals, comparisons, opinions.",
+       "canDo": "Galiu kalbėti apie patirtį, apibūdinti nuotrauką ir kartu su pašnekovu priimti sprendimą.",
+       "sources": [
+        "a2-key",
+        "b1-preliminary",
+        "kcl-can-do"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "b1",
+   "name": "B1",
+   "title": "Savarankiškas kalbėtojas",
+   "description": "Išmoksi pasakoti istorijas, kalbėti apie darbą, sveikatą, keliones, žiniasklaidą ir aplinką, perpasakoti, spėlioti ir diskutuoti. Pabaigoje – pilnas B1 Preliminary kalbėjimo egzamino modelis.",
+   "units": [
+    {
+     "id": "b1-u01",
+     "title": "Istorijos ir pasakojimai",
+     "titleEn": "Stories and narratives",
+     "topic": "Personal anecdotes, feelings, stories",
+     "lessons": [
+      {
+       "id": "b1-u01-l01",
+       "kind": "grammar",
+       "title": "Esamieji laikai ir būsenos veiksmažodžiai",
+       "titleEn": "Present simple vs continuous; state verbs",
+       "focus": "Revision of present simple vs continuous (habits vs temporary/now); state verbs (know, want, believe, own, seem) not used in continuous; think/have/see with two meanings; L1 trap: *I am knowing.",
+       "canDo": "Galiu tiksliai atskirti nuolatinius ir laikinus dalykus kalbėdama apie save.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u01-l02",
+       "kind": "grammar",
+       "title": "Būtasis atliktinis laikas (Past Perfect)",
+       "titleEn": "Past perfect",
+       "focus": "had + past participle for an earlier past event (When I arrived, the train had left); by the time, already, before; contrast with past simple.",
+       "canDo": "Galiu aiškiai parodyti, kuris praeities įvykis įvyko anksčiau.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u01-l03",
+       "kind": "grammar",
+       "title": "Pasakojimo laikai kartu",
+       "titleEn": "Narrative tenses together",
+       "focus": "Past simple + past continuous + past perfect in one story; time linkers as soon as, while, after, then, eventually; setting the scene vs main events.",
+       "canDo": "Galiu papasakoti istoriją vartodama visus tris pasakojimo laikus.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u01-l04",
+       "kind": "vocabulary",
+       "title": "Jausmai ir prieveiksmiai pasakojimui",
+       "titleEn": "Feelings and narrative adverbs",
+       "focus": "Strong adjectives (furious, exhausted, delighted, terrified, astonished), absolutely/really vs very; narrative adverbs: suddenly, luckily, unfortunately, fortunately, immediately, eventually.",
+       "canDo": "Galiu gyvai apibūdinti jausmus ir įvykius.",
+       "sources": [
+        "oxford-3000",
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u01-l05",
+       "kind": "functional",
+       "title": "Anekdoto pasakojimas ir susidomėjimo rodymas",
+       "titleEn": "Telling an anecdote and showing interest",
+       "focus": "Openers (Did I ever tell you about…? You'll never guess what happened), keeping the story going (Anyway, So, Then), ending (In the end…); listener responses: No way! What happened next? You're joking!",
+       "canDo": "Galiu įtraukiančiai papasakoti istoriją ir aktyviai klausytis kito pasakojimo.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "speakout"
+       ]
+      },
+      {
+       "id": "b1-u01-l06",
+       "kind": "pronunciation",
+       "title": "Had / 'd ir pasakojimo intonacija",
+       "titleEn": "had/'d and storytelling intonation",
+       "focus": "Contracted 'd (I'd = I had / I would), weak /həd/; intonation to build suspense and show emotion; pausing in chunks.",
+       "canDo": "Galiu pasakoti išraiškinga intonacija.",
+       "sources": [
+        "english-file",
+        "lt-th-fronting"
+       ]
+      },
+      {
+       "id": "b1-u01-l07",
+       "kind": "skills",
+       "title": "Nuotraukos apibūdinimas (B1 2 dalis)",
+       "titleEn": "Describing a photo – B1 Preliminary Part 2",
+       "focus": "Strategies for the 1-minute photo description: overview, people, actions, place, guessing (It looks like, He might be, I think it's…, maybe), paraphrasing unknown words (a kind of…, something you use for…); practice with everyday-life photos.",
+       "canDo": "Galiu vieną minutę sklandžiai apibūdinti nuotrauką, net jei nežinau kai kurių žodžių.",
+       "sources": [
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "b1-u01-l08",
+       "kind": "review",
+       "title": "Kartojimas: istorijos",
+       "titleEn": "Review: Stories and narratives",
+       "focus": "Present and narrative tenses, feelings vocabulary, anecdote language; task: tell a story about an unforgettable day.",
+       "canDo": "Galiu laisvai papasakoti asmeninę istoriją.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u02",
+     "title": "Darbas ir karjera",
+     "titleEn": "Work and careers",
+     "topic": "Work, careers, job interviews, formal language",
+     "lessons": [
+      {
+       "id": "b1-u02-l01",
+       "kind": "vocabulary",
+       "title": "Darbo sąlygos ir karjera",
+       "titleEn": "Work conditions and careers",
+       "focus": "apply for a job, CV, interview, salary, contract, permanent/temporary, promotion, get promoted, be made redundant, resign, retire, skills, experience, qualifications, work-life balance.",
+       "canDo": "Galiu kalbėti apie darbo sąlygas ir savo karjerą.",
+       "sources": [
+        "oxford-3000",
+        "english-file",
+        "empower"
+       ]
+      },
+      {
+       "id": "b1-u02-l02",
+       "kind": "grammar",
+       "title": "Present Perfect Continuous",
+       "titleEn": "Present perfect continuous vs simple",
+       "focus": "have/has been + -ing for ongoing activities (I've been working here since…), recent activity with visible results; contrast with present perfect simple (how long vs how many); state verbs exception.",
+       "canDo": "Galiu papasakoti, kiek laiko ką nors darau ir ką per tą laiką nuveikiau.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u02-l03",
+       "kind": "grammar",
+       "title": "Gerundijus ir prielinksniai",
+       "titleEn": "Gerunds and dependent prepositions",
+       "focus": "-ing as subject (Working from home is…), after prepositions (good at, interested in, responsible for, look forward to -ing), adjective/verb + preposition collocations (depend on, apply for, worried about); L1 traps with prepositions.",
+       "canDo": "Galiu teisingai vartoti prielinksnius ir -ing formas apibūdindama savo įgūdžius.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "b1-u02-l04",
+       "kind": "functional",
+       "title": "Darbo pokalbis",
+       "titleEn": "Job interview",
+       "focus": "Tell me about yourself; strengths and weaknesses; I have experience in…; I'm good at…; I've been working as…; asking questions at the end (What would a typical day look like?); answering with examples.",
+       "canDo": "Galiu dalyvauti paprastame darbo pokalbyje anglų kalba.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "empower"
+       ]
+      },
+      {
+       "id": "b1-u02-l05",
+       "kind": "functional",
+       "title": "Formali kalba: el. laiškai ir susirinkimai",
+       "titleEn": "Formal requests in emails and meetings",
+       "focus": "Would it be possible to…? I was wondering if… Could you let me know…? I'd appreciate it if…; opening/closing an email; formal vs informal register; making a suggestion in a meeting.",
+       "canDo": "Galiu mandagiai ir formaliai paprašyti ko nors darbe.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "b1-u02-l06",
+       "kind": "pronunciation",
+       "title": "Žodžių šeimų kirtis ir /ɜː/–/ɔː/",
+       "titleEn": "Word-family stress and /ɜː/ vs /ɔː/",
+       "focus": "Stress shift in word families (eMPLOY, employEE, eMPLOYment; PHOtograph, phoTOgrapher); suffixes -tion/-ity; /ɜː/ vs /ɔː/ (work/walk, firm/form, shirt/short).",
+       "canDo": "Galiu teisingai kirčiuoti žodžių šeimas ir ištarti „work“, „world“, „first“.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u02-l07",
+       "kind": "skills",
+       "title": "Nuotolinis darbas: straipsnis ir diskusija",
+       "titleEn": "Remote work – article and discussion",
+       "focus": "Graded article on remote work; comprehension and word formation (employ → employer, employment, unemployed; prefixes un-, dis-, im-; suffixes -ful, -less, -ment); balanced opinion with however, although, on the other hand.",
+       "canDo": "Galiu suprasti straipsnį apie darbą ir pateikti argumentus už ir prieš.",
+       "sources": [
+        "speakout",
+        "b1-preliminary",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u02-l08",
+       "kind": "review",
+       "title": "Kartojimas: darbas ir karjera",
+       "titleEn": "Review: Work and careers",
+       "focus": "Present perfect continuous, gerunds and prepositions, work vocabulary, interview and formal language; mock interview.",
+       "canDo": "Galiu kalbėti apie savo profesinę patirtį.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u03",
+     "title": "Sveikata ir gyvenimo būdas",
+     "titleEn": "Health and lifestyle",
+     "topic": "Health, medicine, sport and fitness",
+     "lessons": [
+      {
+       "id": "b1-u03-l01",
+       "kind": "vocabulary",
+       "title": "Ligos, traumos ir gydymas",
+       "titleEn": "Illnesses, injuries and treatment",
+       "focus": "flu, infection, allergy, sprain your ankle, cut, bruise, swollen, prescription, operation, painkillers, recover, get over; describing symptoms precisely.",
+       "canDo": "Galiu tiksliai apibūdinti ligą ar traumą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u03-l02",
+       "kind": "grammar",
+       "title": "Spėjimo modaliniai veiksmažodžiai",
+       "titleEn": "Modals of deduction (present)",
+       "focus": "must/might/may/could/can't + infinitive for deduction (She must be tired. It can't be serious.); contrast with must for obligation; using them to speculate about photos.",
+       "canDo": "Galiu spėlioti apie situaciją ir išreikšti, kiek esu tikra.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u03-l03",
+       "kind": "grammar",
+       "title": "Antroji sąlyga",
+       "titleEn": "Second conditional",
+       "focus": "if + past simple, would/could/might for unreal present/future; If I were you…; contrast with first conditional (real vs imaginary); L1 trap: *If I would have…",
+       "canDo": "Galiu kalbėti apie įsivaizduojamas situacijas ir patarti „jei būčiau tavimi“.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory",
+        "lt-negative-transfer"
+       ]
+      },
+      {
+       "id": "b1-u03-l04",
+       "kind": "functional",
+       "title": "Pas gydytoją: išsamiai",
+       "titleEn": "At the doctor's – detailed",
+       "focus": "Describing symptoms and their duration (I've had a pain here for…), answering the doctor's questions, asking about treatment and side effects; giving advice: You'd better…, If I were you…, Have you tried…?",
+       "canDo": "Galiu išsamiai pasikalbėti su gydytoju ir patarti draugui.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "b1-u03-l05",
+       "kind": "grammar",
+       "title": "So / such ir stiprinamieji žodžiai",
+       "titleEn": "So/such, intensifiers, too/enough",
+       "focus": "so + adjective, such (a) + adjective + noun, so… that; intensifiers really/quite/extremely/fairly/a bit; too/enough review with infinitive (too tired to…).",
+       "canDo": "Galiu sustiprinti ar sušvelninti savo teiginius.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u03-l06",
+       "kind": "skills",
+       "title": "Bendra užduotis: sveikatos diena (B1 3 dalis)",
+       "titleEn": "Collaborative task – B1 Preliminary Part 3",
+       "focus": "Part 3: discussing options for a healthy-lifestyle event with a partner; making and responding to suggestions (What about…? That's a good idea, but…), comparing options and reaching a decision (So, shall we choose…?); sport/fitness vocabulary.",
+       "canDo": "Galiu kartu su pašnekovu aptarti galimybes ir susitarti dėl geriausios.",
+       "sources": [
+        "b1-preliminary",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "b1-u03-l07",
+       "kind": "review",
+       "title": "Kartojimas: sveikata",
+       "titleEn": "Review: Health and lifestyle",
+       "focus": "Modals of deduction, second conditional, so/such, health vocabulary, doctor role-play and advice.",
+       "canDo": "Galiu kalbėti apie sveikatą ir patarti.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u04",
+     "title": "Kelionės ir kultūra",
+     "titleEn": "Travel and culture",
+     "topic": "Travel problems, tourism, customs and festivals",
+     "lessons": [
+      {
+       "id": "b1-u04-l01",
+       "kind": "grammar",
+       "title": "Neveikiamoji rūšis: esamasis ir būtasis",
+       "titleEn": "Passive – present and past simple",
+       "focus": "is/are + past participle, was/were + past participle; by + agent; when to use passive (process, facts, unknown agent): The castle was built in…, English is spoken…",
+       "canDo": "Galiu papasakoti apie vietas ir faktus neveikiamąja rūšimi.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u04-l02",
+       "kind": "vocabulary",
+       "title": "Kelionių problemos",
+       "titleEn": "Travel problems",
+       "focus": "delay, cancel, miss a connection, lost luggage, overbooked, get lost, break down, be stuck in traffic, pickpocket, compensation; collocations with get (get lost, get stuck, get on/off).",
+       "canDo": "Galiu apibūdinti nesklandumus kelionėje.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u04-l03",
+       "kind": "functional",
+       "title": "Problemų sprendimas ir skundai kelionėje",
+       "titleEn": "Dealing with travel problems and complaints",
+       "focus": "Polite complaints at a hotel/airport: I'm afraid there's a problem with… I'd like to speak to the manager. Could you sort it out? What are you going to do about it? Responding to apologies; staying calm and firm.",
+       "canDo": "Galiu mandagiai, bet tvirtai pasiskųsti ir išspręsti problemą kelionėje.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "empower"
+       ]
+      },
+      {
+       "id": "b1-u04-l04",
+       "kind": "grammar",
+       "title": "Netiesioginiai klausimai",
+       "titleEn": "Indirect questions",
+       "focus": "Could you tell me where the station is? Do you know what time it opens? I wonder if…; word order change (no inversion); L1 trap: *Can you tell me where is the station?",
+       "canDo": "Galiu mandagiai klausti informacijos netiesioginiais klausimais.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "lt-grammar-errors"
+       ]
+      },
+      {
+       "id": "b1-u04-l05",
+       "kind": "grammar",
+       "title": "Neapibrėžiamieji šalutiniai sakiniai",
+       "titleEn": "Non-defining relative clauses; whose, where",
+       "focus": "Non-defining clauses with commas (Vilnius, which is the capital, …), who/which/whose/where/when; no 'that' in non-defining; adding extra information about places and people.",
+       "canDo": "Galiu papildyti sakinius papildoma informacija apie vietas ir žmones.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u04-l06",
+       "kind": "skills",
+       "title": "Šventės ir papročiai",
+       "titleEn": "Festivals and customs",
+       "focus": "Graded text about festivals in different countries (Joninės, Thanksgiving…); comprehension; vocabulary of customs (celebrate, tradition, take place, decorate); presenting a Lithuanian tradition using the passive and relative clauses.",
+       "canDo": "Galiu papasakoti užsieniečiui apie lietuvišką tradiciją.",
+       "sources": [
+        "speakout",
+        "b1-preliminary",
+        "oxford-3000"
+       ]
+      },
+      {
+       "id": "b1-u04-l07",
+       "kind": "review",
+       "title": "Kartojimas: kelionės ir kultūra",
+       "titleEn": "Review: Travel and culture",
+       "focus": "Passive, indirect questions, relative clauses, travel problems vocabulary; role-play: lost luggage at the airport.",
+       "canDo": "Galiu susitvarkyti kelionių nesklandumus ir kalbėti apie kultūrą.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u05",
+     "title": "Naujienos ir žiniasklaida",
+     "titleEn": "News and media",
+     "topic": "News, media, social media, entertainment",
+     "lessons": [
+      {
+       "id": "b1-u05-l01",
+       "kind": "vocabulary",
+       "title": "Naujienos ir žiniasklaida",
+       "titleEn": "News and media",
+       "focus": "headline, article, journalist, reporter, broadcast, channel, the press, social media, influencer, fake news, advert; crime and events basics (rob, arrest, witness, accident, injure).",
+       "canDo": "Galiu kalbėti apie naujienas ir žiniasklaidą.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics",
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u05-l02",
+       "kind": "grammar",
+       "title": "Netiesioginė kalba: teiginiai",
+       "titleEn": "Reported speech – statements",
+       "focus": "say vs tell (said that / told me that), tense backshift (is → was, will → would, has done → had done), pronoun and time changes (tomorrow → the next day).",
+       "canDo": "Galiu perpasakoti, ką kas nors pasakė.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u05-l03",
+       "kind": "grammar",
+       "title": "Netiesioginė kalba: klausimai ir prašymai",
+       "titleEn": "Reported questions, requests and commands",
+       "focus": "asked if/whether…, asked where I lived (statement word order), told/asked me to…, told me not to…; reporting verbs: explain, promise, suggest (receptive).",
+       "canDo": "Galiu perpasakoti klausimus, prašymus ir nurodymus.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u05-l04",
+       "kind": "grammar",
+       "title": "Neveikiamoji rūšis: kiti laikai",
+       "titleEn": "Passive – other tenses",
+       "focus": "Present perfect passive (has been arrested), future passive (will be opened), modal passive (can be done, must be paid), passive in news headlines and reports.",
+       "canDo": "Galiu suprasti ir perteikti žinias neveikiamąja rūšimi.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp"
+       ]
+      },
+      {
+       "id": "b1-u05-l05",
+       "kind": "functional",
+       "title": "Naujienų perdavimas ir reakcija",
+       "titleEn": "Passing on news and reacting",
+       "focus": "Have you heard about…? Apparently…, According to…, I read that…; reacting with surprise/doubt: Seriously? I don't believe it! That can't be true; showing sympathy.",
+       "canDo": "Galiu perduoti naujieną ir išreikšti nuostabą ar abejonę.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions"
+       ]
+      },
+      {
+       "id": "b1-u05-l06",
+       "kind": "skills",
+       "title": "Naujienos perpasakojimas",
+       "titleEn": "Summarising a news story",
+       "focus": "Graded news article; identifying who/what/where/when/why; summarising the story in your own words with reported speech and passive; discussing how you get news; saying numbers, dates and percentages clearly with contrastive stress (It was in MAY, not March).",
+       "canDo": "Galiu savais žodžiais perpasakoti naujienų straipsnį.",
+       "sources": [
+        "speakout",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "b1-u05-l07",
+       "kind": "review",
+       "title": "Kartojimas: naujienos",
+       "titleEn": "Review: News and media",
+       "focus": "Reported speech, passive tenses, media vocabulary; task: report a conversation and a news story.",
+       "canDo": "Galiu perpasakoti pokalbius ir naujienas.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u06",
+     "title": "Aplinka ir ateitis",
+     "titleEn": "Environment and the future",
+     "topic": "Environment, the natural world, society, the future",
+     "lessons": [
+      {
+       "id": "b1-u06-l01",
+       "kind": "vocabulary",
+       "title": "Aplinka ir gamta",
+       "titleEn": "Environment and nature",
+       "focus": "pollution, climate change, recycle, waste, rubbish, plastic, energy, renewable, protect, endangered species, global warming, save water; natural world vocabulary (forest, coast, wildlife).",
+       "canDo": "Galiu kalbėti apie aplinkosaugos problemas.",
+       "sources": [
+        "oxford-3000",
+        "a2-key-topics"
+       ]
+      },
+      {
+       "id": "b1-u06-l02",
+       "kind": "grammar",
+       "title": "Ateities formos ir Future Continuous",
+       "titleEn": "Future forms review and future continuous",
+       "focus": "will/going to for predictions (evidence vs opinion), be likely to, future continuous (This time next year I'll be living…), future time clauses (when/before/after + present).",
+       "canDo": "Galiu tiksliai kalbėti apie ateities planus ir prognozes.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u06-l03",
+       "kind": "grammar",
+       "title": "Trečioji sąlyga",
+       "titleEn": "Third conditional",
+       "focus": "if + past perfect, would have + past participle for unreal past; contrast with second conditional; weak form /wʊdəv/.",
+       "canDo": "Galiu kalbėti apie tai, kas būtų buvę, jei praeityje būtų nutikę kitaip.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u06-l04",
+       "kind": "grammar",
+       "title": "Should have / might have: apgailestavimas",
+       "titleEn": "Past modals – should have, could have, might have",
+       "focus": "should(n't) have, could have, might have + past participle for regret, criticism and past possibility; must have / can't have for past deduction.",
+       "canDo": "Galiu išreikšti apgailestavimą ir spėlioti apie praeitį.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u06-l05",
+       "kind": "grammar",
+       "title": "Jungtukai: priežastis, priešprieša, tikslas",
+       "titleEn": "Linking words – cause, contrast, purpose",
+       "focus": "because/because of, so, as; although, even though, however, despite (+ -ing/noun), whereas; so that, in order to; On the one hand… on the other hand; organising a spoken argument (Firstly, Another point is, In conclusion).",
+       "canDo": "Galiu logiškai susieti argumentus kalbėdama.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u06-l06",
+       "kind": "functional",
+       "title": "Diskusija: argumentavimas",
+       "titleEn": "Discussion skills",
+       "focus": "Expressing strong and tentative opinions, agreeing/disagreeing partly (I agree up to a point), interrupting politely (Sorry to interrupt, but…), asking others' views (What do you think?), turn-taking.",
+       "canDo": "Galiu dalyvauti diskusijoje: išsakyti nuomonę, ją pagrįsti ir įtraukti kitus.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "b1-u06-l07",
+       "kind": "skills",
+       "title": "Diskusija apie aplinką (B1 4 dalis)",
+       "titleEn": "Discussion on the environment – B1 Preliminary Part 4",
+       "focus": "Graded text about a zero-waste family; comprehension; B1 Part 4-style discussion: your own habits, experiences and opinions on environmental issues, giving reasons and examples.",
+       "canDo": "Galiu kelias minutes diskutuoti apie visuomenės temą, pagrįsdama nuomonę pavyzdžiais.",
+       "sources": [
+        "b1-preliminary",
+        "speakout"
+       ]
+      },
+      {
+       "id": "b1-u06-l08",
+       "kind": "review",
+       "title": "Kartojimas: aplinka ir ateitis",
+       "titleEn": "Review: Environment and the future",
+       "focus": "Future forms, third conditional, past modals, linking words, environment vocabulary; debate: 'Cars should be banned from city centres'.",
+       "canDo": "Galiu argumentuotai kalbėti apie ateitį ir aplinką.",
+       "sources": [
+        "core-inventory"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "b1-u07",
+     "title": "Santykiai ir prisiminimai",
+     "titleEn": "Relationships and memories",
+     "topic": "Relationships, childhood memories, social life",
+     "lessons": [
+      {
+       "id": "b1-u07-l01",
+       "kind": "grammar",
+       "title": "Used to, would ir be used to",
+       "titleEn": "Past habits – used to and would",
+       "focus": "used to vs would for repeated past actions (would not for states), childhood memories; be/get used to + -ing (receptive contrast).",
+       "canDo": "Galiu gyvai papasakoti savo vaikystės prisiminimus.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u07-l02",
+       "kind": "grammar",
+       "title": "Pritariamieji klausimai (question tags)",
+       "titleEn": "Question tags",
+       "focus": "Tags with be, do, have, modals and different tenses (It's cold, isn't it? You didn't call, did you?); using tags to check and to make conversation.",
+       "canDo": "Galiu vartoti „ar ne?“ tipo klausimus, kad pasitikslinčiau ar palaikyčiau pokalbį.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp",
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u07-l03",
+       "kind": "grammar",
+       "title": "I wish ir if only",
+       "titleEn": "Wishes about the present",
+       "focus": "I wish / If only + past simple for present wishes (I wish I had more time; I wish I could…); contrast with hope; link to second conditional.",
+       "canDo": "Galiu pasakyti, ko norėčiau, kad būtų kitaip dabartyje.",
+       "sources": [
+        "bc-grammar-b1b2",
+        "egp"
+       ]
+      },
+      {
+       "id": "b1-u07-l04",
+       "kind": "vocabulary",
+       "title": "Santykiai: frazeologiniai veiksmažodžiai",
+       "titleEn": "Relationships – phrasal verbs",
+       "focus": "get on (well) with, fall out with, make up, go out with, break up, look after, bring up, grow up, get together, keep in touch, rely on; both/either/neither, so/neither do I.",
+       "canDo": "Galiu kalbėti apie santykius natūraliais frazeologiniais veiksmažodžiais.",
+       "sources": [
+        "oxford-3000",
+        "english-file",
+        "egp"
+       ]
+      },
+      {
+       "id": "b1-u07-l05",
+       "kind": "functional",
+       "title": "Pasiūlymai ir susitarimas",
+       "titleEn": "Suggesting and reaching agreement",
+       "focus": "Making and responding to suggestions (Why don't we…? I'd rather… What if we…?), negotiating (That's true, but…, How about a compromise?), reaching a decision (OK, let's go with…); small talk openers and keeping conversation going.",
+       "canDo": "Galiu derėtis ir susitarti su pašnekovu, palaikyti nerišlų pokalbį.",
+       "sources": [
+        "core-inventory",
+        "esl-lounge-functions",
+        "b1-preliminary"
+       ]
+      },
+      {
+       "id": "b1-u07-l06",
+       "kind": "pronunciation",
+       "title": "Pritariamųjų klausimų intonacija",
+       "titleEn": "Intonation of question tags",
+       "focus": "Falling tag (checking, expecting agreement) vs rising tag (real question); rising/falling patterns in suggestions and responses; linking and weak forms review.",
+       "canDo": "Galiu intonacija parodyti, ar klausiu, ar tikiuosi pritarimo.",
+       "sources": [
+        "english-file"
+       ]
+      },
+      {
+       "id": "b1-u07-l07",
+       "kind": "review",
+       "title": "Kartojimas: santykiai ir prisiminimai",
+       "titleEn": "Review: Relationships and memories",
+       "focus": "used to/would, question tags, wishes, relationship phrasal verbs, negotiating; full B1 conversation practice on family and friends.",
+       "canDo": "Galiu laisvai kalbėti apie santykius ir prisiminimus.",
+       "sources": [
+        "core-inventory"
+       ]
+      },
+      {
+       "id": "b1-u07-exam",
+       "kind": "checkpoint",
+       "title": "B1 lygio egzaminas",
+       "titleEn": "B1 level checkpoint",
+       "focus": "Full B1 Preliminary Speaking model: Part 1 interview (personal details, routines, likes, past/future); Part 2 one-minute photo description; Part 3 collaborative task with visual prompts (suggest, discuss alternatives, decide); Part 4 general discussion on the Part 3 theme (opinions, experiences, reasons). Assessed on grammar & vocabulary range, discourse management, pronunciation and interactive communication.",
+       "canDo": "Galiu išlaikyti B1 Preliminary kalbėjimo dalies modelį: kalbu sklandžiai, argumentuoju ir bendradarbiauju pokalbyje.",
+       "sources": [
+        "b1-preliminary",
+        "kcl-can-do"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
