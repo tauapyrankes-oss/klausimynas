@@ -687,7 +687,7 @@ function mountTalk($el, opts) {
             }
           },
         });
-        await mic.start(player.ctx);
+        await mic.start(player.ctx, { echo: settings.micMode !== 'headphones' });
       } catch (e) {
         mic = null;
         micOn = false;

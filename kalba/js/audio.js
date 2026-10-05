@@ -24,9 +24,10 @@ export class MicRecorder {
   }
 
   // ctx – bendras AudioContext, sukurtas paspaudimo metu (iPhone kitaip jį palieka sustabdytą ir mikrofonas „tyli“).
-  async start(ctx) {
+  // echo=false – su ausinėmis: be aido slopinimo iPhone'as negadina garso kokybės.
+  async start(ctx, { echo = true } = {}) {
     this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      audio: { channelCount: 1, echoCancellation: echo, noiseSuppression: true, autoGainControl: true },
     });
     this.ownCtx = !ctx;
     this.ctx = ctx || new AudioContext();
@@ -64,23 +65,32 @@ export class PcmPlayer {
   constructor(rate = 24000) {
     this.rate = rate;
     this.ctx = null;
-    this.next = 0;
-    this.sources = new Set();
-    this.muted = false;
+    this.node = null;
+    this.pending = [];
+    this.buffered = 0; // sekundės, likusios groti (pranešama iš worklet'o)
+    this.lastAudio = 0;
   }
 
   // Kviesti iš vartotojo paspaudimo, kad iOS/Android leistų groti garsą.
   ensure() {
     if (!this.ctx) {
-      this.ctx = new AudioContext(); // aparatūros dažnis; 24 kHz buferius naršyklė perskaičiuoja pati
+      this.ctx = new AudioContext();
       this.gain = this.ctx.createGain();
       this.gain.connect(this.ctx.destination);
+      this.ready = this.ctx.audioWorklet
+        .addModule(new URL('./pcm-player-worklet.js', import.meta.url))
+        .then(() => {
+          this.node = new AudioWorkletNode(this.ctx, 'pcm-player', { outputChannelCount: [1] });
+          this.node.port.onmessage = (e) => (this.buffered = e.data);
+          this.node.connect(this.gain);
+          for (const f of this.pending) this.node.port.postMessage(f, [f.buffer]);
+          this.pending = [];
+        });
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
   }
 
   setMuted(m) {
-    this.muted = m;
     if (this.gain) this.gain.gain.value = m ? 0 : 1;
   }
 
@@ -88,35 +98,30 @@ export class PcmPlayer {
     this.ensure();
     const bytes = base64ToBytes(b64);
     const pcm = new Int16Array(bytes.buffer, 0, bytes.length >> 1);
-    const buf = this.ctx.createBuffer(1, pcm.length, this.rate);
-    const ch = buf.getChannelData(0);
-    for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 0x8000;
-    const src = this.ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(this.gain);
-    const now = this.ctx.currentTime;
-    if (this.next < now + 0.03) this.next = now + 0.06;
-    src.start(this.next);
-    this.next += buf.duration;
-    this.sources.add(src);
-    src.onended = () => this.sources.delete(src);
+    const f = new Float32Array(pcm.length);
+    for (let i = 0; i < pcm.length; i++) f[i] = pcm[i] / 0x8000;
+    this.lastAudio = performance.now();
+    if (this.node) this.node.port.postMessage(f, [f.buffer]);
+    else this.pending.push(f);
   }
 
+  // Ar Ema dar kalba (yra negrotų mėginių arba garsas ką tik atėjo).
   get playing() {
-    return !!this.ctx && this.ctx.state === 'running' && this.next > this.ctx.currentTime + 0.05;
+    if (!this.ctx || this.ctx.state !== 'running') return false;
+    return this.buffered > 0.02 || this.pending.length > 0 || performance.now() - this.lastAudio < 250;
   }
 
   stop() {
-    for (const s of this.sources) {
-      try { s.stop(); } catch (_) {}
-    }
-    this.sources.clear();
-    this.next = 0;
+    this.pending = [];
+    this.buffered = 0;
+    this.lastAudio = 0;
+    if (this.node) this.node.port.postMessage('clear');
   }
 
   close() {
     this.stop();
     this.ctx && this.ctx.close().catch(() => {});
     this.ctx = null;
+    this.node = null;
   }
 }

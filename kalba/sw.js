@@ -1,9 +1,9 @@
 // Programėlės failai saugomi telefone, kad ji greitai atsidarytų (teorija ir pratimai veikia ir be interneto).
 // Pakeitus failus, padidink VERSION.
-const VERSION = 'kalbek-v8';
+const VERSION = 'kalbek-v9';
 const SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
-  'js/app.js', 'js/native.js', 'js/util.js', 'js/exercise.js', 'js/live.js', 'js/audio.js', 'js/prompt.js', 'js/store.js', 'js/pcm-worklet.js',
+  'js/app.js', 'js/native.js', 'js/util.js', 'js/exercise.js', 'js/live.js', 'js/audio.js', 'js/prompt.js', 'js/store.js', 'js/pcm-worklet.js', 'js/pcm-player-worklet.js',
   'curriculum/course.js', // skyrių failai patenka į talpyklą pirmą kartą juos įkėlus
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'assets/ema/manifest.json',
