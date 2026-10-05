@@ -36,3 +36,17 @@ yra `.gitignore` – raktas į GitHub nepatenka. PWA svetainė (vieša) rakto ne
 ## Xcode projekto pakeitimai
 `ruby scripts/add-ios-widget.rb` (reikia `gem install xcodeproj`) įtraukia valdiklio taikinį ir failus.
 Jau pritaikyta – kartoti reikia tik sugeneravus `ios/` iš naujo.
+
+## Tikro iPhone garso patikra
+
+**Mikrofono netikrinti per Device Hub „View Screen“ / Screen Sharing.** Apple dokumentuoja, kad nuotolinio
+valdymo metu fizinio įrenginio mikrofonas gali grąžinti tylą net turint leidimą. Prieš bandymą pasirinkti
+„Stop Screen Sharing“ arba užverti Device Hub; diegimas per Wi-Fi ir vienkartinė `devicectl` ekrano nuotrauka
+gali būti atliekami be nuotolinio valdymo. Patikrinti, kad `devicectl device info displays` neberodo Wireless.
+Šaltinis: https://developer.apple.com/documentation/xcode/interacting-with-your-app-in-device-hub
+
+Native iOS audio: `AudioBridgePlugin.swift` (AVAudioEngine, vienas įrašymo/grojimo kelias); `js/audio.js`
+iOS naudoja bridge, naršyklė ir Android išlaiko Web Audio kelią. Įvestis — 16 kHz mono PCM16, Emos išvestis —
+24 kHz PCM16. Native garso variklis valdo savo sesiją; AppDelegate jos nekeičia kiekvieną kartą grįžus į app.
+Regresinė bridge patikra: `node kalba/tools/native-audio-test.mjs`. Galutinei garso kokybei ir mikrofonui
+patvirtinti vis tiek reikia realaus telefono bandymo, ne vien naršyklės testų.

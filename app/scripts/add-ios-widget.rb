@@ -10,7 +10,7 @@ app = project.targets.find { |t| t.name == 'App' } or abort('Nėra App taikinio'
 app_group = project.main_group.find_subpath('App', false)
 
 # 1) Nauji Swift failai App taikinyje
-%w[MainViewController.swift WidgetBridgePlugin.swift ActivityBridgePlugin.swift].each do |name|
+%w[MainViewController.swift WidgetBridgePlugin.swift ActivityBridgePlugin.swift AudioBridgePlugin.swift].each do |name|
   next if app_group.files.any? { |f| f.path == name }
   ref = app_group.new_reference(name)
   app.source_build_phase.add_file_reference(ref)
@@ -80,6 +80,14 @@ unless wgroup.files.any? { |f| f.path == 'Assets.xcassets' }
 end
 widget.build_configurations.each do |c|
   c.build_settings['ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME'] = nil
+end
+
+# Both bundles declare their shared UserDefaults use for App Group progress.
+[[app, app_group], [widget, wgroup]].each do |target, group|
+  ref = group.files.find { |f| f.path == 'PrivacyInfo.xcprivacy' } || group.new_reference('PrivacyInfo.xcprivacy')
+  unless target.resources_build_phase.files.any? { |f| f.file_ref == ref }
+    target.resources_build_phase.add_file_reference(ref)
+  end
 end
 
 project.save

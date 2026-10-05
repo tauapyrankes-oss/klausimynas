@@ -11,7 +11,9 @@
 		1BD2FF78BC2456B77096E2B7 /* KalbekWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE266FB28BC8ED031F98DCF /* KalbekWidget.swift */; };
 		22B2173DA854E8D466C92F46 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14C9F15BBB750A9F2A9FCFBA /* WidgetKit.framework */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		46490BD76F7B83CB4390801A /* AudioBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0881A7CFDED1944D3DE62D11 /* AudioBridgePlugin.swift */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
+		4EDDAC475096AF0AF2BD722C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D726F70AB2D38C52C8ADF032 /* PrivacyInfo.xcprivacy */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
@@ -20,6 +22,7 @@
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		76CBF816BA34D55322581B0F /* LessonActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB65A7363A37AA87301081D /* LessonActivityAttributes.swift */; };
 		7A9112FF7511410FB549E25F /* LessonActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB65A7363A37AA87301081D /* LessonActivityAttributes.swift */; };
+		7D4198762A62236BF35B3F96 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F57D0A24F11773E9E73F7B22 /* PrivacyInfo.xcprivacy */; };
 		82D6824DE0ECB625405C3875 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0568F16E7C34C3A4A3AF87E2 /* SwiftUI.framework */; };
 		8B6EA67B6AB16CCD09557288 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 281C362693E95F8EEFA7E7DB /* Foundation.framework */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
@@ -55,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		0568F16E7C34C3A4A3AF87E2 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		0881A7CFDED1944D3DE62D11 /* AudioBridgePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioBridgePlugin.swift; sourceTree = "<group>"; };
 		12848E361D32F3BBD0457B47 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		14C9F15BBB750A9F2A9FCFBA /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		281C362693E95F8EEFA7E7DB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -74,9 +78,11 @@
 		A618679E350B95337CF9622D /* App.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		C2437AB43E40CA70A2F0522E /* WidgetBridgePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetBridgePlugin.swift; sourceTree = "<group>"; };
 		CCB65A7363A37AA87301081D /* LessonActivityAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LessonActivityAttributes.swift; sourceTree = "<group>"; };
+		D726F70AB2D38C52C8ADF032 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D772474891A2689A792C4D74 /* ActivityBridgePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ActivityBridgePlugin.swift; sourceTree = "<group>"; };
 		DA4B41E5AADC5FE5B3F4F353 /* KalbekWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = KalbekWidget.entitlements; sourceTree = "<group>"; };
 		E7BC7C3C56A19951023BCC89 /* KalbekWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KalbekWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F57D0A24F11773E9E73F7B22 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FDE266FB28BC8ED031F98DCF /* KalbekWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KalbekWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -148,6 +154,8 @@
 				C2437AB43E40CA70A2F0522E /* WidgetBridgePlugin.swift */,
 				A618679E350B95337CF9622D /* App.entitlements */,
 				D772474891A2689A792C4D74 /* ActivityBridgePlugin.swift */,
+				0881A7CFDED1944D3DE62D11 /* AudioBridgePlugin.swift */,
+				F57D0A24F11773E9E73F7B22 /* PrivacyInfo.xcprivacy */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -159,6 +167,7 @@
 				7D6C0100BB2EE5CB4B3DEED3 /* Info.plist */,
 				DA4B41E5AADC5FE5B3F4F353 /* KalbekWidget.entitlements */,
 				12848E361D32F3BBD0457B47 /* Assets.xcassets */,
+				D726F70AB2D38C52C8ADF032 /* PrivacyInfo.xcprivacy */,
 			);
 			name = KalbekWidget;
 			path = KalbekWidget;
@@ -268,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				008C224020E6E12FD09F52F9 /* Assets.xcassets in Resources */,
+				4EDDAC475096AF0AF2BD722C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +291,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+				7D4198762A62236BF35B3F96 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +308,7 @@
 				C55E8C88DBECF449E8F2E956 /* WidgetBridgePlugin.swift in Sources */,
 				E72655F58BD13AE545594B9B /* ActivityBridgePlugin.swift in Sources */,
 				76CBF816BA34D55322581B0F /* LessonActivityAttributes.swift in Sources */,
+				46490BD76F7B83CB4390801A /* AudioBridgePlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,7 +360,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = KalbekWidget/KalbekWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = G77JXZ2QM3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KalbekWidget/Info.plist;
@@ -486,7 +498,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = G77JXZ2QM3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -510,7 +522,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = G77JXZ2QM3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -535,7 +547,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = KalbekWidget/KalbekWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = G77JXZ2QM3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = KalbekWidget/Info.plist;

@@ -31,7 +31,7 @@ struct Entry: TimelineEntry {
 }
 
 struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> Entry { Entry(date: .now, data: WidgetData(streak: 7, wordsDue: 12, passed: 12, nextTitle: "Veiksmažodis „to be“ ir įvardžiai")) }
+    func placeholder(in context: Context) -> Entry { Entry(date: .now, data: WidgetData(streak: 7, wordsDue: 12, nextTitle: "Veiksmažodis „to be“ ir įvardžiai", passed: 12)) }
     func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
         completion(Entry(date: .now, data: context.isPreview ? placeholder(in: context).data : .load()))
     }

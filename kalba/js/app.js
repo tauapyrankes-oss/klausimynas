@@ -711,6 +711,7 @@ function mountTalk($el, opts) {
   let session = null;
   let mic = null;
   let player = null;
+  let speakerMuted = false;
   let micOn = settings.micMode !== 'tap';
   let turns = prior ? prior.turns : 0;
   let bubble = null;
@@ -749,7 +750,24 @@ function mountTalk($el, opts) {
       b.style.height = `${Math.max(4, Math.min(29, 4 + lvl * 26 * (0.5 + shape) * (0.6 + 0.4 * jitter)))}px`;
     });
   };
-  const scroll = () => $controls.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  // Follow new content within the conversation, never scroll the whole page to the controls.
+  let followTranscript = true;
+  let scrollFrame = 0;
+  $tr.addEventListener('scroll', () => {
+    followTranscript = $tr.scrollHeight - $tr.clientHeight - $tr.scrollTop < 56;
+  }, { passive: true });
+  const scroll = () => {
+    if (!followTranscript || scrollFrame) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      if (!$tr.isConnected) return;
+      const last = $tr.lastElementChild;
+      if (!last) return;
+      const top = last.getBoundingClientRect().top - $tr.getBoundingClientRect().top + $tr.scrollTop;
+      // A long exercise or reply starts at its heading, rather than hiding it behind the dock.
+      $tr.scrollTop = last.offsetHeight > $tr.clientHeight ? top : $tr.scrollHeight;
+    });
+  };
   const sys = (text) => {
     const d = document.createElement('div');
     d.className = 'bubble sys';
@@ -844,6 +862,7 @@ function mountTalk($el, opts) {
         <button class="icon-btn" id="texttoggle" aria-label="Rašyti tekstu">${icon('pen')}</button>
         <div><button class="mic ${micOn ? '' : 'off'}" id="mic" aria-label="Mikrofonas">${icon('mic')}<span class="ring" id="ring"></span></button>
         <span class="mic-caption">${tap ? (micOn ? 'Kalbėk… baigusi paspausk' : 'Paspausk ir kalbėk') : micOn ? 'Kalbėk – Ema klauso' : 'Mikrofonas išjungtas'}</span></div>
+        <button class="icon-btn" id="speaker" aria-label="${speakerMuted ? 'Įjungti Emos garsą' : 'Nutildyti Emą'}" aria-pressed="${speakerMuted}">${icon(speakerMuted ? 'volume-off' : 'volume')}</button>
         <button class="icon-btn" id="end" aria-label="Baigti pokalbį">${icon('close')}</button></div>
       <div class="textrow hidden" id="textrow"><input type="text" id="txt" placeholder="…arba parašyk" autocomplete="off" aria-label="Žinutė Emai">
         <button class="btn" id="send" aria-label="Siųsti">${icon('send')}</button></div>
@@ -852,6 +871,14 @@ function mountTalk($el, opts) {
       const row = $controls.querySelector('#textrow');
       row.classList.toggle('hidden');
       if (!row.classList.contains('hidden')) row.querySelector('input').focus();
+    };
+    $controls.querySelector('#speaker').onclick = (event) => {
+      speakerMuted = !speakerMuted;
+      player?.setMuted(speakerMuted);
+      const button = event.currentTarget;
+      button.setAttribute('aria-pressed', String(speakerMuted));
+      button.setAttribute('aria-label', speakerMuted ? 'Įjungti Emos garsą' : 'Nutildyti Emą');
+      button.innerHTML = icon(speakerMuted ? 'volume-off' : 'volume');
     };
     $controls.querySelector('#mic').onclick = () => {
       if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
@@ -1455,7 +1482,9 @@ function viewSettings() {
     };
     const player = new PcmPlayer();
     player.ensure();
-    log(`Garso kontekstas: ${player.ctx.sampleRate} Hz, būsena ${player.ctx.state}`);
+    try { await player.ready; }
+    catch (error) { log(`KLAIDA – garso variklis: ${error.message}`); player.close(); return; }
+    log(`Garso variklis: ${player.native ? 'iOS AVAudioEngine' : 'Web Audio'}, ${player.ctx.sampleRate} Hz, būsena ${player.ctx.state}`);
     let peak = 0;
     let chunks = 0;
     const mic = new MicRecorder({
@@ -1483,6 +1512,7 @@ function viewSettings() {
     mic.stop();
     player.close();
     bar.style.width = '0%';
+    if (player.native) log(`Native įėjimo pikas: ${(mic.rawLevel || 0).toFixed(4)}; nutildytas: ${mic.inputMuted}`);
     log(peak > 0.01 ? `OK – mikrofonas girdi (lygis ${peak.toFixed(3)}, ${chunks} gabaliukų)` : `KLAIDA – iš mikrofono garso negauta (lygis ${peak.toFixed(4)}, ${chunks} gabaliukų)`);
   };
   document.getElementById('export').onclick = () => {
@@ -1510,6 +1540,17 @@ function viewSettings() {
     }
   };
 }
+
+// Keep the voice layout above the onscreen keyboard without moving the document.
+const updateViewport = () => {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  document.documentElement.style.setProperty('--voice-viewport', `${Math.round(viewport.height)}px`);
+  document.body.classList.toggle('keyboard-open', window.innerHeight - viewport.height > 120);
+};
+window.visualViewport?.addEventListener('resize', updateViewport);
+window.addEventListener('resize', updateViewport);
+updateViewport();
 
 // ---------- Paleidimas ----------
 onDeepLink((url) => {

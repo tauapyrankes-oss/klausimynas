@@ -156,6 +156,7 @@ main { flex: 1; padding: 16px 24px calc(100px + env(safe-area-inset-bottom)); }
   min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
   background: none; border: 0; border-radius: 14px; color: var(--muted);
 }
+.icon-btn[aria-pressed="true"] { color: var(--accent); background: var(--surface-2); }
 .icon-btn:active { background: var(--surface-2); }
 .progressbar { height: 6px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
 .progressbar > span { display: block; height: 100%; background: var(--accent); border-radius: 6px; transition: width .3s var(--ease); }
@@ -353,7 +354,7 @@ textarea.inp { resize: vertical; min-height: 103px; line-height: 1.7; }
   background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 10px 14px 12px;
   box-shadow: var(--shadow); margin-top: 8px;
 }
-.mic-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mic-line { position: relative; padding-bottom: 23px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .mic-line > div { display: flex; align-items: center; flex-direction: column; gap: 7px; flex: 1; }
 .mic {
   width: 64px; height: 64px; border-radius: 24px; border: 0; position: relative; flex: 0 0 auto;
@@ -367,7 +368,7 @@ textarea.inp { resize: vertical; min-height: 103px; line-height: 1.7; }
 .mic.wait { background: var(--accent-soft); color: var(--accent); }
 .mic .ring { position: absolute; inset: -5px; border-radius: 29px; border: 2px solid var(--ok); opacity: 0; pointer-events: none; transition: opacity .1s, transform .1s; }
 .mic.wait .ring { border-color: var(--line); }
-.mic-caption { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; }
+.mic-caption { position: absolute; bottom: 0; left: 0; width: 100%; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; }
 .textrow { display: flex; gap: 7px; margin-top: 10px; align-items: center; }
 .textrow input { flex: 1; min-width: 0; min-height: 44px; }
 .textrow .btn { padding: 10px 14px; min-height: 44px; }
@@ -570,3 +571,74 @@ pre.small { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-si
   .stat:nth-last-child(-n+2) { border-bottom: 1px solid var(--line); }
   .stat:last-child { border-bottom: 0; }
 }
+
+/* Voice screens have one bounded, readable transcript; controls never pull the document away. */
+body:has(#talk) { min-height: 0; }
+.app:has(#talk) {
+  height: var(--voice-viewport, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+.app:has(#talk) .topbar { flex-shrink: 0; }
+#view:has(#talk) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px 20px 12px;
+}
+#step:has(#talk) { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+#view:has(#talk) .lesson-tabs { flex-shrink: 0; margin-bottom: 5px; }
+#view:has(#talk) .lesson-head { flex-shrink: 0; padding: 3px 0 7px; gap: 8px; }
+#view:has(#talk) .lesson-head .square-icon { width: 30px; height: 30px; border-radius: 10px; }
+#view:has(#talk) .lesson-head h2 { font-size: 12px !important; line-height: 1.3; }
+#view:has(#talk) .lesson-head p { display: none; }
+#view:has(#talk) .notice { max-height: 54px; overflow-y: auto; flex-shrink: 0; padding: 6px 10px; }
+#view:has(#talk) > .card:has(#topic) { max-height: 94px; overflow-y: auto; flex-shrink: 0; }
+#talk { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.talk { flex: 1; min-height: 0; overflow: hidden; }
+.ema-stage { flex-shrink: 0; padding: 0 0 6px; }
+.ema-stage .ema { width: 82px; height: 82px; }
+.ema-stage.compact .ema { width: 52px; height: 52px; }
+.ema-stage .waveform { height: 16px; margin-top: 3px; }
+.ema-stage > .row { margin-top: 3px !important; }
+.ema-stage .chip { min-height: 26px; padding: 3px 8px; font-size: 11px; }
+.transcript {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+  padding: 6px 0 10px;
+}
+.transcript > * { flex-shrink: 0; }
+.controls { position: relative; bottom: auto; flex-shrink: 0; padding: 8px 12px; margin-top: 5px; }
+
+/* Keyboard reductions follow viewport size, never :focus (which would move Send during a tap). */
+.keyboard-open .ema-stage .ema,
+.keyboard-open .ema-stage .waveform,
+.keyboard-open .ema-stage > p,
+.keyboard-open .ema-stage > .row { display: none; }
+.keyboard-open .app:has(#talk) { padding-bottom: 0; }
+.keyboard-open .app:has(#talk) .tabbar { display: none; }
+@media (max-height: 650px) {
+  .app:has(#talk) { padding-bottom: 0; }
+  .app:has(#talk) .tabbar { display: none; }
+  .app:has(#talk) .ema-stage .ema,
+  .app:has(#talk) .ema-stage .waveform,
+  .app:has(#talk) .ema-stage > p,
+  .app:has(#talk) .ema-stage > .row,
+  .app:has(#talk) .lesson-head { display: none; }
+  .app:has(#talk) .ema-stage { padding: 0 0 5px; }
+  .app:has(#talk) .stage-label { font-size: 14px; }
+}
+@media (max-height: 650px) {
+  .app:has(#talk) .controls .mic { width: 48px; height: 48px; border-radius: 18px; }
+  .app:has(#talk) .controls .mic-caption,
+  .app:has(#talk) .controls #assess { display: none; }
+}
+.keyboard-open .app:has(#talk) .controls .mic { width: 48px; height: 48px; border-radius: 18px; }
+.keyboard-open .app:has(#talk) .controls .mic-caption,
+.keyboard-open .app:has(#talk) .controls #assess { display: none; }
