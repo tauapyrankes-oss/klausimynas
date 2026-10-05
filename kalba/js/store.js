@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS = {
   ltHelp: 'some', // much | some | little
   name: '',
   sfx: 'on',
+  reminder: '19:00', // tik native programėlėje
 };
 
 function read(key, fallback) {

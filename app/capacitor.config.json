@@ -1,0 +1,18 @@
+{
+  "appId": "lt.kalbek.app",
+  "appName": "Kalbėk!",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f6f5fb"
+  },
+  "android": {
+    "backgroundColor": "#f6f5fb"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_kalbek",
+      "iconColor": "#5b4fd6"
+    }
+  }
+}
