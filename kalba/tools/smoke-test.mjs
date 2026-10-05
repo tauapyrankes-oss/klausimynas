@@ -79,9 +79,14 @@ await page.click('[data-close]');
 
 // Teorija ir pratimai.
 await page.locator('.node').first().click();
-await page.waitForSelector('.explain');
+// Pamoka atsidaro iškart su Ema; teorija – mygtuku pamokos viduje.
+await page.waitForSelector('#start');
+if (await page.locator('.steps').count()) fail('pamoka neturi būti skaidoma į atskirus žingsnius');
+await page.click('#theory');
+await page.waitForSelector('.modal .explain');
 await shot('2-teorija');
-await page.click('#quiz');
+await page.click('.modal [data-close]');
+await page.goto(`${base}#/lesson/${firstId}/quiz`);
 await page.waitForSelector('.quiz-q');
 for (let k = 0; k < 20 && (await page.locator('.check').count()); k++) {
   if (await page.locator('.match').count()) {

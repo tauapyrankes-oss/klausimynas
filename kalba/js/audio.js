@@ -23,12 +23,17 @@ export class MicRecorder {
     this.ctx = null;
   }
 
-  async start() {
+  // ctx – bendras AudioContext, sukurtas paspaudimo metu (iPhone kitaip jį palieka sustabdytą ir mikrofonas „tyli“).
+  async start(ctx) {
     this.stream = await navigator.mediaDevices.getUserMedia({
       audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
     });
-    this.ctx = new AudioContext();
-    await this.ctx.audioWorklet.addModule(new URL('./pcm-worklet.js', import.meta.url));
+    this.ownCtx = !ctx;
+    this.ctx = ctx || new AudioContext();
+    if (!this.ctx.__pcmWorklet) {
+      await this.ctx.audioWorklet.addModule(new URL('./pcm-worklet.js', import.meta.url));
+      this.ctx.__pcmWorklet = true;
+    }
     this.source = this.ctx.createMediaStreamSource(this.stream);
     this.node = new AudioWorkletNode(this.ctx, 'pcm-recorder', { processorOptions: { targetRate: 16000 } });
     this.node.port.onmessage = (e) => {
@@ -36,15 +41,20 @@ export class MicRecorder {
       this.onChunk(e.data.pcm);
     };
     // Worklet'as turi būti prijungtas prie išvesties, kad naršyklė jį „suktų“; garsas nutildytas.
-    const mute = this.ctx.createGain();
-    mute.gain.value = 0;
-    this.source.connect(this.node).connect(mute).connect(this.ctx.destination);
-    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    this.mute = this.ctx.createGain();
+    this.mute.gain.value = 0;
+    this.source.connect(this.node).connect(this.mute).connect(this.ctx.destination);
+    if (this.ctx.state !== 'running') await this.ctx.resume().catch(() => {});
   }
 
   stop() {
     this.stream && this.stream.getTracks().forEach((t) => t.stop());
-    this.ctx && this.ctx.close().catch(() => {});
+    try {
+      this.source && this.source.disconnect();
+      this.node && this.node.disconnect();
+      this.mute && this.mute.disconnect();
+    } catch (_) {}
+    if (this.ownCtx && this.ctx) this.ctx.close().catch(() => {});
     this.ctx = null;
     this.stream = null;
   }
@@ -62,7 +72,7 @@ export class PcmPlayer {
   // Kviesti iš vartotojo paspaudimo, kad iOS/Android leistų groti garsą.
   ensure() {
     if (!this.ctx) {
-      this.ctx = new AudioContext({ sampleRate: this.rate });
+      this.ctx = new AudioContext(); // aparatūros dažnis; 24 kHz buferius naršyklė perskaičiuoja pati
       this.gain = this.ctx.createGain();
       this.gain.connect(this.ctx.destination);
     }
@@ -93,7 +103,7 @@ export class PcmPlayer {
   }
 
   get playing() {
-    return !!this.ctx && this.next > this.ctx.currentTime + 0.05;
+    return !!this.ctx && this.ctx.state === 'running' && this.next > this.ctx.currentTime + 0.05;
   }
 
   stop() {

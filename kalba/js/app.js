@@ -189,6 +189,8 @@ function viewPath() {
     html += `<div class="notice" style="margin-bottom:16px">👋 Sveika! Kad galėtum kalbėtis su AI mokytoja Ema,
       įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
   }
+  html += `<button class="card sprint-cta" data-go="#/talk">${ema('wave', 48)}<span class="grow"><b>💬 Laisvas pokalbis su Ema</b>
+    <span class="small muted">Be testo – tiesiog pasikalbėk apie bet ką</span></span><span>→</span></button>`;
   html += `<button class="card sprint-cta" data-go="#/sprint">${ema('idle', 48)}<span class="grow"><b>⚡ Žodžių sprintas</b>
     <span class="small muted">${(() => {
       const n = sprintPool().filter((v) => store.isWordDue(v.en)).length;
@@ -198,7 +200,7 @@ function viewPath() {
     html += `<div class="card" style="margin-bottom:20px"><h3>🔁 Laikas pakartoti</h3>
       <p class="small muted">Trumpas pakartojimas padeda neužmiršti (kartojimas su didėjančiais intervalais).</p>
       <div class="due-list">${due
-        .map((x) => `<button class="due-item" data-go="#/lesson/${x.lesson.id}/talk">${esc(x.lesson.icon)} ${esc(x.lesson.title)}</button>`)
+        .map((x) => `<button class="due-item" data-go="#/lesson/${x.lesson.id}">${esc(x.lesson.icon)} ${esc(x.lesson.title)}</button>`)
         .join('')}</div></div>`;
   }
   for (const level of LEVELS) {
@@ -264,23 +266,32 @@ function viewLesson(x, step) {
     location.hash = '#/path';
     return;
   }
-  if (!step) step = settings.apiKey ? 'talk' : 'learn';
-  setHeader(l.title, '#/path');
+  setHeader(l.title, step === 'learn' || step === 'quiz' ? `#/lesson/${l.id}` : '#/path');
   setTab('path');
-  const st = store.lessonState(l.id) || {};
-  const steps = [
-    ['talk', `${l.type === 'checkpoint' ? '🏆 Egzaminas' : '💬 Pamoka su Ema'}`, !!st.passed],
-    ['learn', '📘 Teorija', false],
-    ['quiz', '✏️ Pratimai', st.quizBest != null],
-  ];
-  $view.innerHTML = `<div class="steps" role="tablist">${steps
-    .map(([k, label, done]) => `<button data-step="${k}" ${k === step ? 'aria-current="step"' : ''}>${label}${done ? ' <span class="done">✓</span>' : ''}</button>`)
-    .join('')}</div><div id="step"></div>`;
-  $view.querySelectorAll('[data-step]').forEach((b) => (b.onclick = () => (location.hash = `#/lesson/${l.id}/${b.dataset.step}`)));
+  $view.innerHTML = '<div id="step"></div>';
   const $step = document.getElementById('step');
+  // Viena pamoka: Ema veda viską (pokalbis, taisyklės, užduotys, rašymas, įvertinimas).
+  // Teorija ir pratimai be interneto – tik papildomi puslapiai peržiūrai.
   if (step === 'quiz') return renderQuiz($step, x);
-  if (step === 'talk') return renderLessonTalk($step, x);
-  return renderLearn($step, x);
+  if (step === 'learn') return renderLearn($step, x);
+  return renderLessonTalk($step, x);
+}
+
+function showTheoryModal(l) {
+  const g = l.grammar || {};
+  modal(
+    `<div class="row"><h2 class="grow">📘 ${esc(g.title || l.title)}</h2><button class="btn secondary" data-close>✕</button></div>
+    <div class="explain">${theoryHtml(l, 'rule')}${g.table ? theoryHtml(l, 'table').replace(/^<h3>.*?<\/h3>/, '') : ''}
+    ${(g.pitfalls || []).map((p) => `<div class="pitfall">⚠️ ${rich(p)}</div>`).join('')}</div>
+    ${(g.examples || []).length ? theoryHtml(l, 'examples') : ''}
+    ${(l.vocab || []).length ? theoryHtml(l, 'vocab') : ''}
+    ${(l.phrases || []).length ? theoryHtml(l, 'phrases') : ''}
+    <button class="btn block" data-close style="margin-top:14px">Grįžti į pamoką</button>`,
+    (m, close) => {
+      bindSay(m);
+      m.querySelectorAll('[data-close]').forEach((b) => (b.onclick = close));
+    }
+  );
 }
 
 const sayBtn = (en) => `<button class="speak" data-say="${esc(en)}" aria-label="Paklausyti">🔊</button>`;
@@ -332,10 +343,10 @@ function renderLearn($el, x) {
     ${(l.vocab || []).length ? card(theoryHtml(l, 'vocab')) : ''}
     ${(l.phrases || []).length ? card(theoryHtml(l, 'phrases')) : ''}
     ${l.reading ? card(theoryHtml(l, 'reading')) : ''}
-    <div class="stack" style="margin-top:16px"><button class="btn block" id="next">💬 Į pamoką su Ema →</button>
+    <div class="stack" style="margin-top:16px"><button class="btn block" id="next">💬 Į pamoką →</button>
     <button class="btn secondary block" id="quiz">✏️ Pratimai be interneto</button></div>`;
   bindSay($el);
-  document.getElementById('next').onclick = () => (location.hash = `#/lesson/${l.id}/talk`);
+  document.getElementById('next').onclick = () => (location.hash = `#/lesson/${l.id}`);
   document.getElementById('quiz').onclick = () => (location.hash = `#/lesson/${l.id}/quiz`);
 }
 
@@ -363,7 +374,7 @@ function renderQuiz($el, { lesson: l }) {
         <p class="muted">Pamoką išmokta patvirtina tik Ema – eik į pamoką su ja.</p>
         <div class="stack"><button class="btn block" id="go">💬 Pamoka su Ema →</button>
         <button class="btn secondary block" id="again">Kartoti pratimus</button></div></div>`;
-      document.getElementById('go').onclick = () => (location.hash = `#/lesson/${l.id}/talk`);
+      document.getElementById('go').onclick = () => (location.hash = `#/lesson/${l.id}`);
       document.getElementById('again').onclick = () => {
         i = 0;
         correct = 0;
@@ -421,9 +432,11 @@ function renderLessonTalk($el, x) {
       ? 'Ema kalbins tave apie visas lygio temas ir duos užduočių ekrane. Pagalbos bus mažiau – parodyk, ką moki!'
       : 'Ema pakalbins, paaiškins taisyklę, duos užduočių ekrane (kai kurios – su laikmačiu), vėl pakalbins… Pabaigoje ji <b>pati nuspręs</b>, ar pamoka išmokta – tik tada atsirakins kita.'}</p>
     <p class="small muted">Kalbėk balsu arba rašyk. Ausinės padeda, kad Ema negirdėtų pati savęs.</p>
+    <div class="row wrap"><button class="chip" id="theory">📘 Teorija</button><a class="chip" href="#/lesson/${esc(l.id)}/quiz">✏️ Pratimai be interneto</a></div>
     ${review ? `<div class="notice review-card small">🔁 Šiandien Ema pakartos ir: ${review.lessons.map((y) => esc(y.lesson.title)).join(' · ')}</div>` : ''}
     ${st.last ? `<div class="notice">Paskutinis bandymas: ${st.last.passed ? '✅ išmokta' : '⏳ dar neišmokta'}, ${st.last.score ?? '–'} / 100. ${esc(st.last.advice_lt || '')}</div>` : ''}
     </div><div id="talk"></div>`;
+  document.getElementById('theory').onclick = () => showTheoryModal(l);
   mountTalk(document.getElementById('talk'), {
     prompt: () =>
       lessonPrompt(
@@ -570,6 +583,7 @@ function mountTalk($el, opts) {
 
   const stop = () => {
     stopped = true;
+    clearInterval(tick);
     session && session.close();
     mic && mic.stop();
     player && player.close();
@@ -586,6 +600,7 @@ function mountTalk($el, opts) {
         <button class="btn" id="send" aria-label="Siųsti">➤</button></div>
       ${opts.canAssess ? '<button class="btn secondary block" id="assess" style="margin-top:10px">✅ Noriu įvertinimo</button>' : ''}`;
     $controls.querySelector('#mic').onclick = () => {
+      if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
       micOn = !micOn;
       if (!micOn && session) session.endAudio();
       drawControls();
@@ -616,16 +631,69 @@ function mountTalk($el, opts) {
     };
   };
 
+  let tick = null;
+  let heardSound = false;
+  let micWarned = false;
+  let listenSince = 0;
+  // Būsena pagal tai, kas iš tikrųjų vyksta: kol groja Emos garsas, mikrofonas (auto režime) tyli.
+  const startStatusLoop = () => {
+    listenSince = Date.now();
+    tick = setInterval(() => {
+      if (!session || stopped) return clearInterval(tick);
+      if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
+      const speaking = player && player.playing;
+      if (speaking) {
+        listenSince = Date.now();
+        status('Ema kalba… (palauk)', 'speaking');
+      } else if (micOn) {
+        status('Tavo eilė – kalbėk 🎙️', 'live');
+      } else {
+        status(settings.micMode === 'tap' ? 'Paspausk 🎙️ ir kalbėk' : 'Mikrofonas išjungtas', 'live');
+      }
+      if (mic && micOn && !speaking && !heardSound && !micWarned && Date.now() - listenSince > 10000) {
+        micWarned = true;
+        sys('🎙️ Negaunu garso iš mikrofono. Patikrink, ar programėlei leistas mikrofonas (iPhone: Nustatymai → Kalbėk!/Safari → Mikrofonas), arba rašyk tekstu.');
+      }
+    }, 250);
+  };
+
   const start = async () => {
     if (!settings.apiKey) {
       sys('Pirmiau įvesk Gemini API raktą nustatymuose.');
       $controls.innerHTML = '<a class="btn block" href="#/settings">⚙️ Į nustatymus</a>';
       return;
     }
+    // Vienas garso kontekstas garsui ir mikrofonui – sukuriamas PASPAUDIMO metu (iPhone reikalavimas).
     player = new PcmPlayer();
-    player.ensure(); // turi įvykti paspaudimo metu
+    player.ensure();
     status('Jungiamasi…', '', 'thinking');
     $controls.innerHTML = '<button class="btn block" disabled>Jungiamasi…</button>';
+    let micError = null;
+    const micReady = (async () => {
+      try {
+        mic = new MicRecorder({
+          onChunk: (pcm) => {
+            if (!session || !micOn) return;
+            if (settings.micMode === 'auto' && player && player.playing) return; // kad Ema negirdėtų pati savęs
+            session.sendAudio(pcm);
+          },
+          onLevel: (lvl) => {
+            if (lvl > 0.004) heardSound = true;
+            const ring = document.getElementById('ring');
+            if (ring) {
+              const v = micOn ? Math.min(1, lvl * 12) : 0;
+              ring.style.opacity = v;
+              ring.style.transform = `scale(${1 + v * 0.25})`;
+            }
+          },
+        });
+        await mic.start(player.ctx);
+      } catch (e) {
+        mic = null;
+        micOn = false;
+        micError = e;
+      }
+    })();
     try {
       if (!settings.model) {
         const models = await listLiveModels(settings.apiKey).catch(() => []);
@@ -646,48 +714,31 @@ function mountTalk($el, opts) {
       sys(`Klaida: ${e.message}. Patikrink API raktą ir modelį nustatymuose (${settings.model || 'modelis nepasirinktas'}).`);
       $controls.innerHTML = '<button class="btn block" id="retry">🔄 Bandyti dar kartą</button>';
       $controls.querySelector('#retry').onclick = () => mountTalk($el, opts);
+      mic && mic.stop();
       player && player.close();
       return;
     }
-    try {
-      mic = new MicRecorder({
-        onChunk: (pcm) => {
-          if (!session || !micOn) return;
-          if (settings.micMode === 'auto' && player && player.playing) return; // kad Ema nepertrauktų pati savęs
-          session.sendAudio(pcm);
-        },
-        onLevel: (lvl) => {
-          const ring = document.getElementById('ring');
-          if (ring) {
-            const v = micOn ? Math.min(1, lvl * 12) : 0;
-            ring.style.opacity = v;
-            ring.style.transform = `scale(${1 + v * 0.25})`;
-          }
-        },
-      });
-      await mic.start();
-    } catch (e) {
-      mic = null;
-      micOn = false;
-      sys('Mikrofonas neleidžiamas – gali rašyti tekstu. (Leisk mikrofoną naršyklės nustatymuose.)');
+    await micReady;
+    if (micError) {
+      sys(
+        micError.name === 'NotAllowedError'
+          ? 'Mikrofonas neleistas – gali rašyti tekstu. Leisk mikrofoną: iPhone Nustatymai → Kalbėk! (arba Safari) → Mikrofonas.'
+          : `Mikrofono nepavyko įjungti (${micError.message || micError.name}) – gali rašyti tekstu.`
+      );
     }
-    status('Prisijungta', 'live');
     drawControls();
-    session.sendText('(The learner has just opened the session. Please start now.)');
+    startStatusLoop();
+    session.sendText('(The learner has just opened the lesson. Please start now.)');
   };
 
   const wire = (s) => {
-    s.addEventListener('audio', (e) => {
-      player && player.play(e.detail);
-      status('Ema kalba…', 'speaking');
-    });
+    s.addEventListener('audio', (e) => player && player.play(e.detail));
     s.addEventListener('output-text', (e) => addText('tutor', e.detail));
     s.addEventListener('input-text', (e) => addText('me', e.detail));
     s.addEventListener('interrupted', () => player && player.stop());
     s.addEventListener('turn-complete', () => {
       bubble = null;
       bubbleRole = '';
-      status(micOn ? 'Klausausi…' : 'Tavo eilė', 'live');
       if (pendingResult) setTimeout(flushResult, 1500);
     });
     s.addEventListener('tool-call', (e) => {
@@ -904,8 +955,8 @@ function viewSprint() {
 
 // ---------- Laisvas pokalbis ----------
 function viewFreeTalk() {
-  setHeader('Laisvas pokalbis');
-  setTab('talk');
+  setHeader('Laisvas pokalbis', '#/path');
+  setTab('path');
   const level = currentLevel();
   $view.innerHTML = `<div class="card"><h3>💬 Pasikalbėk su Ema apie bet ką</h3>
     <p>Čia nėra testo – tiesiog kalbiesi ir pratiniesi. Ema prisitaikys prie tavo lygio (<b>${esc(level.name)}</b>) ir naudos jau išmoktą gramatiką.</p>
@@ -974,7 +1025,8 @@ function viewSettings() {
       <label class="field"><span>Kaip į tave kreiptis (vardas)</span><input type="text" id="name" value="${esc(settings.name)}"></label>
       <label class="field"><span>Balsas</span><select id="voice">${voices.map((v) => opt(v, settings.voice)).join('')}</select></label>
       <label class="field"><span>Kalbėjimo tempas</span><select id="pace">${opt('slow', settings.pace, 'Lėtai ir aiškiai')}${opt('normal', settings.pace, 'Natūraliai')}</select></label>
-      <label class="field"><span>Kiek aiškinti lietuviškai</span><select id="lt">${opt('much', settings.ltHelp, 'Daug (pradžiai)')}${opt('some', settings.ltHelp, 'Kartais (rekomenduojama)')}${opt('little', settings.ltHelp, 'Beveik ne')}</select></label>
+      <label class="field"><span>Kiek aiškinti lietuviškai</span><select id="lt">${opt('auto', settings.ltHelp, 'Pagal lygį (rekomenduojama)')}${opt('much', settings.ltHelp, 'Daugiausia lietuviškai')}${opt('some', settings.ltHelp, 'Pusiau')}${opt('little', settings.ltHelp, 'Beveik tik angliškai')}</select>
+        <small>„Pagal lygį“: A1+–A2 Ema aiškina lietuviškai, A2+ – pusiau, B1 – beveik tik angliškai.</small></label>
       <label class="field"><span>Mikrofonas</span><select id="mic">
         ${opt('auto', settings.micMode, 'Automatiškai, be ausinių (Ema nepertraukiama)')}
         ${opt('headphones', settings.micMode, 'Su ausinėmis (gali pertraukti Emą)')}
