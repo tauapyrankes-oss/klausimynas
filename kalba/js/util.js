@@ -33,3 +33,17 @@ export function speak(text, rate = 0.9) {
   u.rate = rate;
   speechSynthesis.speak(u);
 }
+
+// Garso efektai (assets/sfx). Išjungiami nustatymuose.
+let sfxOn = true;
+export function setSfx(on) {
+  sfxOn = on;
+}
+export function sfx(name) {
+  if (!sfxOn) return;
+  try {
+    const a = new Audio(`assets/sfx/${name}.mp3`);
+    a.volume = 0.6;
+    a.play().catch(() => {});
+  } catch (_) {}
+}

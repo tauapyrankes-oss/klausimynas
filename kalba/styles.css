@@ -281,3 +281,4 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .unit-head b { font-size: 17px; }
 .unit-head .small { color: var(--muted); }
 p.reading { font-size: 17px; line-height: 1.6; }
+.level-art { display: block; width: 100%; height: auto; border-radius: 12px; margin-bottom: 12px; background: rgba(255,255,255,.85); }

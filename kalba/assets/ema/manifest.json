@@ -1,0 +1,11 @@
+{
+  "states": {
+    "idle": "idle.svg",
+    "wave": "wave.svg",
+    "listening": "listening.svg",
+    "talking": "talking.svg",
+    "thinking": "thinking.svg",
+    "happy": "happy.svg",
+    "encourage": "encourage.svg"
+  }
+}

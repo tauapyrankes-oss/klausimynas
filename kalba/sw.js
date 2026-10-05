@@ -1,15 +1,35 @@
 // Programėlės failai saugomi telefone, kad ji greitai atsidarytų (teorija ir pratimai veikia ir be interneto).
 // Pakeitus failus, padidink VERSION.
-const VERSION = 'kalbek-v3';
+const VERSION = 'kalbek-v4';
 const SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'js/app.js', 'js/util.js', 'js/exercise.js', 'js/live.js', 'js/audio.js', 'js/prompt.js', 'js/store.js', 'js/pcm-worklet.js',
   'curriculum/course.js', // skyrių failai patenka į talpyklą pirmą kartą juos įkėlus
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
+  'assets/ema/manifest.json',
+  'assets/ema/idle.svg',
+  'assets/ema/wave.svg',
+  'assets/ema/listening.svg',
+  'assets/ema/talking.svg',
+  'assets/ema/thinking.svg',
+  'assets/ema/happy.svg',
+  'assets/ema/encourage.svg',
+  'assets/levels/a1plus.svg',
+  'assets/levels/a2.svg',
+  'assets/levels/a2plus.svg',
+  'assets/levels/b1.svg',
+  'assets/sfx/correct.mp3',
+  'assets/sfx/wrong.mp3',
+  'assets/sfx/levelup.mp3',
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // Kiekvienas failas atskirai: vieno trūkstamo failo klaida nesugadina viso diegimo.
+  e.waitUntil(
+    caches.open(VERSION)
+      .then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {

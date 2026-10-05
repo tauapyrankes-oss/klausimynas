@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS = {
   pace: 'slow', // slow | normal
   ltHelp: 'some', // much | some | little
   name: '',
+  sfx: 'on',
 };
 
 function read(key, fallback) {

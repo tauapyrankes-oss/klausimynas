@@ -2,10 +2,11 @@ import { LiveSession, listLiveModels } from './live.js';
 import { MicRecorder, PcmPlayer } from './audio.js';
 import { lessonPrompt, freeTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
 import * as store from './store.js';
-import { esc, rich, norm, shuffle, speak } from './util.js';
+import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
 
 const { settings } = store;
+setSfx(settings.sfx !== 'off');
 // Kursas: curriculum/course.js (lygiai ir skyriai) + kiekvieno skyriaus failas curriculum/<lygis>/<skyrius>.js.
 function loadScript(src) {
   return new Promise((resolve) => {
@@ -179,7 +180,7 @@ function viewPath() {
     const passed = items.filter((x) => isPassed(x.lesson.id)).length;
     const levelLocked = !isUnlocked(items[0].index);
     html += `<section class="level ${levelLocked ? 'locked' : ''}" style="--lvl:${LEVEL_COLORS[level.id] || 'var(--accent)'}">
-      <div class="level-head"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
+      <div class="level-head"><img class="level-art" src="assets/levels/${esc(level.id)}.svg" alt="" onerror="this.remove()"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
       <div class="progressbar"><span style="width:${(passed / items.length) * 100}%"></span></div>
       <div class="small" style="margin-top:6px">${passed} / ${items.length} pamokų</div></div><div class="path">`;
     let unitId = null;
@@ -396,8 +397,9 @@ function showResult(x, r) {
   const { lesson: l } = x;
   const next = ALL[x.index + 1];
   const stars = r.passed ? (r.score >= 90 ? 3 : r.score >= 75 ? 2 : 1) : 0;
-  return () =>
-    modal(
+  return () => {
+    if (r.passed) sfx('levelup');
+    return modal(
       `<div class="big-emoji">${ema(r.passed ? 'happy' : 'encourage', 96)}${r.passed && l.type === 'checkpoint' ? '🏆' : ''}</div>
       <h2 style="text-align:center">${r.passed ? (l.type === 'checkpoint' ? 'Lygis įveiktas!' : 'Pamoka išmokta!') : 'Dar ne visai – bet jau arti!'}</h2>
       ${r.passed ? `<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>` : ''}
@@ -425,6 +427,7 @@ function showResult(x, r) {
         if (lr) lr.onclick = () => go(`#/lesson/${l.id}/learn`);
       }
     );
+  };
 }
 
 // ---------- Balso pokalbis (bendras pamokai ir laisvam pokalbiui) ----------
@@ -899,6 +902,7 @@ function viewSettings() {
         ${opt('headphones', settings.micMode, 'Su ausinėmis (gali pertraukti Emą)')}
         ${opt('tap', settings.micMode, 'Paspausk ir kalbėk')}</select>
         <small>Jei Ema pati save pertraukinėja – rinkis „Paspausk ir kalbėk“ arba naudok ausines.</small></label>
+      <label class="field"><span>Garso efektai</span><select id="sfx">${opt('on', settings.sfx, 'Įjungti')}${opt('off', settings.sfx, 'Išjungti')}</select></label>
     </div>
     <div class="card"><h3>💾 Pažanga</h3>
       <p class="small muted">Pažanga saugoma telefone. Kartais pasidaryk atsarginę kopiją.</p>
@@ -915,6 +919,8 @@ function viewSettings() {
   bind('pace', 'pace');
   bind('lt', 'ltHelp');
   bind('mic', 'micMode');
+  document.getElementById('sfx').addEventListener('change', (e) => setSfx(e.target.value !== 'off'));
+  bind('sfx', 'sfx');
   document.getElementById('find').onclick = async () => {
     const out = document.getElementById('find-out');
     const key = document.getElementById('key').value.trim();

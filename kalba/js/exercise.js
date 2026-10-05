@@ -1,6 +1,6 @@
 // Viena interaktyvi užduotis (pasirinkimas, įrašymas, dėliojimas, diktantas, poros).
 // Naudojama ir atskiruose pratimuose, ir Emos pamokoje (kai ji iškviečia give_exercise).
-import { esc, rich, norm, shuffle, speak } from './util.js';
+import { esc, rich, norm, shuffle, speak, sfx } from './util.js';
 
 const INPUT = 'type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"';
 
@@ -143,6 +143,7 @@ export function mountExercise($el, q, opts = {}) {
     clearInterval(timer);
     const r = { ...getAnswer(), timedOut: !!timedOut, seconds: Math.round((Date.now() - started) / 1000) };
     if (timedOut) r.ok = false;
+    sfx(r.ok ? 'correct' : 'wrong');
     $('.fb').innerHTML = `<div class="feedback ${r.ok ? 'right' : 'wrong'}">
       <h3>${r.ok ? '✅ Teisingai!' : timedOut ? '⏰ Laikas baigėsi' : '❌ Ne visai'}</h3>${r.ok ? '' : `<p>Teisingai: <b>${esc(r.right)}</b></p>`}
       ${q.explain ? `<p class="small">${rich(q.explain)}</p>` : ''}</div>`;
