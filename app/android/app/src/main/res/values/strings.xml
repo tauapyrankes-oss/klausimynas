@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kalbėk!</string>
+    <string name="title_activity_main">Kalbėk!</string>
+    <string name="package_name">lt.kalbek.app</string>
+    <string name="custom_url_scheme">lt.kalbek.app</string>
+    <string name="widget_description">Dienų serija, kita pamoka ir kartojimui laukiantys žodžiai</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/kalbek_widget_bg"
+    android:orientation="vertical"
+    android:padding="14dp">
+    <TextView android:id="@+id/widget_streak" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#FFFFFF" android:textSize="22sp" android:textStyle="bold" android:text="🔥 0" />
+    <TextView android:id="@+id/widget_status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="#E7E4FB" android:textSize="12sp" android:text="Ema laukia 🙂" />
+    <TextView android:id="@+id/widget_next" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="6dp" android:maxLines="2" android:ellipsize="end"
+        android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold" android:text="👋 Pradėk pirmą pamoką" />
+    <TextView android:id="@+id/widget_words" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" android:textColor="#FFF4D1" android:textSize="12sp" android:text="" />
+</LinearLayout>

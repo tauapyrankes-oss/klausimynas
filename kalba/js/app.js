@@ -4,6 +4,7 @@ import { lessonPrompt, freeTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, T
 import * as store from './store.js';
 import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
+import { isNative, updateWidget, scheduleReminders, onDeepLink } from './native.js';
 
 const { settings } = store;
 // Gemini Live modeliai (2026 m. spalis): numatytasis – gemini-3.8-live.
@@ -82,6 +83,26 @@ function memory() {
 function updateChips() {
   document.getElementById('xp').textContent = `⭐ ${store.progress.xp}`;
   document.getElementById('streak').textContent = `🔥 ${store.streakCount()}`;
+  if (isNative) syncNative();
+}
+
+// Native programėlėje: atnaujinti valdiklį ir priminimus pagal pažangą.
+function syncNative() {
+  if (!ALL.length) return;
+  const cur = ALL[currentIndex()];
+  const doneToday = store.progress.streak.last === store.today();
+  updateWidget({
+    streak: store.streakCount(),
+    doneToday,
+    wordsDue: sprintPool().filter((v) => store.isWordDue(v.en)).length,
+    xp: store.progress.xp,
+    level: cur.level.name,
+    nextTitle: cur.lesson.title,
+    nextIcon: cur.lesson.icon,
+    passed: ALL.filter((x) => isPassed(x.lesson.id)).length,
+    total: ALL.length,
+  });
+  scheduleReminders({ time: settings.reminder, doneToday, streak: store.streakCount() });
 }
 
 // ---------- Veikėja Ema ----------
@@ -959,6 +980,8 @@ function viewSettings() {
         ${opt('headphones', settings.micMode, 'Su ausinėmis (gali pertraukti Emą)')}
         ${opt('tap', settings.micMode, 'Paspausk ir kalbėk')}</select>
         <small>Jei Ema pati save pertraukinėja – rinkis „Paspausk ir kalbėk“ arba naudok ausines.</small></label>
+      ${isNative ? `<label class="field"><span>Kasdienis priminimas</span><input type="time" id="reminder" value="${esc(settings.reminder === 'off' ? '' : settings.reminder)}">
+        <small>Ištrink laiką, jei priminimų nenori. Vakare (21:30) dar kartą primins, jei tą dieną nesimokei.</small></label>` : ''}
       <label class="field"><span>Garso efektai</span><select id="sfx">${opt('on', settings.sfx, 'Įjungti')}${opt('off', settings.sfx, 'Išjungti')}</select></label>
     </div>
     <div class="card"><h3>💾 Pažanga</h3>
@@ -978,6 +1001,11 @@ function viewSettings() {
   bind('mic', 'micMode');
   document.getElementById('sfx').addEventListener('change', (e) => setSfx(e.target.value !== 'off'));
   bind('sfx', 'sfx');
+  const rem = document.getElementById('reminder');
+  if (rem) rem.onchange = () => {
+    store.saveSettings({ reminder: rem.value || 'off' });
+    syncNative();
+  };
   document.getElementById('find').onclick = async () => {
     const out = document.getElementById('find-out');
     const key = document.getElementById('key').value.trim();
@@ -1022,6 +1050,10 @@ function viewSettings() {
 }
 
 // ---------- Paleidimas ----------
+onDeepLink((url) => {
+  if (/sprint/.test(url)) location.hash = '#/sprint';
+  else if (ALL.length) location.hash = `#/lesson/${ALL[currentIndex()].lesson.id}`;
+});
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ('speechSynthesis' in window) speechSynthesis.getVoices();
