@@ -19,6 +19,11 @@ npm run android     # sync + atidaro Android Studio
 ```
 Pakeitus PWA (`../kalba`), programėlei atnaujinti užtenka `npm run sync` ir perkompiliuoti.
 
+## Gemini raktas
+Įrašyk į `app/.env` (pavyzdys `app/.env.example`): `GEMINI_API_KEY=...`. `npm run sync` jį įdeda tik į vietinį
+build'ą (`www/js/config.js`), todėl programėlėje nieko įvesti nereikia. `.env`, `www/` ir native `public/` kopijos
+yra `.gitignore` – raktas į GitHub nepatenka. PWA svetainė (vieša) rakto neturi ir jo paprašo nustatymuose.
+
 ## Identifikatoriai
 - Bundle ID: `lt.kalbek.app`, valdiklis `lt.kalbek.app.widget`, App Group `group.lt.kalbek.app`.
 - Jei Apple sako, kad ID užimtas – pakeisk visur (`capacitor.config.json`, `ios/App/App.xcodeproj/project.pbxproj`,

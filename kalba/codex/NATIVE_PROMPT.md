@@ -7,7 +7,10 @@ directly to the device over USB (later Wi-Fi). Do not change app logic; only fix
 
 ## Steps
 1. `git fetch && git checkout claude/duolingo-style-language-app-2mgqad && git pull`
-2. `cd app && npm ci && npm run sync` (Node 20+). If `npx cap sync ios` warns about CocoaPods – ignore, the project uses SPM.
+2. **Gemini key (built into the app, never committed):** ask the user for their Gemini API key and write it to
+   `app/.env` as `GEMINI_API_KEY=...` (see `app/.env.example`; `app/.env` is gitignored – NEVER commit it,
+   never print it in logs or commit messages). `npm run sync` writes it only into the local build (`www/js/config.js`).
+   Then: `cd app && npm ci && npm run sync` (Node 20+) – it must print „Gemini raktas įdiegtas“. If `npx cap sync ios` warns about CocoaPods – ignore, the project uses SPM.
 3. Find the user's Team ID (Xcode → Settings → Accounts, or ask the user). Use it as `DEVELOPMENT_TEAM` for BOTH targets.
 4. Ask the user to connect the iPhone with a cable, unlock it, tap „Trust“, and enable
    **Settings → Privacy & Security → Developer Mode** (iPhone restarts). Get the UDID: `xcrun devicectl list devices`.
@@ -27,7 +30,7 @@ directly to the device over USB (later Wi-Fi). Do not change app logic; only fix
    then the same `xcodebuild` + `devicectl install` works without the cable.
 7. Commit and push any build fixes to the same branch (never commit secrets or the API key).
 8. Reply to the user in Lithuanian:
-   - programėlė įdiegta; pirmas paleidimas: Nustatymai → Gemini API raktas → modelis `gemini-3.8-live` → leisti mikrofoną ir pranešimus;
+   - programėlė įdiegta; raktas jau įdiegtas – tereikia leisti mikrofoną ir pranešimus (modelis `gemini-3.8-live` parenkamas automatiškai);
    - valdiklis: ilgai paspausk pagrindinį ekraną → „+“ → „Kalbėk!“ → pasirink dydį (ir užrakinimo ekrane – Customize);
    - pažangos perkėlimas iš PWA: PWA Nustatymai → Eksportuoti → failą atidaryti programėlėje → Nustatymai → Importuoti;
    - development diegimas galioja ~1 metus; atnaujinimams pakanka paleisti tą patį build ir install.

@@ -7,6 +7,9 @@ import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js
 import { isNative, updateWidget, scheduleReminders, onDeepLink } from './native.js';
 
 const { settings } = store;
+// Native programėlėje raktas įdiegiamas kompiliuojant (app/.env → www/js/config.js, į GitHub nepatenka).
+const BUILTIN_KEY = (window.KALBEK_CONFIG && window.KALBEK_CONFIG.geminiKey) || '';
+const apiKey = () => settings.apiKey || BUILTIN_KEY;
 // Gemini Live modeliai (2026 m. spalis): numatytasis – gemini-3.8-live.
 const KNOWN_LIVE = ['gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.1-flash-live-preview'];
 setSfx(settings.sfx !== 'off');
@@ -185,7 +188,7 @@ function viewPath() {
   const due = ALL.filter((x) => store.isDue(x.lesson.id)).slice(0, 6);
   const offsets = [0, 46, 70, 46, 0, -46, -70, -46];
   let html = '';
-  if (!settings.apiKey) {
+  if (!apiKey()) {
     html += `<div class="notice" style="margin-bottom:16px">👋 Sveika! Kad galėtum kalbėtis su AI mokytoja Ema,
       įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
   }
@@ -658,7 +661,7 @@ function mountTalk($el, opts) {
   };
 
   const start = async () => {
-    if (!settings.apiKey) {
+    if (!apiKey()) {
       sys('Pirmiau įvesk Gemini API raktą nustatymuose.');
       $controls.innerHTML = '<a class="btn block" href="#/settings">⚙️ Į nustatymus</a>';
       return;
@@ -696,11 +699,11 @@ function mountTalk($el, opts) {
     })();
     try {
       if (!settings.model) {
-        const models = await listLiveModels(settings.apiKey).catch(() => []);
+        const models = await listLiveModels(apiKey()).catch(() => []);
         store.saveSettings({ model: models.length ? models[0].id : KNOWN_LIVE[0] });
       }
       session = new LiveSession({
-        apiKey: settings.apiKey,
+        apiKey: apiKey(),
         model: settings.model,
         voice: settings.voice,
         systemInstruction: opts.prompt(),
@@ -1011,10 +1014,12 @@ function viewSettings() {
   const voices = ['Kore', 'Aoede', 'Leda', 'Zephyr', 'Puck', 'Charon', 'Fenrir', 'Orus'];
   const opt = (v, cur, label) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(label || v)}</option>`;
   $view.innerHTML = `
-    <div class="card"><h3>🔑 Gemini API raktas</h3>
-      <p class="small">Nemokamą raktą gausi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>
-      → „Create API key“. Raktas saugomas tik šiame telefone.</p>
-      <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="AIza…" autocomplete="off"></label>
+    <div class="card"><h3>🔑 Gemini ryšys</h3>
+      ${BUILTIN_KEY ? `<p class="small">✅ Raktas jau įdiegtas programėlėje – nieko įvesti nereikia.</p>
+      <details><summary class="small muted">Naudoti kitą raktą</summary>` : `<p class="small">Nemokamą raktą gausi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>
+      → „Create API key“. Raktas saugomas tik šiame telefone.</p>`}
+      <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="${BUILTIN_KEY ? 'palik tuščią – naudojamas įdiegtas' : 'AIza…'}" autocomplete="off"></label>
+      ${BUILTIN_KEY ? '</details>' : ''}
       <label class="field"><span>Live modelis</span>
         <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
         <datalist id="models">${KNOWN_LIVE.map((m) => `<option value="${m}">`).join('')}</datalist>
@@ -1060,8 +1065,8 @@ function viewSettings() {
   };
   document.getElementById('find').onclick = async () => {
     const out = document.getElementById('find-out');
-    const key = document.getElementById('key').value.trim();
-    store.saveSettings({ apiKey: key });
+    store.saveSettings({ apiKey: document.getElementById('key').value.trim() });
+    const key = apiKey();
     if (!key) return (out.textContent = 'Pirmiau įvesk raktą.');
     out.textContent = 'Ieškoma…';
     try {
