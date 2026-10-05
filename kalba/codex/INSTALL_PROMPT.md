@@ -6,8 +6,9 @@ The app lives in `kalba/` on branch `claude/duolingo-style-language-app-2mgqad`.
 
 ## Steps
 1. **Check the branch is ready** (on `claude/duolingo-style-language-app-2mgqad`):
-   - `node kalba/tools/validate.mjs` → must print `OK: 4 lygiai, 172 pamokos parašytos` and no line
-     `Dar neparašyti skyriai`. If units are still missing, STOP and tell the user to wait for Claude.
+   - `node kalba/tools/validate.mjs` → must end with `OK: 4 lygiai, … pamokos parašytos` (no errors).
+     A line `Dar neparašyti skyriai (1): b1-u01` is acceptable – that unit is still being written and the app
+     skips missing units safely (it will appear later without losing progress).
    - `cd kalba && npm i --no-save playwright && node tools/smoke-test.mjs && node tools/check-assets.mjs` → both OK.
      (Use the preinstalled Chromium if available; do not change app code to make tests pass – report failures.)
 2. **Publish:** open a pull request `claude/duolingo-style-language-app-2mgqad` → `main` titled

@@ -27,11 +27,7 @@ async function loadCourse() {
   }
   await Promise.all(C.levels.flatMap((l) => l.units.map((u) => loadScript(`curriculum/${u.file}`))));
   const units = window.UNITS || {};
-  // Kol parašyti ne visi skyriai, rodomas ankstesnis (v1) kursas.
-  if (!C.levels.every((l) => l.units.every((u) => units[u.id]))) {
-    for (const f of ['a1plus', 'a2', 'a2plus', 'b1']) await loadScript(`curriculum/${f}.js`);
-    return window.LEVELS || [];
-  }
+  // Dar neparašyti skyriai praleidžiami; atsiradę jie įsiterpia į savo vietą (pamokų id nesikeičia).
   return C.levels
     .map((l) => ({
       ...l,
