@@ -1,5 +1,5 @@
 import { LiveSession, listLiveModels } from './live.js';
-import { MicRecorder, PcmPlayer } from './audio.js';
+import { MicRecorder, PcmPlayer, bytesToBase64 } from './audio.js';
 import { lessonPrompt, freeTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
 import * as store from './store.js';
 import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
@@ -53,14 +53,27 @@ const $back = document.getElementById('back');
 let activeTalk = null;
 
 // ---------- Pagalbinės ----------
+// Atrakinimas: iš eilės, kai ankstesnė pamoka išlaikyta. Lygio egzaminą galima laikyti IŠ ANKSTO –
+// išlaikius jį atsirakina visas tas lygis (peržiūrai) ir kitas lygis.
+function levelPassed(level) {
+  const exam = level.lessons.find((l) => l.type === 'checkpoint');
+  return !!exam && isPassed(exam.id);
+}
 function isUnlocked(i) {
-  return i === 0 || !!(store.lessonState(ALL[i - 1].lesson.id) || {}).passed;
+  const x = ALL[i];
+  if (i === 0 || x.lesson.type === 'checkpoint') return true;
+  if (isPassed(ALL[i - 1].lesson.id)) return true;
+  if (levelPassed(x.level)) return true;
+  const li = LEVELS.indexOf(x.level);
+  return li > 0 && x.lesson === x.level.lessons[0] && levelPassed(LEVELS[li - 1]);
 }
 function isPassed(id) {
   return !!(store.lessonState(id) || {}).passed;
 }
+// Dabartinė pamoka: pirma neišlaikyta pamoka tame lygyje, kurio egzaminas dar neišlaikytas.
 function currentIndex() {
-  const i = ALL.findIndex((x) => !isPassed(x.lesson.id));
+  const level = LEVELS.find((l) => !levelPassed(l)) || LEVELS[LEVELS.length - 1];
+  const i = ALL.findIndex((x) => x.level === level && !isPassed(x.lesson.id));
   return i === -1 ? ALL.length - 1 : i;
 }
 function currentLevel() {
@@ -176,6 +189,27 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 
+// ---------- Šiandienos planas ----------
+// Kad per dieną būtų ne tik nauja pamoka, bet ir kartojimas (tyrimai: kartojimas + kalbėjimas > nauja medžiaga).
+function dailyPlanHtml(cur, due) {
+  const t = store.today();
+  const p = store.progress;
+  const doneLesson = Object.values(p.lessons).some((l) => l.last && l.last.date === t && l.last.passed);
+  const reviewedToday = Object.values(p.lessons).some((l) => l.passedOn === t && (l.reviews || 0) > 0);
+  const sprintToday = p.sprintLast === t;
+  const talkToday = p.talkLast === t;
+  const items = [
+    ['📘', `Nauja pamoka: ${esc(ALL[cur].lesson.title)}`, doneLesson, `#/lesson/${ALL[cur].lesson.id}`],
+    due.length ? ['🔁', `Pakartoti: ${esc(due[0].lesson.title)}`, reviewedToday, `#/lesson/${due[0].lesson.id}`] : null,
+    ['⚡', 'Žodžių sprintas (1 min.)', sprintToday, '#/sprint'],
+    ['💬', 'Laisvas pokalbis (5 min.)', talkToday, '#/talk'],
+  ].filter(Boolean);
+  const done = items.filter((i) => i[2]).length;
+  return `<div class="card plan"><div class="row"><h3 class="grow">📅 Šiandien</h3><span class="chip small">${done}/${items.length}</span></div>
+    ${items.map(([ico, label, ok, href]) => `<a class="plan-item ${ok ? 'done' : ''}" href="${href}"><span>${ok ? '✅' : ico}</span><span class="grow">${label}</span><span>›</span></a>`).join('')}
+    <p class="small muted" style="margin:8px 0 0">~30 min. per dieną: nauja pamoka + kartojimas. Taip pasieksi B1 greičiau nei vien iš eilės einant pamokas.</p></div>`;
+}
+
 // ---------- Kelias ----------
 function viewPath() {
   setHeader('Kalbėk!');
@@ -192,6 +226,7 @@ function viewPath() {
     html += `<div class="notice" style="margin-bottom:16px">👋 Sveika! Kad galėtum kalbėtis su AI mokytoja Ema,
       įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
   }
+  html += dailyPlanHtml(cur, due);
   html += `<button class="card sprint-cta" data-go="#/talk">${ema('wave', 48)}<span class="grow"><b>💬 Laisvas pokalbis su Ema</b>
     <span class="small muted">Be testo – tiesiog pasikalbėk apie bet ką</span></span><span>→</span></button>`;
   html += `<button class="card sprint-cta" data-go="#/sprint">${ema('idle', 48)}<span class="grow"><b>⚡ Žodžių sprintas</b>
@@ -210,6 +245,7 @@ function viewPath() {
     const items = ALL.filter((x) => x.level === level);
     const passed = items.filter((x) => isPassed(x.lesson.id)).length;
     const levelLocked = !isUnlocked(items[0].index);
+    const examPending = !levelPassed(level);
     html += `<section class="level ${levelLocked ? 'locked' : ''}" style="--lvl:${LEVEL_COLORS[level.id] || 'var(--accent)'}">
       <div class="level-head"><img class="level-art" src="assets/levels/${esc(level.id)}.svg" alt="" onerror="this.remove()"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
       <div class="progressbar"><span style="width:${(passed / items.length) * 100}%"></span></div>
@@ -234,7 +270,8 @@ function viewPath() {
       html += `<div class="node-wrap" style="--x:${l.type === 'checkpoint' ? 0 : offsets[k % offsets.length]}px">
         ${isCur ? '<div class="start-bubble">PRADĖK ČIA</div>' : ''}
         <button class="${cls}" data-id="${esc(l.id)}" aria-label="${esc(l.title)}${unlocked ? '' : ' (užrakinta)'}">${unlocked ? esc(l.icon) : '🔒'}</button>
-        <div class="node-label ${unlocked ? '' : 'locked'}">${esc(l.title)}${done ? `<span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span>` : ''}</div>
+        <div class="node-label ${unlocked ? '' : 'locked'}">${esc(l.title)}${done ? `<span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span>` : ''}${
+          l.type === 'checkpoint' && !done && examPending && !isPassed(items[items.length - 2].lesson.id) ? '<span class="small muted" style="display:block;font-weight:600">Gali laikyti iš anksto – išlaikius atsirakina kitas lygis</span>' : ''}</div>
       </div>`;
     });
     html += '</div></section>';
@@ -436,6 +473,7 @@ function renderLessonTalk($el, x) {
       : 'Ema pakalbins, paaiškins taisyklę, duos užduočių ekrane (kai kurios – su laikmačiu), vėl pakalbins… Pabaigoje ji <b>pati nuspręs</b>, ar pamoka išmokta – tik tada atsirakins kita.'}</p>
     <p class="small muted">Kalbėk balsu arba rašyk. Ausinės padeda, kad Ema negirdėtų pati savęs.</p>
     <div class="row wrap"><button class="chip" id="theory">📘 Teorija</button><a class="chip" href="#/lesson/${esc(l.id)}/quiz">✏️ Pratimai be interneto</a></div>
+    ${resumeFor(l.id) ? `<div class="notice small">🔄 Pamoka buvo nutrūkusi – Ema pratęs nuo tos vietos (${resumeFor(l.id).turns} replikos, ${resumeFor(l.id).exDone} užduotys jau padarytos).</div>` : ''}
     ${review ? `<div class="notice review-card small">🔁 Šiandien Ema pakartos ir: ${review.lessons.map((y) => esc(y.lesson.title)).join(' · ')}</div>` : ''}
     ${st.last ? `<div class="notice">Paskutinis bandymas: ${st.last.passed ? '✅ išmokta' : '⏳ dar neišmokta'}, ${st.last.score ?? '–'} / 100. ${esc(st.last.advice_lt || '')}</div>` : ''}
     </div><div id="talk"></div>`;
@@ -451,7 +489,8 @@ function renderLessonTalk($el, x) {
         review && {
           lessons: review.lessons.map((y) => `${y.lesson.titleEn} (${y.lesson.kind})`),
           words: review.words.map((v) => v.en),
-        }
+        },
+        resumeFor(l.id)
       ),
     tools: [...TOOLS_LESSON, TOOL_EXERCISE, TOOL_THEORY, TOOL_SHOW],
     lesson: l,
@@ -479,6 +518,8 @@ function showResult(x, r) {
       ${r.passed ? `<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>` : ''}
       <div class="score">${esc(r.score)}<span class="muted" style="font-size:18px"> / 100</span></div>
       <p>${esc(r.summary_lt || '')}</p>
+      ${r.attempts ? `<p class="small muted" style="text-align:center">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
+      ${(r.criteria || []).length ? `<div class="criteria">${r.criteria.map((c) => `<div class="crit ${c.met ? 'ok' : 'no'}">${c.met ? '✅' : '◻️'} ${esc(c.criterion)}${c.evidence ? `<div class="small muted">„${esc(c.evidence)}“</div>` : ''}</div>`).join('')}</div>` : ''}
       ${(r.strengths_lt || []).length ? `<h3>👍 Sekėsi</h3><ul>${r.strengths_lt.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
       ${(r.mistakes || []).length ? `<h3>✏️ Klaidos</h3>${r.mistakes
         .map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="small muted">${esc(m.note_lt)}</div>` : ''}</div>`)
@@ -504,6 +545,16 @@ function showResult(x, r) {
   };
 }
 
+// Nutrūkusios pamokos būsena (kol programėlė atidaryta) – pratęsiama vietoj pradėjimo iš naujo.
+const resumeStates = {};
+function clearResume(id) {
+  if (id) delete resumeStates[id];
+}
+function resumeFor(id) {
+  const r = resumeStates[id];
+  return r && Date.now() - r.at < 2 * 60 * 60 * 1000 && (r.turns >= 2 || r.exDone >= 1) ? r : null;
+}
+
 // ---------- Balso pokalbis (bendras pamokai ir laisvam pokalbiui) ----------
 function mountTalk($el, opts) {
   $el.innerHTML = `<div class="talk">
@@ -520,19 +571,23 @@ function mountTalk($el, opts) {
   const $controls = $el.querySelector('#controls');
   const $turns = $el.querySelector('#turns');
   const $exs = $el.querySelector('#exs');
-  let exDone = 0;
-  let exRight = 0;
+  const prior = opts.lesson ? resumeFor(opts.lesson.id) : null;
+  let exDone = prior ? prior.exDone : 0;
+  let exRight = prior ? prior.exRight : 0;
+  let writingDone = prior ? prior.writingDone : false;
   let openExercise = null;
 
   let session = null;
   let mic = null;
   let player = null;
   let micOn = settings.micMode !== 'tap';
-  let turns = 0;
+  let turns = prior ? prior.turns : 0;
   let bubble = null;
   let bubbleRole = '';
   let pendingResult = null;
   let resultShown = false;
+  let userWantsStop = false;
+  const transcriptLog = []; // paskutinės replikos – pamokai pratęsti nutrūkus ryšiui
   let stopped = false;
   let reconnecting = false;
 
@@ -562,11 +617,28 @@ function mountTalk($el, opts) {
       if (role === 'me') {
         turns++;
         store.recordSpeakingTurn();
+        if (!opts.canAssess && turns === 3) store.recordTalk();
         if ($turns) $turns.textContent = `🗣️ ${turns} / ${opts.minTurns}`;
       }
     }
     bubble.textContent += text;
     scroll();
+    const last = transcriptLog[transcriptLog.length - 1];
+    if (last && last.role === role) last.text += text;
+    else transcriptLog.push({ role, text });
+    if (transcriptLog.length > 40) transcriptLog.shift();
+    saveResume();
+  };
+  const saveResume = () => {
+    if (!opts.lesson) return;
+    resumeStates[opts.lesson.id] = {
+      turns,
+      exDone,
+      exRight,
+      writingDone,
+      transcript: transcriptLog.slice(-16).map((t) => `${t.role === 'me' ? 'Learner' : 'Ema'}: ${t.text.trim()}`).join('\n'),
+      at: Date.now(),
+    };
   };
   const board = ({ title, lines }) => {
     const d = document.createElement('div');
@@ -629,7 +701,8 @@ function mountTalk($el, opts) {
     const a = $controls.querySelector('#assess');
     if (a) a.onclick = () => {
       if (!session) return;
-      sys('Paprašei įvertinimo');
+      userWantsStop = true;
+      sys('Paprašei įvertinimo – jei pamoka dar nebaigta, ji bus įrašyta kaip neišlaikyta ir galėsi pratęsti vėliau');
       session.sendText("I think I'm ready. Please assess me now if I have done enough; if not, tell me what is still missing.");
     };
   };
@@ -779,7 +852,9 @@ function mountTalk($el, opts) {
             onDone: (r) => {
               openExercise = null;
               if (q.type === 'write') {
+                writingDone = true;
                 store.recordExercise(true);
+                saveResume();
                 session &&
                   session.sendText(
                     `[WRITING RESULT] Task: ${q.q} | learner wrote: «${r.given}» | Now correct it: call show_on_screen with the corrected text (keep the learner's ideas), praise what is good, explain the 1-2 most important mistakes very briefly (Lithuanian allowed), give a score 1-5, then continue the lesson.`
@@ -788,6 +863,7 @@ function mountTalk($el, opts) {
               }
               exDone++;
               if (r.ok) exRight++;
+              saveResume();
               store.recordExercise(r.ok);
               updateChips();
               if ($exs) {
@@ -804,16 +880,39 @@ function mountTalk($el, opts) {
           response = { result: 'Exercise is on the learner\'s screen. Say only a short encouragement now and wait silently for the [EXERCISE RESULT] message. Do not reveal the answer.' };
         }
       } else if (fc.name === 'complete_lesson' && opts.onResult) {
-        if (!pendingResult) {
+        // Griežti saitai programoje (ne tik instrukcijose): Ema negali „padovanoti“ pamokos.
+        const attempts = Math.max(0, Number(args.target_attempts) || 0);
+        const correct = Math.max(0, Math.min(attempts, Number(args.target_correct) || 0));
+        const acc = attempts ? correct / attempts : 0;
+        const minTurns = opts.minTurns || 8;
+        const minEx = opts.canAssess ? Math.min(3, (opts.prepared || []).length) : 0;
+        const missing = [];
+        if (args.passed) {
+          if (turns < minTurns) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
+          if (exDone < minEx) missing.push(`only ${exDone} on-screen exercises done (minimum ${minEx})`);
+          if (attempts < 6) missing.push(`only ${attempts} attempts at the target language counted (need at least 6)`);
+          else if (acc < 0.75) missing.push(`accuracy ${(acc * 100).toFixed(0)}% is below 75%`);
+          const crit = Array.isArray(args.criteria) ? args.criteria : [];
+          const unmet = crit.filter((c) => c && c.met === false).map((c) => c.criterion);
+          if (unmet.length) missing.push(`criteria not met: ${unmet.join('; ')}`);
+        }
+        if (args.passed && missing.length && !pendingResult && !userWantsStop) {
+          sys(`⏳ Dar ne viskas: ${missing.length === 1 && /spoken only/.test(missing[0]) ? 'per mažai kalbėjai – Ema tęsia pamoką' : 'Ema tęsia pamoką, kad būtum tikrai pasiruošusi'}.`);
+          response = { error: `Not accepted yet: ${missing.join('; ')}. Do not end the lesson. Continue practising the weak points for a few more turns, then call complete_lesson again.` };
+        } else if (!pendingResult) {
           const r = {
-            passed: !!args.passed,
+            passed: !!args.passed && !missing.length,
             score: Math.max(0, Math.min(100, Math.round(Number(args.score) || 0))),
             summary_lt: args.summary_lt || '',
             strengths_lt: args.strengths_lt || [],
             mistakes: args.mistakes || [],
             advice_lt: args.advice_lt || '',
+            attempts,
+            correct,
+            criteria: Array.isArray(args.criteria) ? args.criteria : [],
           };
           if (r.passed && r.score < 60) r.passed = false;
+          if (r.passed) clearResume(opts.lesson && opts.lesson.id);
           pendingResult = opts.onResult(r);
           sys(r.passed ? '✅ Ema įvertino: pamoka išmokta!' : '⏳ Ema įvertino: dar reikia pasipraktikuoti.');
           response = { result: 'saved', passed: r.passed, score: r.score };
@@ -1029,7 +1128,8 @@ function viewSettings() {
     <div class="card"><h3>👩‍🏫 Mokytoja Ema</h3>
       <label class="field"><span>Kaip į tave kreiptis (vardas)</span><input type="text" id="name" value="${esc(settings.name)}"></label>
       <label class="field"><span>Balsas</span><select id="voice">${voices.map((v) => opt(v, settings.voice)).join('')}</select></label>
-      <label class="field"><span>Kalbėjimo tempas</span><select id="pace">${opt('slow', settings.pace, 'Lėtai ir aiškiai')}${opt('normal', settings.pace, 'Natūraliai')}</select></label>
+      <label class="field"><span>Kalbėjimo tempas</span><select id="pace">${opt('auto', settings.pace, 'Pagal lygį (rekomenduojama)')}${opt('slow', settings.pace, 'Lėtai ir aiškiai')}${opt('normal', settings.pace, 'Natūraliai')}</select>
+        <small>„Pagal lygį“: A1+–A2 lėtai, A2+–B1 natūraliu tempu – kad išmoktum suprasti tikrą kalbą.</small></label>
       <label class="field"><span>Kiek aiškinti lietuviškai</span><select id="lt">${opt('auto', settings.ltHelp, 'Pagal lygį (rekomenduojama)')}${opt('much', settings.ltHelp, 'Daugiausia lietuviškai')}${opt('some', settings.ltHelp, 'Pusiau')}${opt('little', settings.ltHelp, 'Beveik tik angliškai')}</select>
         <small>„Pagal lygį“: A1+–A2 Ema aiškina lietuviškai, A2+ – pusiau, B1 – beveik tik angliškai.</small></label>
       <label class="field"><span>Mikrofonas</span><select id="mic">
@@ -1040,6 +1140,12 @@ function viewSettings() {
       ${isNative ? `<label class="field"><span>Kasdienis priminimas</span><input type="time" id="reminder" value="${esc(settings.reminder === 'off' ? '' : settings.reminder)}">
         <small>Ištrink laiką, jei priminimų nenori. Vakare (21:30) dar kartą primins, jei tą dieną nesimokei.</small></label>` : ''}
       <label class="field"><span>Garso efektai</span><select id="sfx">${opt('on', settings.sfx, 'Įjungti')}${opt('off', settings.sfx, 'Išjungti')}</select></label>
+    </div>
+    <div class="card"><h3>🔧 Garso testas</h3>
+      <p class="small muted">Patikrina mikrofoną ir garsiakalbį tuo pačiu keliu, kuriuo kalba Ema. Jei kas nors neveikia – parašyk, ką čia rodo.</p>
+      <button class="btn secondary" id="audiotest">▶️ Pradėti testą (5 s)</button>
+      <div class="progressbar" style="margin-top:10px"><span id="miclevel" style="width:0%"></span></div>
+      <pre class="small" id="audio-out" style="white-space:pre-wrap;margin:8px 0 0"></pre>
     </div>
     <div class="card"><h3>💾 Pažanga</h3>
       <p class="small muted">Pažanga saugoma telefone. Kartais pasidaryk atsarginę kopiją.</p>
@@ -1079,6 +1185,46 @@ function viewSettings() {
     } catch (e) {
       out.textContent = `Klaida: ${e.message}`;
     }
+  };
+  document.getElementById('audiotest').onclick = async () => {
+    const out = document.getElementById('audio-out');
+    const bar = document.getElementById('miclevel');
+    const lines = [];
+    const log = (t) => {
+      lines.push(t);
+      out.textContent = lines.join('\n');
+    };
+    const player = new PcmPlayer();
+    player.ensure();
+    log(`Garso kontekstas: ${player.ctx.sampleRate} Hz, būsena ${player.ctx.state}`);
+    let peak = 0;
+    let chunks = 0;
+    const mic = new MicRecorder({
+      onChunk: () => chunks++,
+      onLevel: (lvl) => {
+        peak = Math.max(peak, lvl);
+        bar.style.width = `${Math.min(100, lvl * 1200)}%`;
+      },
+    });
+    try {
+      await mic.start(player.ctx, { echo: settings.micMode !== 'headphones' });
+      const track = mic.stream.getAudioTracks()[0];
+      const st = track.getSettings ? track.getSettings() : {};
+      log(`Mikrofonas: ${track.label || 'įrenginys'}; ${st.sampleRate ? st.sampleRate + ' Hz, ' : ''}aido slopinimas ${st.echoCancellation}`);
+    } catch (e) {
+      log(`❌ Mikrofonas: ${e.name} – ${e.message}`);
+    }
+    log('🔊 Groju toną… turi girdėtis lygus 1 s pyptelėjimas (be traškesio)');
+    await player.ready;
+    const tone = new Int16Array(24000);
+    for (let i = 0; i < tone.length; i++) tone[i] = Math.round(Math.sin((2 * Math.PI * 440 * i) / 24000) * 0.4 * 32767 * Math.min(1, i / 2000, (tone.length - i) / 2000));
+    for (let o = 0; o < tone.length; o += 960) player.play(bytesToBase64(tone.slice(o, o + 960).buffer));
+    log('🎙️ Kalbėk ką nors 5 sekundes…');
+    await new Promise((r) => setTimeout(r, 5000));
+    mic.stop();
+    player.close();
+    bar.style.width = '0%';
+    log(peak > 0.01 ? `✅ Mikrofonas girdi (lygis ${peak.toFixed(3)}, ${chunks} gabaliukų)` : `❌ Iš mikrofono garso negauta (lygis ${peak.toFixed(4)}, ${chunks} gabaliukų)`);
   };
   document.getElementById('export').onclick = () => {
     const a = document.createElement('a');

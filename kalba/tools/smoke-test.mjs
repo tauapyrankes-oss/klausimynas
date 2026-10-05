@@ -34,6 +34,15 @@ const shot = async (name) => shots && page.screenshot({ path: `${shots}/${name}.
 
 // Imituotas Gemini Live serveris.
 const sent = [];
+let exResults = 0;
+let learnerTexts = 0;
+let prematureRejected = null;
+const PASS_ARGS = {
+  passed: true, score: 88, target_attempts: 9, target_correct: 8,
+  criteria: [{ criterion: 'am/is/are', met: true, evidence: "I'm from Vilnius" }, { criterion: 'questions', met: true, evidence: 'Where are you from?' }],
+  summary_lt: 'Puikiai prisistatei!', strengths_lt: ['Teisingai vartoji am/is/are'],
+  mistakes: [{ wrong: 'I from Lithuania', correct: "I'm from Lithuania", note_lt: 'Nepamiršk „am“.' }], advice_lt: 'Pakartok klausimus su „Are you…?“',
+};
 await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
   ws.onMessage((raw) => {
     const msg = JSON.parse(raw);
@@ -49,17 +58,33 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
         reply({ toolCall: { functionCalls: [{ id: 'e0', name: 'give_exercise', args: { type: 'choice', options: ['only one'] } }] } });
         reply({ toolCall: { functionCalls: [{ id: 'e1', name: 'give_exercise', args: { type: 'order', sentence: 'Where are you from?', translation_lt: 'Iš kur tu?', seconds: 30 } }] } });
         reply({ serverContent: { outputTranscription: { text: ' Take your time!' }, turnComplete: true } });
-      } else if (/^\[EXERCISE RESULT\]/.test(text)) {
+      } else if (/^\[EXERCISE RESULT\]/.test(text) && exResults === 0) {
+        exResults++;
         reply({ serverContent: { outputTranscription: { text: 'Great job! Now write me a short message.' }, turnComplete: true } });
         reply({ toolCall: { functionCalls: [{ id: 'w1', name: 'give_exercise', args: { type: 'write', question: 'Write 2-3 sentences about yourself.', min_words: 5 } }] } });
       } else if (/^\[WRITING RESULT\]/.test(text)) {
         reply({ toolCall: { functionCalls: [{ id: 'c3', name: 'show_on_screen', args: { title: 'Corrected', lines: ["I'm Ona. I'm from Vilnius."] } }] } });
-        reply({ serverContent: { outputTranscription: { text: 'Nice writing! Now tell me about you.' }, turnComplete: true } });
-      } else {
-        reply({ serverContent: { inputTranscription: { text: '' } } });
-        reply({ toolCall: { functionCalls: [{ id: 'c2', name: 'complete_lesson', args: { passed: true, score: 88, summary_lt: 'Puikiai prisistatei!', strengths_lt: ['Teisingai vartoji am/is/are'], mistakes: [{ wrong: 'I from Lithuania', correct: "I'm from Lithuania", note_lt: 'Nepamiršk „am“.' }], advice_lt: 'Pakartok klausimus su „Are you…?“' } }] } });
+        reply({ serverContent: { outputTranscription: { text: 'Nice writing! Two quick tasks.' }, turnComplete: true } });
+        reply({ toolCall: { functionCalls: [{ id: 'e2', name: 'give_exercise', args: { quiz_index: 1 } }] } });
+      } else if (/^\[EXERCISE RESULT\]/.test(text)) {
+        exResults++;
+        if (exResults === 2) reply({ toolCall: { functionCalls: [{ id: 'e3', name: 'give_exercise', args: { quiz_index: 2 } }] } });
+        reply({ serverContent: { outputTranscription: { text: exResults === 2 ? 'One more!' : 'Super! Now tell me about you.' }, turnComplete: true } });
+      } else if (/^FINAL$/.test(text)) {
+        reply({ toolCall: { functionCalls: [{ id: 'c4', name: 'complete_lesson', args: PASS_ARGS }] } });
         reply({ serverContent: { outputTranscription: { text: 'Well done!' }, turnComplete: true } });
+      } else {
+        learnerTexts++;
+        if (learnerTexts === 1) {
+          // Per anksti: programa turi atmesti (per mažai replikų / užduočių).
+          reply({ toolCall: { functionCalls: [{ id: 'c2', name: 'complete_lesson', args: PASS_ARGS }] } });
+        }
+        reply({ serverContent: { outputTranscription: { text: `Nice (${learnerTexts}). Tell me more.` }, turnComplete: true } });
       }
+    }
+    if (msg.toolResponse && msg.toolResponse.functionResponses[0].id === 'c2') {
+      const r = msg.toolResponse.functionResponses[0].response;
+      prematureRejected = !!r.error;
     }
   });
 });
@@ -68,7 +93,8 @@ await page.goto(base);
 await page.waitForSelector('.node');
 const nodes = await page.locator('.node').count();
 if (nodes < 50) fail(`per mažai pamokų: ${nodes}`);
-if ((await page.locator('.node.locked').count()) !== nodes - 1) fail('turi būti atrakinta tik pirma pamoka');
+const exams = await page.locator('.node.checkpoint').count();
+if ((await page.locator('.node.locked').count()) !== nodes - 1 - exams) fail('turi būti atrakinta tik pirma pamoka (ir egzaminai iš anksto)');
 const firstId = await page.locator('.node').first().getAttribute('data-id');
 await shot('1-kelias');
 
@@ -144,16 +170,41 @@ await page.fill('.inline-exercise textarea', 'I am Ona. I from Vilnius and I lik
 await page.click('.inline-exercise .check');
 await page.waitForFunction(() => [...document.querySelectorAll('.board')].some((b) => b.textContent.includes('Corrected')));
 if (!sent.some((m) => m.realtimeInput && /^\[WRITING RESULT\].*I from Vilnius/.test(m.realtimeInput.text || ''))) fail('rašymo rezultatas nenusiųstas');
+// Dar dvi užduotys ekrane (pasirenkame bet kurį atsakymą) – reikia ≥3 užduočių pamokai užskaityti.
+const solveNewest = async () => {
+  await page.waitForFunction(() => { const e = [...document.querySelectorAll('.inline-exercise')].pop(); return e && !e.querySelector('.feedback') && (e.querySelector('.option, .inp, .bank .word')); });
+  const ex = page.locator('.inline-exercise').last();
+  if (await ex.locator('.options .option').count()) await ex.locator('.options .option').first().click();
+  else if (await ex.locator('.inp').count()) await ex.locator('.inp').fill('test');
+  else while (await ex.locator('.bank .word:not(.used)').count()) await ex.locator('.bank .word:not(.used)').first().click();
+  await ex.locator('.check').click();
+};
+await solveNewest();
+await solveNewest();
 await page.waitForSelector('#txt');
+// Pirmas „complete_lesson“ ateina per anksti – programa turi jį atmesti ir Ema tęsia.
 await page.fill('#txt', "Hi, I'm Ona. I'm from Lithuania.");
 await page.click('#send');
+await page.waitForFunction(() => [...document.querySelectorAll('.bubble.sys')].some((b) => /Ema tęsia pamoką/.test(b.textContent)));
+if (prematureRejected !== true) fail('per ankstyvas complete_lesson turėjo būti atmestas');
+if (await page.locator('.modal').count()) fail('rezultato langas pasirodė per anksti');
+// Kalbame, kol pasiekiamas minimalus replikų skaičius.
+const need = +(await page.locator('#turns').innerText()).match(/\/ (\d+)/)[1];
+for (let k = 1; k < need + 1; k++) {
+  await page.fill('#txt', `My sentence number ${k}. I'm a teacher and I live in Kaunas.`);
+  await page.click('#send');
+  await page.waitForFunction((n) => [...document.querySelectorAll('.bubble.tutor')].some((b) => b.textContent.includes(`Nice (${n})`)), k + 1);
+}
+await page.fill('#txt', 'FINAL');
+await page.click('#send');
 await page.waitForSelector('.modal', { timeout: 10000 });
+if (!/8\/9 teisingai/.test(await page.locator('.modal').innerText())) fail('rezultate nėra tikslinės gramatikos statistikos');
 await shot('4-rezultatas');
 const setup = sent.find((m) => m.setup);
 if (!setup || setup.setup.model !== 'models/gemini-3.8-live') fail('setup be teisingo modelio');
 if (!setup.setup.tools[0].functionDeclarations.every((f) => f.behavior === 'BLOCKING')) fail('3.8 Live įrankiai turi būti BLOCKING');
 if (!setup.setup.tools[0].functionDeclarations.some((f) => f.name === 'complete_lesson')) fail('nėra complete_lesson įrankio');
-if (!sent.some((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'c2')) fail('negautas toolResponse');
+if (!sent.some((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'c4' && m.toolResponse.functionResponses[0].response.result === 'saved')) fail('galutinis complete_lesson neužskaitytas');
 if (!sent.some((m) => m.realtimeInput && m.realtimeInput.audio)) console.warn('WARN: mikrofono garsas nesiųstas (gali būti normalu be garso įrenginio)');
 const txt = await page.locator('.modal').innerText();
 if (!/Pamoka išmokta/.test(txt)) fail('rezultate nėra „Pamoka išmokta“');
@@ -163,7 +214,7 @@ await page.click('#r-next');
 await page.waitForSelector('#start');
 await page.goto(`${base}#/path`);
 await page.waitForSelector('.node');
-if ((await page.locator('.node.locked').count()) !== nodes - 2) fail('po patvirtinimo neatsirakino kita pamoka');
+if ((await page.locator('.node.locked').count()) !== nodes - 2 - exams) fail('po patvirtinimo neatsirakino kita pamoka');
 
 // Sprintas.
 await page.goto(`${base}#/sprint`);

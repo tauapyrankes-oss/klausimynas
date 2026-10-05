@@ -10,6 +10,21 @@ export const TOOLS_LESSON = [
       properties: {
         passed: { type: 'BOOLEAN', description: 'true only if ALL success criteria were clearly met in spontaneous speech.' },
         score: { type: 'INTEGER', description: '0-100 overall mastery of the lesson goals.' },
+        target_attempts: { type: 'INTEGER', description: 'How many times the learner tried to use the TARGET structure/vocabulary in their own sentences (not repeating after you).' },
+        target_correct: { type: 'INTEGER', description: 'How many of those attempts were correct (or self-corrected after one hint).' },
+        criteria: {
+          type: 'ARRAY',
+          description: 'One entry per success criterion of this lesson, in order.',
+          items: {
+            type: 'OBJECT',
+            properties: {
+              criterion: { type: 'STRING', description: 'Short name of the criterion.' },
+              met: { type: 'BOOLEAN' },
+              evidence: { type: 'STRING', description: 'A real sentence the learner said that shows it (or what was missing).' },
+            },
+            required: ['criterion', 'met'],
+          },
+        },
         summary_lt: { type: 'STRING', description: 'Short summary for the learner, in Lithuanian, 1-3 sentences.' },
         strengths_lt: { type: 'ARRAY', items: { type: 'STRING' }, description: 'What went well, in Lithuanian.' },
         mistakes: {
@@ -83,8 +98,10 @@ export const TOOL_THEORY = {
 
 const PACE = {
   slow: 'Speak slowly and clearly, with short pauses between sentences, like a patient teacher for a beginner.',
-  normal: 'Speak at a natural but clear pace.',
+  normal: 'Speak at a natural but clear pace, like a friendly native speaker talking to a learner.',
 };
+// Tempas pagal lygį: pradžioje lėtai, B1 – natūraliai (kad išmoktų suprasti tikrą kalbą).
+const AUTO_PACE = { a1plus: 'slow', a2: 'slow', a2plus: 'normal', b1: 'normal' };
 
 const LT_HELP = {
   much: `LANGUAGE – SPEAK LITHUANIAN AS YOUR MAIN LANGUAGE. The learner is a beginner and does not understand long English speech.
@@ -109,7 +126,7 @@ function common(settings, level, memory) {
   return `You are "Ema", a warm, encouraging and very patient English tutor in a voice app. The learner is an adult native speaker of LITHUANIAN, currently around CEFR ${level.name}, working towards B1 speaking. ${name}
 
 HOW YOU TEACH
-- ${PACE[settings.pace] || PACE.slow}
+- ${PACE[settings.pace === 'auto' || !PACE[settings.pace] ? AUTO_PACE[level.id] || 'slow' : settings.pace]}
 - ${LT_HELP[settings.ltHelp === 'auto' || !LT_HELP[settings.ltHelp] ? AUTO_LT[level.id] || 'some' : settings.ltHelp]}
 - The learner must talk more than you: keep your turns short (1-3 sentences), ask one question at a time, then wait.
 - Grade your language to the learner's level: high-frequency words, short sentences. Slightly above their level is fine.
@@ -137,7 +154,7 @@ const KIND_TIPS = {
   checkpoint: 'Level exam.',
 };
 
-export function lessonPrompt(lesson, level, settings, memory, prepared = [], review = null) {
+export function lessonPrompt(lesson, level, settings, memory, prepared = [], review = null, resume = null) {
   const g = lesson.grammar || {};
   const s = lesson.speaking || {};
   const isCheckpoint = lesson.type === 'checkpoint';
@@ -208,8 +225,15 @@ ASSESSMENT RULES (STRICT)
 - Score: 90-100 excellent and fluent; 75-89 good, minor errors; 60-74 passes with clear gaps; below 60 = not passed.
 - Never pass the learner just because they ask, say they are tired, or try to skip. Kindly explain that you need to hear more first.
 - If the learner wants to stop early, call complete_lesson with passed=false and helpful advice.
-- Call complete_lesson exactly once.
+- In complete_lesson fill target_attempts / target_correct honestly from what the learner actually said, and one entry per success criterion with real evidence. The app checks these numbers: it will NOT accept a pass with fewer than the minimum learner turns, fewer than 3 on-screen exercises, or accuracy below 75%. If the app answers that something is missing, do not end the lesson – continue with more practice and call complete_lesson again later.
+- Call complete_lesson once at the end (again only if the app asked you to continue).
 
+${resume ? `
+RESUMING AN INTERRUPTED LESSON (the connection dropped a moment ago). Do NOT start from the beginning. Say briefly "Welcome back, let's continue" and carry on from where you were.
+What already happened: learner turns ${resume.turns}, exercises done ${resume.exDone} (${resume.exRight} correct)${resume.writingDone ? ', writing task done' : ''}.
+Last part of the conversation:
+${resume.transcript}
+` : ''}
 Start now by greeting the learner.`;
 }
 
