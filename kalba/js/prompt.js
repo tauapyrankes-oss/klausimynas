@@ -120,13 +120,13 @@ ${mistakes}`;
 const KIND_TIPS = {
   grammar: 'Focus on using the grammar point in real communication.',
   vocabulary:
-    'Teach the word set through personal questions, collocations and quick games; make the learner use each new word in their own sentence; recycle the words several times.',
+    'Teach the word set through personal questions, collocations and quick games; make the learner use each new word in their own sentence; recycle the words several times. Watch for false friends with Lithuanian (e.g. cabinet ≠ kabinetas, magazine ≠ magazinas, sympathetic ≠ simpatiškas): show the real meaning in a context sentence.',
   functional:
     'This is real-life "Everyday English": practise the situation as role-plays (you play the other person), with the useful phrases; repeat the role-play with a twist (a problem, a change of plan).',
   skills:
     'Pre-teach 2-3 key words, then show the reading with show_theory part "reading" (offer to read it aloud), check understanding with exercises, then discuss the topic and ask the learner to retell the text in their own words.',
   pronunciation:
-    'Model each sound or pattern slowly, ask the learner to repeat words and sentences, use minimal pairs. Judge pronunciation from the AUDIO you hear, not from the transcript (the transcript may auto-correct). Give concrete mouth/tongue tips in Lithuanian.',
+    'Perception first: say a minimal pair, then say one of the words and ask the learner which one they heard; only after that ask them to repeat words and sentences. Judge pronunciation from the AUDIO you hear, not from the transcript (the transcript may auto-correct). Judge vowel quality AND the final consonant, not only length. Give concrete mouth/tongue tips in Lithuanian. Aim for being easily understood, not a perfect accent.',
   review: 'Mixed review of the whole unit: quick-fire questions, exercises from different lessons, one longer speaking task that combines the unit grammar and vocabulary.',
   checkpoint: 'Level exam.',
 };
