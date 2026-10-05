@@ -17,7 +17,9 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 
 ## Taisyklės
 - Be build žingsnio ir be priklausomybių – grynas HTML/CSS/JS, kad veiktų GitHub Pages ir iPhone Safari.
-- Pamoka atrakinama TIK kai AI iškviečia `complete_lesson` su `passed: true` – nekurk apėjimų.
+- Pamoka atrakinama TIK kai AI iškviečia `complete_lesson` su `passed: true` IR programa patvirtina saitus
+  (min. replikų, ≥3 užduotys, ≥6 bandymai, ≥75 % tikslumas, visi kriterijai) – `js/app.js` `complete_lesson` apdorojimas. Nekurk apėjimų.
+- Lygio egzaminą galima laikyti iš anksto (`isUnlocked`); nutrūkusi pamoka pratęsiama (`resumeStates`).
 - Pakeitus kursą: `node tools/validate.mjs` turi rodyti `OK`.
 - Testai naršyklėje: `node tools/smoke-test.mjs` (reikia `npm i playwright`; imituoja Gemini Live serverį).
 - Vartotojo tekstai – lietuviškai su diakritikais.

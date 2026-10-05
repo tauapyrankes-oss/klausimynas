@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
   model: '',
   voice: 'Kore',
   micMode: 'auto', // auto | headphones | tap
-  pace: 'slow', // slow | normal
+  pace: 'auto', // auto (pagal lygį) | slow | normal
   ltHelp: 'auto', // auto (pagal lygį) | much | some | little
   name: '',
   sfx: 'on',
@@ -39,6 +39,7 @@ export const settings = { ...DEFAULT_SETTINGS, ...read(SETTINGS_KEY, {}) };
 // Migracija v2: anksčiau numatytasis „some“ būdavo išsaugomas kartu su raktu – pereiname į „auto“ (pagal lygį).
 if (!settings.v2) {
   if (settings.ltHelp === 'some') settings.ltHelp = 'auto';
+  if (settings.pace === 'slow') settings.pace = 'auto';
   settings.v2 = true;
   write(SETTINGS_KEY, settings);
 }
@@ -94,6 +95,11 @@ export function recordExercise(ok) {
   saveProgress();
 }
 
+export function recordTalk() {
+  progress.talkLast = today();
+  saveProgress();
+}
+
 export function recordSpeakingTurn() {
   progress.speakingTurns = (progress.speakingTurns || 0) + 1;
   saveProgress();
@@ -123,6 +129,7 @@ export function recordResult(id, result) {
 
 // Grąžina true, jei tai naujas rekordas.
 export function recordSprint(score) {
+  progress.sprintLast = today();
   const best = score > (progress.sprintBest || 0);
   if (best) progress.sprintBest = score;
   progress.xp += score;
