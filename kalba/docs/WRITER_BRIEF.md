@@ -44,6 +44,12 @@ Lessons in exactly the syllabus order with exactly the syllabus ids. For each le
   (the learner's own life), include a role-play where natural. Checkpoints follow the Cambridge A2 Key /
   B1 Preliminary speaking format as described in the syllabus focus.
 
+## Self-contained lessons
+- Lessons must teach everything themselves. NO links or references to external lessons/websites in learner-facing
+  text. The `sources` field is internal metadata only (not shown).
+- Deliberately recycle: reuse words, phrases and grammar from EARLIER lessons in examples, quiz items, readings and
+  speaking tasks (≈20–30 % recycled material), so the learner meets them again.
+
 ## Language rules
 - Lithuanian: correct, natural, with diacritics, friendly "tu" form. Explain simply, no linguistics jargon
   (or explain it). Gender-neutral wording towards the learner where easy.

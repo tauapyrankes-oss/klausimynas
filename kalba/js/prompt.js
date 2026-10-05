@@ -54,7 +54,7 @@ export const TOOL_EXERCISE = {
     type: 'OBJECT',
     properties: {
       quiz_index: { type: 'INTEGER', description: 'Number of a prepared exercise from the lesson list (1-based). If set, other fields are ignored.' },
-      type: { type: 'STRING', enum: ['choice', 'input', 'order', 'listen', 'match'], description: 'choice = pick one option; input = type the answer (e.g. translate or fill the gap); order = build a sentence from shuffled words; listen = dictation of a sentence; match = match English words with Lithuanian.' },
+      type: { type: 'STRING', enum: ['choice', 'input', 'order', 'listen', 'match', 'write'], description: 'choice = pick one option; input = type the answer (e.g. translate or fill the gap); order = build a sentence from shuffled words; listen = dictation of a sentence; match = match English words with Lithuanian; write = free writing task (sentences, a message, an email, a short story) that YOU will correct.' },
       question: { type: 'STRING', description: 'Instruction or question shown on screen. For input/choice in Lithuanian or English, with ___ for a gap.' },
       options: { type: 'ARRAY', items: { type: 'STRING' }, description: 'choice: 2-4 options.' },
       correct_option: { type: 'INTEGER', description: 'choice: 0-based index of the correct option.' },
@@ -63,6 +63,7 @@ export const TOOL_EXERCISE = {
       translation_lt: { type: 'STRING', description: 'order/listen: Lithuanian translation shown as a hint.' },
       pairs: { type: 'ARRAY', items: { type: 'STRING' }, description: 'match: 3-6 items like "yesterday = vakar".' },
       explanation_lt: { type: 'STRING', description: 'Optional short rule in Lithuanian shown after answering.' },
+      min_words: { type: 'INTEGER', description: 'write: minimum number of words.' },
       seconds: { type: 'INTEGER', description: 'Optional time limit 15-60 s to make it a challenge. Omit for no timer.' },
     },
   },
@@ -130,7 +131,7 @@ const KIND_TIPS = {
   checkpoint: 'Level exam.',
 };
 
-export function lessonPrompt(lesson, level, settings, memory, prepared = []) {
+export function lessonPrompt(lesson, level, settings, memory, prepared = [], review = null) {
   const g = lesson.grammar || {};
   const s = lesson.speaking || {};
   const isCheckpoint = lesson.type === 'checkpoint';
@@ -152,6 +153,13 @@ Success criteria:
 ${(s.successCriteria || []).map((c) => `- ${c}`).join('\n')}
 Minimum learner turns before assessment: ${s.minLearnerTurns || 8}
 
+${review ? `SPACED REVIEW – material from earlier lessons (retrieval practice makes memory stronger):
+- Lessons to recycle: ${review.lessons.join('; ')}
+- Words to recycle: ${review.words.join(', ')}
+- Start with a 1-2 minute warm-up: 2-3 quick questions that make the learner USE the grammar and words of these earlier lessons (do not explain them again unless the learner fails).
+- Weave the review words naturally into the conversation, and use at least 2 of the exercises marked REVIEW.
+- If the learner has clearly forgotten something, re-teach it in one sentence and come back to it later in the lesson.
+` : ''}
 Prepared on-screen exercises (use with give_exercise quiz_index; answers are for you only – never say them before the learner answers):
 ${prepared.join('\n')}
 
@@ -162,6 +170,7 @@ ${isCheckpoint
     ? `1. Greet, say this is the ${level.name} level exam and that you will help less than usual.
 2. Alternate: 2-4 conversational exchanges on one topic of the level, then an exercise (give_exercise), then a new topic. Cover all topics of the level.
 3. Use at least 6 exercises in total, mixing prepared ones and your own, all types (choice, input, order, listen, match); give 2-3 of them a time limit (seconds: 20-45).
+   Include a WRITING part (give_exercise type "write"): ${level.id === 'b1' ? 'an email or a short story of 80-100 words (min_words 80), like B1 Preliminary Writing' : level.id === 'a2plus' ? 'a message or short story of 50-70 words (min_words 50)' : 'a short message/note of 25-35 words (min_words 25), like A2 Key Writing'}.
 4. Finish with the speaking tasks above (no explanations during the exam, only repeat or rephrase).`
     : `1. Greet warmly; in 1-2 sentences (simple English + a short Lithuanian line) say what we learn today.
 2. Discover the rule: ask 1-2 easy questions that make the learner try the new structure. Then call show_theory (part "rule" or "table") and explain it in 2-3 short sentences (Lithuanian allowed). Later use show_theory for "examples", "pitfalls" or "vocab" when useful.
@@ -170,6 +179,7 @@ ${isCheckpoint
    b) one give_exercise (start easy with prepared ones, then your own, personalised with things the learner told you);
    c) react to the [EXERCISE RESULT]: praise specifically, or explain the mistake in 1-2 sentences and ask the learner to say the correct sentence aloud.
    Use at least 4 exercises in total and at least 3 different types (include order and listen). Give 1-2 later exercises a time limit (seconds: 20-40) as a fun challenge.
+   Include ONE short writing task (give_exercise type "write") with the target language: ${level.id === 'b1' ? '4-6 sentences (min_words 50)' : level.id === 'a2plus' ? '3-5 sentences (min_words 30)' : '2-3 sentences (min_words 12)'}, personal and real (a message to a friend, a few sentences about the learner's own life).
 4. Final part: the role-play / speaking tasks above, with little help.`}
 5. When the tasks are done and the minimum number of learner turns is reached, say you will now give feedback, then call complete_lesson. Exercise results count, but speaking matters most.
 6. After calling it, tell the result briefly and kindly (English + one Lithuanian sentence). If not passed, say what to practise and that they can try again.
@@ -178,6 +188,14 @@ EXERCISE ETIQUETTE
 - After calling give_exercise, say only a very short encouragement ("Take your time!") and then stay silent until the [EXERCISE RESULT] message arrives.
 - Never call give_exercise twice in a row without talking in between. Never reveal the answer before the result.
 - Messages starting with [EXERCISE RESULT] come from the app, not from the learner's mouth – do not count them as speaking turns.
+- After a [WRITING RESULT], always show the corrected text with show_on_screen, then ask the learner to read the corrected version aloud.
+
+HOW PEOPLE LEARN BEST (apply throughout)
+- Retrieval before explanation: let the learner try first, then help ("What do you think…?"). Struggling a little is good.
+- Meaning first: every exercise and question should be about something real and personal, not abstract.
+- Chunks: teach and recycle whole phrases ("I'd like to…", "Have you ever…?") and make the learner say them several times in different situations.
+- Repetition with variation: each new word or structure should come back at least 3-4 times in the lesson, in different tasks.
+- Fluency: once in each lesson, ask the learner to say the same thing again faster or better (e.g. retell a short story a second time in less time).
 
 ASSESSMENT RULES (STRICT)
 - You alone decide whether the lesson is learned. Pass (passed=true) only if every success criterion is met by the learner's OWN spontaneous sentences, with the target structure correct in roughly 80% or more of attempts. Repeating after you does not count.

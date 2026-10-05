@@ -31,7 +31,7 @@ function write(key, value) {
 }
 
 function emptyProgress() {
-  return { lessons: {}, xp: 0, streak: { count: 0, last: '' }, mistakes: [], speakingTurns: 0 };
+  return { lessons: {}, xp: 0, streak: { count: 0, last: '' }, mistakes: [], speakingTurns: 0, words: {} };
 }
 
 export const settings = { ...DEFAULT_SETTINGS, ...read(SETTINGS_KEY, {}) };
@@ -153,5 +153,40 @@ export function importData(text) {
 
 export function resetProgress() {
   progress = emptyProgress();
+  saveProgress();
+}
+
+// Ankstesnės pamokos, pakartotos naujoje pamokoje, laikomos pakartotomis (intervalas ilgėja).
+export function markReviewed(ids) {
+  for (const id of ids) {
+    const l = progress.lessons[id];
+    if (l && l.passed && isDue(id)) {
+      l.reviews = (l.reviews || 0) + 1;
+      l.passedOn = today();
+    }
+  }
+  saveProgress();
+}
+
+// ---------- Žodžių kartojimas (Leitnerio dėžutės) ----------
+const WORD_DAYS = [0, 1, 3, 7, 14, 30, 60];
+function addDays(n) {
+  const d = new Date(today());
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+export function wordState(en) {
+  return (progress.words || {})[en] || null;
+}
+export function isWordDue(en) {
+  const w = wordState(en);
+  return !!w && w.due <= today();
+}
+export function recordWord(en, ok) {
+  progress.words = progress.words || {};
+  const w = progress.words[en] || { box: 0 };
+  w.box = ok ? Math.min(w.box + 1, WORD_DAYS.length - 1) : 1;
+  w.due = ok ? addDays(WORD_DAYS[w.box]) : today();
+  progress.words[en] = w;
   saveProgress();
 }

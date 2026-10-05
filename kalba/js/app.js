@@ -38,7 +38,6 @@ async function loadCourse() {
     .filter((l) => l.lessons.length);
 }
 const LEVELS = await loadCourse();
-const SOURCES = (window.COURSE && window.COURSE.sources) || {};
 const LEVEL_COLORS = { a1plus: '#1f9d8a', a2: '#5b4fd6', a2plus: '#d9632b', b1: '#c23b7a' };
 
 // Visas kursas viena eile: atrakinimas eina griežtai iš eilės.
@@ -172,7 +171,10 @@ function viewPath() {
       įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
   }
   html += `<button class="card sprint-cta" data-go="#/sprint">${ema('idle', 48)}<span class="grow"><b>⚡ Žodžių sprintas</b>
-    <span class="small muted">60 sekundžių – kiek žodžių spėsi išversti? Rekordas: ${store.progress.sprintBest || 0}</span></span><span>→</span></button>`;
+    <span class="small muted">${(() => {
+      const n = sprintPool().filter((v) => store.isWordDue(v.en)).length;
+      return n ? `🔁 ${n} žodž. laukia kartojimo` : '60 sekundžių – kiek žodžių spėsi išversti?';
+    })()} · Rekordas: ${store.progress.sprintBest || 0}</span></span><span>→</span></button>`;
   if (due.length) {
     html += `<div class="card" style="margin-bottom:20px"><h3>🔁 Laikas pakartoti</h3>
       <p class="small muted">Trumpas pakartojimas padeda neužmiršti (kartojimas su didėjančiais intervalais).</p>
@@ -311,10 +313,6 @@ function renderLearn($el, x) {
     ${(l.vocab || []).length ? card(theoryHtml(l, 'vocab')) : ''}
     ${(l.phrases || []).length ? card(theoryHtml(l, 'phrases')) : ''}
     ${l.reading ? card(theoryHtml(l, 'reading')) : ''}
-    ${(l.sources || []).filter((id) => SOURCES[id]).length ? `<div class="card small"><h3>📚 Šaltiniai</h3><ul>${l.sources
-      .filter((id) => SOURCES[id])
-      .map((id) => `<li><a href="${esc(SOURCES[id].url)}" target="_blank" rel="noopener">${esc(SOURCES[id].title)}</a></li>`)
-      .join('')}</ul></div>` : ''}
     <div class="stack" style="margin-top:16px"><button class="btn block" id="next">💬 Į pamoką su Ema →</button>
     <button class="btn secondary block" id="quiz">✏️ Pratimai be interneto</button></div>`;
   bindSay($el);
@@ -368,12 +366,35 @@ function renderQuiz($el, { lesson: l }) {
   draw();
 }
 
+// Kartojimas tarp pamokų: ankstesnės pamokos parenkamos su didėjančiais tarpais (1, 3, 7, 15 pamokų atgal)
+// ir tos, kurias laikas kartoti. Iš jų – gramatika, žodžiai ir 2–3 užduotys, kurias Ema įpins į naują pamoką.
+function reviewPack(x) {
+  const prev = ALL.slice(0, x.index).filter((y) => isPassed(y.lesson.id) && y.lesson.type !== 'checkpoint');
+  if (!prev.length) return null;
+  const pick = new Map();
+  const add = (y) => y && pick.set(y.lesson.id, y);
+  [1, 3, 7, 15].forEach((k) => add(prev[prev.length - k]));
+  prev.filter((y) => store.isDue(y.lesson.id)).slice(0, 2).forEach(add);
+  const lessons = [...pick.values()].slice(0, 5);
+  const exercises = shuffle(
+    lessons.flatMap((y) => (y.lesson.quiz || []).filter((q) => q.type !== 'match').map((q) => ({ ...q, from: y.lesson.titleEn })))
+  ).slice(0, 3);
+  const words = shuffle(lessons.flatMap((y) => y.lesson.vocab || [])).slice(0, 10);
+  return { lessons, exercises, words };
+}
+
 function renderLessonTalk($el, x) {
   const { lesson: l, level } = x;
   const st = store.lessonState(l.id) || {};
   const s = l.speaking || {};
   const exam = l.type === 'checkpoint';
-  const prepared = [...(l.quiz || []), ...((l.reading && l.reading.questions) || []), ...extraExercises(l)];
+  const review = reviewPack(x);
+  const prepared = [
+    ...(l.quiz || []),
+    ...((l.reading && l.reading.questions) || []),
+    ...extraExercises(l),
+    ...(review ? review.exercises : []),
+  ];
   $el.innerHTML = `<div class="card"><div class="row">${ema('wave', 56)}<div class="grow">
     <h3>${exam ? `🏆 ${esc(level.name)} lygio egzaminas` : '💬 Pamoka su Ema'}</h3>
     <ul class="cando small">${(l.canDo || []).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div></div>
@@ -381,10 +402,22 @@ function renderLessonTalk($el, x) {
       ? 'Ema kalbins tave apie visas lygio temas ir duos užduočių ekrane. Pagalbos bus mažiau – parodyk, ką moki!'
       : 'Ema pakalbins, paaiškins taisyklę, duos užduočių ekrane (kai kurios – su laikmačiu), vėl pakalbins… Pabaigoje ji <b>pati nuspręs</b>, ar pamoka išmokta – tik tada atsirakins kita.'}</p>
     <p class="small muted">Kalbėk balsu arba rašyk. Ausinės padeda, kad Ema negirdėtų pati savęs.</p>
+    ${review ? `<div class="notice review-card small">🔁 Šiandien Ema pakartos ir: ${review.lessons.map((y) => esc(y.lesson.title)).join(' · ')}</div>` : ''}
     ${st.last ? `<div class="notice">Paskutinis bandymas: ${st.last.passed ? '✅ išmokta' : '⏳ dar neišmokta'}, ${st.last.score ?? '–'} / 100. ${esc(st.last.advice_lt || '')}</div>` : ''}
     </div><div id="talk"></div>`;
   mountTalk(document.getElementById('talk'), {
-    prompt: () => lessonPrompt(l, level, settings, memory(), prepared.map((q, n) => describeExercise(q, n + 1))),
+    prompt: () =>
+      lessonPrompt(
+        l,
+        level,
+        settings,
+        memory(),
+        prepared.map((q, n) => describeExercise(q, n + 1) + (q.from ? ` (REVIEW from "${q.from}")` : '')),
+        review && {
+          lessons: review.lessons.map((y) => `${y.lesson.titleEn} (${y.lesson.kind})`),
+          words: review.words.map((v) => v.en),
+        }
+      ),
     tools: [...TOOLS_LESSON, TOOL_EXERCISE, TOOL_THEORY, TOOL_SHOW],
     lesson: l,
     prepared,
@@ -392,6 +425,7 @@ function renderLessonTalk($el, x) {
     canAssess: true,
     onResult: (result) => {
       store.recordResult(l.id, result);
+      if (review) store.markReviewed(review.lessons.map((y) => y.lesson.id));
       updateChips();
       return showResult(x, result);
     },
@@ -672,6 +706,14 @@ function mountTalk($el, opts) {
             seconds: secs,
             onDone: (r) => {
               openExercise = null;
+              if (q.type === 'write') {
+                store.recordExercise(true);
+                session &&
+                  session.sendText(
+                    `[WRITING RESULT] Task: ${q.q} | learner wrote: «${r.given}» | Now correct it: call show_on_screen with the corrected text (keep the learner's ideas), praise what is good, explain the 1-2 most important mistakes very briefly (Lithuanian allowed), give a score 1-5, then continue the lesson.`
+                  );
+                return;
+              }
               exDone++;
               if (r.ok) exRight++;
               store.recordExercise(r.ok);
@@ -747,23 +789,35 @@ function mountTalk($el, opts) {
 }
 
 // ---------- Žodžių sprintas (60 s) ----------
+function sprintPool() {
+  const open = ALL.filter((x) => isUnlocked(x.index));
+  const seen = new Set();
+  return (open.length >= 2 ? open : ALL.slice(0, 2))
+    .flatMap((x) => x.lesson.vocab || [])
+    .filter((v) => v.en && v.lt && !seen.has(v.en) && seen.add(v.en));
+}
+
 function viewSprint() {
   setHeader('Žodžių sprintas', '#/path');
   setTab('path');
-  // Žodžiai iš atrakintų pamokų (bent pirmų dviejų, kad būtų iš ko rinktis).
-  const open = ALL.filter((x) => isUnlocked(x.index));
-  const pool = (open.length >= 2 ? open : ALL.slice(0, 2)).flatMap((x) => x.lesson.vocab || []).filter((v) => v.en && v.lt);
+  // Pirmiausia – žodžiai, kuriuos laikas kartoti (Leitnerio dėžutės), tada nauji iš atrakintų pamokų.
+  const pool = sprintPool();
   const strip = (s) => norm(s).replace(/^(to|a|an|the) /, '');
   const intro = () => {
     $view.innerHTML = `<div class="card" style="text-align:center">${ema('wave', 96)}
       <h2>⚡ Žodžių sprintas</h2><p>Matysi žodį lietuviškai – rašyk angliškai. Turi <b>60 sekundžių</b>.
-      Teisingas atsakymas: +1 taškas ir +2 sek. Žodžiai – iš tavo atrakintų pamokų (${pool.length}).</p>
+      Teisingas atsakymas: +1 taškas ir +2 sek.</p>
+      <p class="small muted">Pirmiausia gausi žodžius, kuriuos laikas pakartoti (šiandien: <b>${pool.filter((v) => store.isWordDue(v.en)).length}</b>).
+      Žinomi žodžiai grįžta vis rečiau – po 1, 3, 7, 14, 30 dienų, o pamiršti – iškart.</p>
       <p class="muted">Rekordas: <b>${store.progress.sprintBest || 0}</b></p>
       <button class="btn block" id="go">Pradėti!</button></div>`;
     document.getElementById('go').onclick = run;
   };
   const run = () => {
-    const deck = shuffle(pool);
+    const due = pool.filter((v) => store.isWordDue(v.en));
+    const fresh = pool.filter((v) => !store.wordState(v.en));
+    const rest = pool.filter((v) => !due.includes(v) && !fresh.includes(v));
+    const deck = [...shuffle(due), ...shuffle(fresh), ...shuffle(rest)];
     let i = 0;
     let score = 0;
     let time = 60;
@@ -784,6 +838,7 @@ function viewSprint() {
     };
     const next = (ok) => {
       const v = deck[i % deck.length];
+      store.recordWord(v.en, ok);
       if (ok) {
         score++;
         time += 2;

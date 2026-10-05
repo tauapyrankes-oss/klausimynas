@@ -19,6 +19,10 @@ export function mountExercise($el, q, opts = {}) {
       <div class="row" style="margin-bottom:12px"><button class="btn secondary play">🔊 Groti</button>
       <button class="btn secondary slow">🐢 Lėtai</button></div>
       <input ${INPUT} class="inp" placeholder="Ką išgirdai?">`;
+  } else if (q.type === 'write') {
+    body = `<div class="quiz-q">✍️ ${esc(q.q)}</div>
+      <textarea class="inp write" rows="5" autocapitalize="sentences" spellcheck="false" placeholder="Rašyk angliškai…"></textarea>
+      <div class="small muted wc">0 žodžių${q.minWords ? ` (reikia bent ${q.minWords})` : ''}</div>`;
   } else if (q.type === 'match') {
     body = `<div class="quiz-q">🧩 ${esc(q.q || 'Sujunk poras')}</div><div class="match">
       <div>${shuffle(q.pairs.map((p, k) => [p[0], k])).map(([t, k]) => `<button class="option" data-side="en" data-k="${k}">${esc(t)}</button>`).join('')}</div>
@@ -75,6 +79,19 @@ export function mountExercise($el, q, opts = {}) {
         given: inp.value.trim(),
         right: q.type === 'listen' && q.lt ? `${answers[0]} (${q.lt})` : answers[0],
       };
+    };
+  } else if (q.type === 'write') {
+    const inp = $('.inp');
+    const count = () => inp.value.trim().split(/\s+/).filter(Boolean).length;
+    inp.oninput = () => {
+      const n = count();
+      $('.wc').textContent = `${n} žodž.${q.minWords ? ` (reikia bent ${q.minWords})` : ''}`;
+      $check.disabled = n < Math.max(1, q.minWords || 1);
+    };
+    $check.textContent = 'Siųsti Emai';
+    getAnswer = () => {
+      inp.disabled = true;
+      return { ok: null, given: inp.value.trim(), right: '' };
     };
   } else if (q.type === 'match') {
     let sel = null;
@@ -142,6 +159,12 @@ export function mountExercise($el, q, opts = {}) {
     finished = true;
     clearInterval(timer);
     const r = { ...getAnswer(), timedOut: !!timedOut, seconds: Math.round((Date.now() - started) / 1000) };
+    if (q.type === 'write') {
+      $('.fb').innerHTML = `<div class="feedback right"><h3>📨 Išsiųsta Emai</h3><p class="small">Ji perskaitys ir pataisys.</p></div>`;
+      $check.remove();
+      opts.onDone && opts.onDone(r);
+      return;
+    }
     if (timedOut) r.ok = false;
     sfx(r.ok ? 'correct' : 'wrong');
     $('.fb').innerHTML = `<div class="feedback ${r.ok ? 'right' : 'wrong'}">
@@ -205,6 +228,11 @@ export function exerciseFromTool(args, prepared) {
     if (words[0] !== 'I' && !/^I'/.test(words[0])) words[0] = words[0][0].toLowerCase() + words[0].slice(1);
     return { q: { type, q: question, words, answer: sentence, lt: a.translation_lt || '', explain: a.explanation_lt || '' } };
   }
+  if (type === 'write') {
+    if (!question) return { error: 'write needs question (the writing task)' };
+    const minWords = Math.max(0, Math.min(150, Math.round(Number(a.min_words) || 0)));
+    return { q: { type, q: question, minWords } };
+  }
   if (type === 'match') {
     const pairs = (a.pairs || [])
       .map((p) => String(p).split(/\s*=\s*/))
@@ -212,7 +240,7 @@ export function exerciseFromTool(args, prepared) {
     if (pairs.length < 3) return { error: 'match needs at least 3 pairs like "english = lietuviškai"' };
     return { q: { type, q: question, pairs: pairs.slice(0, 6) } };
   }
-  return { error: 'type must be one of choice, input, order, listen, match' };
+  return { error: 'type must be one of choice, input, order, listen, match, write' };
 }
 
 // Trumpas užduoties aprašas AI mokytojai (prompt'e).
@@ -222,6 +250,7 @@ export function describeExercise(q, n) {
   if (q.type === 'input') return `${t} ${q.q} | answer: ${[].concat(q.answer)[0]}`;
   if (q.type === 'order') return `${t} build the sentence: ${q.answer}`;
   if (q.type === 'listen') return `${t} dictation: ${q.en}`;
+  if (q.type === 'write') return `${t} writing task: ${q.q}`;
   if (q.type === 'match') return `${t} match words: ${q.pairs.map((p) => p[0]).join(', ')}`;
   return t;
 }

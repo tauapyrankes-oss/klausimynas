@@ -50,7 +50,11 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
         reply({ toolCall: { functionCalls: [{ id: 'e1', name: 'give_exercise', args: { type: 'order', sentence: 'Where are you from?', translation_lt: 'Iš kur tu?', seconds: 30 } }] } });
         reply({ serverContent: { outputTranscription: { text: ' Take your time!' }, turnComplete: true } });
       } else if (/^\[EXERCISE RESULT\]/.test(text)) {
-        reply({ serverContent: { outputTranscription: { text: 'Great job! Now tell me about you.' }, turnComplete: true } });
+        reply({ serverContent: { outputTranscription: { text: 'Great job! Now write me a short message.' }, turnComplete: true } });
+        reply({ toolCall: { functionCalls: [{ id: 'w1', name: 'give_exercise', args: { type: 'write', question: 'Write 2-3 sentences about yourself.', min_words: 5 } }] } });
+      } else if (/^\[WRITING RESULT\]/.test(text)) {
+        reply({ toolCall: { functionCalls: [{ id: 'c3', name: 'show_on_screen', args: { title: 'Corrected', lines: ["I'm Ona. I'm from Vilnius."] } }] } });
+        reply({ serverContent: { outputTranscription: { text: 'Nice writing! Now tell me about you.' }, turnComplete: true } });
       } else {
         reply({ serverContent: { inputTranscription: { text: '' } } });
         reply({ toolCall: { functionCalls: [{ id: 'c2', name: 'complete_lesson', args: { passed: true, score: 88, summary_lt: 'Puikiai prisistatei!', strengths_lt: ['Teisingai vartoji am/is/are'], mistakes: [{ wrong: 'I from Lithuania', correct: "I'm from Lithuania", note_lt: 'Nepamiršk „am“.' }], advice_lt: 'Pakartok klausimus su „Are you…?“' } }] } });
@@ -129,6 +133,12 @@ const exMsg = sent.find((m) => m.realtimeInput && /^\[EXERCISE RESULT\].*CORRECT
 if (!exMsg) fail('užduoties rezultatas nenusiųstas Emai');
 const errResp = sent.find((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'e0');
 if (!errResp || !errResp.toolResponse.functionResponses[0].response.error) fail('klaidinga užduotis negrąžino klaidos');
+// Rašymo užduotis: Ema gauna tekstą ir parodo pataisytą variantą.
+await page.waitForSelector('.inline-exercise textarea');
+await page.fill('.inline-exercise textarea', 'I am Ona. I from Vilnius and I like coffee.');
+await page.click('.inline-exercise .check');
+await page.waitForFunction(() => [...document.querySelectorAll('.board')].some((b) => b.textContent.includes('Corrected')));
+if (!sent.some((m) => m.realtimeInput && /^\[WRITING RESULT\].*I from Vilnius/.test(m.realtimeInput.text || ''))) fail('rašymo rezultatas nenusiųstas');
 await page.waitForSelector('#txt');
 await page.fill('#txt', "Hi, I'm Ona. I'm from Lithuania.");
 await page.click('#send');

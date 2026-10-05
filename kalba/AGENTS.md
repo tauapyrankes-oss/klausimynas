@@ -10,7 +10,8 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 - `js/live.js` – Gemini Live klientas + automatinis Live modelių radimas (`listLiveModels`, pirmenybė „3.8“).
 - `js/audio.js`, `js/pcm-worklet.js` – mikrofonas 16 kHz PCM16 → API; grojimas 24 kHz PCM16.
 - `js/prompt.js` – Emos sistemos instrukcijos ir įrankiai: `complete_lesson` (vienintelis būdas
-  pažymėti pamoką išmokta) ir `show_on_screen`.
+  pažymėti pamoką išmokta), `give_exercise` (užduotys ekrane, įskaitant rašymą), `show_theory`, `show_on_screen`.
+- Kartojimas tarp pamokų: `reviewPack()` faile `js/app.js`; žodžių Leitnerio dėžutės – `js/store.js`. Metodika – `docs/RESEARCH.md`.
 - `js/store.js` – pažanga `localStorage` (`kalba.progress.v1`), nustatymai, kartojimo intervalai.
 - `sw.js` – talpykla (keisk `VERSION` keisdamas failus). `codex/` – užduotys vaizdiniams ištekliams.
 
