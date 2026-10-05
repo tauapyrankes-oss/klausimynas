@@ -204,3 +204,31 @@ export function recordWord(en, ok) {
   progress.words[en] = w;
   saveProgress();
 }
+
+// ---------- Pratybos / vedamas pokalbis (antra ir trečia pamokos sesija) ----------
+export function recordPractice(id, kind, result) {
+  const l = (progress.lessons[id] = progress.lessons[id] || {});
+  l.practice = l.practice || { drill: 0, talk: 0 };
+  l.practice[kind] = (l.practice[kind] || 0) + 1;
+  l.practice[`${kind}At`] = today();
+  l.lastPractice = today();
+  if (result && result.passed && l.passed) {
+    // Pratybos skaitosi kaip kartojimas – kitas kartojimas vėliau.
+    l.reviews = (l.reviews || 0) + 1;
+    l.passedOn = today();
+  }
+  progress.xp += Math.round((result && result.score ? result.score : 50) / 4);
+  for (const m of (result && result.mistakes) || []) {
+    if (m && m.correct) progress.mistakes.unshift({ ...m, lesson: id, date: today() });
+  }
+  progress.mistakes = progress.mistakes.slice(0, 60);
+  touchStreak();
+  saveProgress();
+}
+
+// Mokymosi laikas (minutės) – rodomas kelyje į B1.
+export function addMinutes(min) {
+  if (!(min > 0)) return;
+  progress.minutes = (progress.minutes || 0) + min;
+  saveProgress();
+}

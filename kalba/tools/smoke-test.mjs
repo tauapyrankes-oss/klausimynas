@@ -216,6 +216,24 @@ await page.goto(`${base}#/path`);
 await page.waitForSelector('.node');
 if ((await page.locator('.node.locked').count()) !== nodes - 2 - exams) fail('po patvirtinimo neatsirakino kita pamoka');
 
+// Pratybos (antra pamokos sesija): atskiras Emos scenarijus, rezultatas įrašomas kaip pratybos.
+await page.goto(`${base}#/practice/${firstId}/drill`);
+await page.click('#start');
+await page.waitForSelector('#txt');
+const drillSetup = sent.filter((m) => m.setup).pop();
+if (!/PRACTICE SESSION/.test(drillSetup.setup.systemInstruction.parts[0].text)) fail('pratybos be savo scenarijaus');
+await page.click('#assess'); // „Baigti sesiją“
+await page.fill('#txt', 'FINAL');
+await page.click('#send');
+await page.waitForSelector('.modal', { timeout: 10000 });
+if (!/Pratybos baigtos/.test(await page.locator('.modal').innerText())) fail('pratybų rezultatas neparodytas');
+await shot('4c-pratybos');
+await page.click('.modal [data-close]');
+await page.goto(`${base}#/path`);
+await page.waitForSelector('.plan');
+if (!(await page.locator('.plan-item', { hasText: 'Pratybos' }).count())) fail('dienos plane nėra pratybų');
+await shot('1b-planas');
+
 // Sprintas.
 await page.goto(`${base}#/sprint`);
 await page.click('#go');

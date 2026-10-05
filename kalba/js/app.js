@@ -1,6 +1,6 @@
 import { LiveSession, listLiveModels } from './live.js';
 import { MicRecorder, PcmPlayer, bytesToBase64 } from './audio.js';
-import { lessonPrompt, freeTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
+import { lessonPrompt, freeTalkPrompt, drillPrompt, guidedTalkPrompt, TOOLS_LESSON, TOOL_SHOW, TOOL_EXERCISE, TOOL_THEORY } from './prompt.js';
 import * as store from './store.js';
 import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
@@ -182,6 +182,7 @@ function route() {
   window.scrollTo(0, 0);
   if (parts[0] === 'lesson' && byId[parts[1]]) return viewLesson(byId[parts[1]], parts[2]);
   if (parts[0] === 'talk') return viewFreeTalk();
+  if (parts[0] === 'practice' && byId[parts[1]]) return viewPractice(byId[parts[1]], parts[2] === 'talk' ? 'talk' : 'drill');
   if (parts[0] === 'sprint') return viewSprint();
   if (parts[0] === 'stats') return viewStats();
   if (parts[0] === 'settings') return viewSettings();
@@ -191,23 +192,30 @@ window.addEventListener('hashchange', route);
 
 // ---------- Šiandienos planas ----------
 // Kad per dieną būtų ne tik nauja pamoka, bet ir kartojimas (tyrimai: kartojimas + kalbėjimas > nauja medžiaga).
+const TOTAL_HOURS = 220; // ~172 × (30+15+15 min) + kartojimo pamokos, egzaminai, sprintai
 function dailyPlanHtml(cur, due) {
   const t = store.today();
   const p = store.progress;
+  const passedList = ALL.filter((x) => isPassed(x.lesson.id) && x.lesson.type !== 'checkpoint');
+  const pr = (x) => (store.lessonState(x.lesson.id) || {}).practice || {};
   const doneLesson = Object.values(p.lessons).some((l) => l.last && l.last.date === t && l.last.passed);
-  const reviewedToday = Object.values(p.lessons).some((l) => l.passedOn === t && (l.reviews || 0) > 0);
-  const sprintToday = p.sprintLast === t;
-  const talkToday = p.talkLast === t;
+  // Pratybos: pirmiausia pamoka, kuriai jų dar nebuvo (vakarykštė), paskui ta, kurią laikas kartoti.
+  const drillFor = passedList.filter((x) => !pr(x).drill).slice(-1)[0] || due[0] || passedList.slice(-1)[0];
+  const talkFor = passedList.filter((x) => pr(x).drill && !pr(x).talk).slice(-1)[0] || passedList.slice(-2)[0];
+  const freeOk = ['a2plus', 'b1'].includes(ALL[cur].level.id);
   const items = [
     ['📘', `Nauja pamoka: ${esc(ALL[cur].lesson.title)}`, doneLesson, `#/lesson/${ALL[cur].lesson.id}`],
-    due.length ? ['🔁', `Pakartoti: ${esc(due[0].lesson.title)}`, reviewedToday, `#/lesson/${due[0].lesson.id}`] : null,
-    ['⚡', 'Žodžių sprintas (1 min.)', sprintToday, '#/sprint'],
-    ['💬', 'Laisvas pokalbis (5 min.)', talkToday, '#/talk'],
+    drillFor ? ['🏋️', `Pratybos: ${esc(drillFor.lesson.title)}`, pr(drillFor).drillAt === t, `#/practice/${drillFor.lesson.id}/drill`] : null,
+    talkFor ? ['🗨️', `Vedamas pokalbis: ${esc(talkFor.lesson.title)}`, pr(talkFor).talkAt === t, `#/practice/${talkFor.lesson.id}/talk`] : freeOk ? ['💬', 'Laisvas pokalbis (10 min.)', p.talkLast === t, '#/talk'] : null,
+    ['⚡', 'Žodžių sprintas (1 min.)', p.sprintLast === t, '#/sprint'],
   ].filter(Boolean);
   const done = items.filter((i) => i[2]).length;
+  const hours = (p.minutes || 0) / 60;
   return `<div class="card plan"><div class="row"><h3 class="grow">📅 Šiandien</h3><span class="chip small">${done}/${items.length}</span></div>
     ${items.map(([ico, label, ok, href]) => `<a class="plan-item ${ok ? 'done' : ''}" href="${href}"><span>${ok ? '✅' : ico}</span><span class="grow">${label}</span><span>›</span></a>`).join('')}
-    <p class="small muted" style="margin:8px 0 0">~30 min. per dieną: nauja pamoka + kartojimas. Taip pasieksi B1 greičiau nei vien iš eilės einant pamokas.</p></div>`;
+    <div class="row" style="margin-top:10px"><div class="progressbar grow"><span style="width:${Math.min(100, (hours / TOTAL_HOURS) * 100)}%"></span></div>
+    <span class="small muted">${hours < 1 ? `${Math.round(hours * 60)} min.` : `${hours.toFixed(1)} val.`} / ~${TOTAL_HOURS} val. iki B1</span></div>
+    <p class="small muted" style="margin:8px 0 0">Kiekviena pamoka – trys sesijos su Ema: pamoka → pratybos → vedamas pokalbis. ~45–60 min. per dieną.</p></div>`;
 }
 
 // ---------- Kelias ----------
@@ -227,8 +235,10 @@ function viewPath() {
       įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
   }
   html += dailyPlanHtml(cur, due);
-  html += `<button class="card sprint-cta" data-go="#/talk">${ema('wave', 48)}<span class="grow"><b>💬 Laisvas pokalbis su Ema</b>
-    <span class="small muted">Be testo – tiesiog pasikalbėk apie bet ką</span></span><span>→</span></button>`;
+  if (['a2plus', 'b1'].includes(ALL[cur].level.id)) {
+    html += `<button class="card sprint-cta" data-go="#/talk">${ema('wave', 48)}<span class="grow"><b>💬 Laisvas pokalbis su Ema</b>
+      <span class="small muted">Be testo – tiesiog pasikalbėk apie bet ką</span></span><span>→</span></button>`;
+  }
   html += `<button class="card sprint-cta" data-go="#/sprint">${ema('idle', 48)}<span class="grow"><b>⚡ Žodžių sprintas</b>
     <span class="small muted">${(() => {
       const n = sprintPool().filter((v) => store.isWordDue(v.en)).length;
@@ -238,7 +248,7 @@ function viewPath() {
     html += `<div class="card" style="margin-bottom:20px"><h3>🔁 Laikas pakartoti</h3>
       <p class="small muted">Trumpas pakartojimas padeda neužmiršti (kartojimas su didėjančiais intervalais).</p>
       <div class="due-list">${due
-        .map((x) => `<button class="due-item" data-go="#/lesson/${x.lesson.id}">${esc(x.lesson.icon)} ${esc(x.lesson.title)}</button>`)
+        .map((x) => `<button class="due-item" data-go="#/practice/${x.lesson.id}/drill">🏋️ ${esc(x.lesson.title)}</button>`)
         .join('')}</div></div>`;
   }
   for (const level of LEVELS) {
@@ -270,7 +280,7 @@ function viewPath() {
       html += `<div class="node-wrap" style="--x:${l.type === 'checkpoint' ? 0 : offsets[k % offsets.length]}px">
         ${isCur ? '<div class="start-bubble">PRADĖK ČIA</div>' : ''}
         <button class="${cls}" data-id="${esc(l.id)}" aria-label="${esc(l.title)}${unlocked ? '' : ' (užrakinta)'}">${unlocked ? esc(l.icon) : '🔒'}</button>
-        <div class="node-label ${unlocked ? '' : 'locked'}">${esc(l.title)}${done ? `<span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span>` : ''}${
+        <div class="node-label ${unlocked ? '' : 'locked'}">${esc(l.title)}${done ? `<span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}${(() => { const pr = (store.lessonState(l.id) || {}).practice || {}; return ` <span class="muted">${pr.drill ? '🏋️' : ''}${pr.talk ? '🗨️' : ''}</span>`; })()}</span>` : ''}${
           l.type === 'checkpoint' && !done && examPending && !isPassed(items[items.length - 2].lesson.id) ? '<span class="small muted" style="display:block;font-weight:600">Gali laikyti iš anksto – išlaikius atsirakina kitas lygis</span>' : ''}</div>
       </div>`;
     });
@@ -287,6 +297,20 @@ function viewPath() {
           <p style="text-align:center">Pirmiau išmok ankstesnę pamoką – ją patvirtina AI mokytoja po pokalbio.</p>
           <button class="btn block" data-close>Gerai</button>`,
           (m, close) => (m.querySelector('[data-close]').onclick = close)
+        );
+        return;
+      }
+      if (isPassed(x.lesson.id) && x.lesson.type !== 'checkpoint') {
+        const pr = (store.lessonState(x.lesson.id) || {}).practice || {};
+        modal(
+          `<div class="row">${ema('idle', 56)}<div class="grow"><h2 style="margin:0">${esc(x.lesson.title)}</h2><div class="stars" style="color:var(--gold)">${'★'.repeat(store.stars(x.lesson.id))}${'☆'.repeat(3 - store.stars(x.lesson.id))}</div></div></div>
+          <div class="stack" style="margin-top:14px">
+            <a class="btn block" href="#/practice/${x.lesson.id}/drill" data-close>🏋️ Pratybos (15 min.)${pr.drill ? ` · ${pr.drill} k.` : ''}</a>
+            <a class="btn block" href="#/practice/${x.lesson.id}/talk" data-close>🗨️ Vedamas pokalbis (15 min.)${pr.talk ? ` · ${pr.talk} k.` : ''}</a>
+            <a class="btn secondary block" href="#/lesson/${x.lesson.id}" data-close>📘 Pamoka iš naujo</a>
+            <a class="btn secondary block" href="#/lesson/${x.lesson.id}/learn" data-close>Teorija ir pratimai</a>
+          </div>`,
+          (m, close) => m.querySelectorAll('[data-close]').forEach((b) => (b.onclick = close))
         );
         return;
       }
@@ -545,6 +569,59 @@ function showResult(x, r) {
   };
 }
 
+// ---------- Pratybos ir vedamas pokalbis ----------
+// Trys sesijos vienai pamokai: pamoka (30 min) → pratybos (15 min) → vedamas pokalbis (15 min).
+const PRACTICE = {
+  drill: { icon: '🏋️', title: 'Pratybos', desc: 'Greiti vedami pratimai su Ema: pakeitimai, vertimas iš lietuvių, klausimų grandinė, diktantas, minutė kalbėjimo. Beveik be aiškinimų – kad gramatika taptų automatiška.', min: 10 },
+  talk: { icon: '🗨️', title: 'Vedamas pokalbis', desc: 'Pokalbis pamokos tema su pagalba: Ema ekrane parodo sakinių rėmus, klausia po vieną paprastą klausimą ir padeda lietuviškai. Saugu – gali skaityti nuo ekrano.', min: 10 },
+};
+function practiceCount(id, kind) {
+  const l = store.lessonState(id);
+  return (l && l.practice && l.practice[kind]) || 0;
+}
+function viewPractice(x, kind) {
+  const { lesson: l, level } = x;
+  if (!isPassed(l.id)) {
+    location.hash = `#/lesson/${l.id}`;
+    return;
+  }
+  const P = PRACTICE[kind];
+  setHeader(`${P.title}: ${l.title}`, '#/path');
+  setTab('path');
+  const prepared = [...(l.quiz || []), ...extraExercises(l)];
+  $view.innerHTML = `<div class="card"><div class="row">${ema('wave', 56)}<div class="grow"><h3>${P.icon} ${P.title}</h3>
+    <p class="small muted" style="margin:0">${esc(l.title)} · ${practiceCount(l.id, kind) ? `jau darei ${practiceCount(l.id, kind)} k.` : 'pirmas kartas'}</p></div></div>
+    <p class="small">${P.desc}</p>
+    <div class="row wrap"><button class="chip" id="theory">📘 Teorija</button>
+      <a class="chip" href="#/practice/${esc(l.id)}/${kind === 'drill' ? 'talk' : 'drill'}">${kind === 'drill' ? '🗨️ Vedamas pokalbis' : '🏋️ Pratybos'}</a></div>
+    </div><div id="talk"></div>`;
+  document.getElementById('theory').onclick = () => showTheoryModal(l);
+  const describe = prepared.map((q, n) => describeExercise(q, n + 1));
+  mountTalk(document.getElementById('talk'), {
+    prompt: () => (kind === 'drill' ? drillPrompt : guidedTalkPrompt)(l, level, settings, memory(), describe),
+    tools: [...TOOLS_LESSON, TOOL_EXERCISE, TOOL_THEORY, TOOL_SHOW],
+    lesson: l,
+    prepared,
+    mode: 'practice',
+    minTurns: P.min,
+    onResult: (r) => {
+      store.recordPractice(l.id, kind, r);
+      updateChips();
+      return () =>
+        modal(
+          `<div class="big-emoji">${ema(r.passed ? 'happy' : 'encourage', 96)}</div>
+          <h2 style="text-align:center">${P.title} baigtos</h2>
+          <div class="score">${esc(r.score)}<span class="muted" style="font-size:18px"> / 100</span></div>
+          <p>${esc(r.summary_lt || '')}</p>
+          ${(r.mistakes || []).length ? `<h3>✏️ Įsimink</h3>${r.mistakes.map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="small muted">${esc(m.note_lt)}</div>` : ''}</div>`).join('')}` : ''}
+          ${r.advice_lt ? `<div class="notice" style="margin:12px 0">💡 ${esc(r.advice_lt)}</div>` : ''}
+          <div class="stack" style="margin-top:16px"><a class="btn block" href="#/path" data-close>Į pamokas</a></div>`,
+          (m, close) => m.querySelectorAll('[data-close]').forEach((b) => (b.onclick = close))
+        );
+    },
+  });
+}
+
 // Nutrūkusios pamokos būsena (kol programėlė atidaryta) – pratęsiama vietoj pradėjimo iš naujo.
 const resumeStates = {};
 function clearResume(id) {
@@ -656,9 +733,15 @@ function mountTalk($el, opts) {
     }
   };
 
+  let startedAt = 0;
   const stop = () => {
     stopped = true;
     clearInterval(tick);
+    if (startedAt) {
+      store.addMinutes(Math.round((Date.now() - startedAt) / 60000));
+      startedAt = 0;
+      updateChips();
+    }
     session && session.close();
     mic && mic.stop();
     player && player.close();
@@ -673,7 +756,7 @@ function mountTalk($el, opts) {
         <button class="btn secondary" id="end">Baigti</button></div>
       <div class="textrow"><input type="text" id="txt" placeholder="…arba parašyk" autocomplete="off">
         <button class="btn" id="send" aria-label="Siųsti">➤</button></div>
-      ${opts.canAssess ? '<button class="btn secondary block" id="assess" style="margin-top:10px">✅ Noriu įvertinimo</button>' : ''}`;
+      ${opts.canAssess ? '<button class="btn secondary block" id="assess" style="margin-top:10px">✅ Noriu įvertinimo</button>' : opts.mode === 'practice' ? '<button class="btn secondary block" id="assess" style="margin-top:10px">🏁 Baigti sesiją</button>' : ''}`;
     $controls.querySelector('#mic').onclick = () => {
       if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
       micOn = !micOn;
@@ -702,6 +785,11 @@ function mountTalk($el, opts) {
     if (a) a.onclick = () => {
       if (!session) return;
       userWantsStop = true;
+      if (opts.mode === 'practice') {
+        sys('Baigiame sesiją');
+        session.sendText('I need to stop now. Please finish the session: call complete_lesson with an honest score for what we did, then say goodbye.');
+        return;
+      }
       sys('Paprašei įvertinimo – jei pamoka dar nebaigta, ji bus įrašyta kaip neišlaikyta ir galėsi pratęsti vėliau');
       session.sendText("I think I'm ready. Please assess me now if I have done enough; if not, tell me what is still missing.");
     };
@@ -804,6 +892,7 @@ function mountTalk($el, opts) {
     }
     drawControls();
     startStatusLoop();
+    startedAt = Date.now();
     session.sendText('(The learner has just opened the lesson. Please start now.)');
   };
 
@@ -887,7 +976,7 @@ function mountTalk($el, opts) {
         const minTurns = opts.minTurns || 8;
         const minEx = opts.canAssess ? Math.min(3, (opts.prepared || []).length) : 0;
         const missing = [];
-        if (args.passed) {
+        if (args.passed && opts.mode !== 'practice') {
           if (turns < minTurns) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
           if (exDone < minEx) missing.push(`only ${exDone} on-screen exercises done (minimum ${minEx})`);
           if (attempts < 6) missing.push(`only ${attempts} attempts at the target language counted (need at least 6)`);
@@ -896,6 +985,7 @@ function mountTalk($el, opts) {
           const unmet = crit.filter((c) => c && c.met === false).map((c) => c.criterion);
           if (unmet.length) missing.push(`criteria not met: ${unmet.join('; ')}`);
         }
+        if (args.passed && opts.mode === 'practice' && turns < minTurns && !userWantsStop) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
         if (args.passed && missing.length && !pendingResult && !userWantsStop) {
           sys(`⏳ Dar ne viskas: ${missing.length === 1 && /spoken only/.test(missing[0]) ? 'per mažai kalbėjai – Ema tęsia pamoką' : 'Ema tęsia pamoką, kad būtum tikrai pasiruošusi'}.`);
           response = { error: `Not accepted yet: ${missing.join('; ')}. Do not end the lesson. Continue practising the weak points for a few more turns, then call complete_lesson again.` };
@@ -914,7 +1004,7 @@ function mountTalk($el, opts) {
           if (r.passed && r.score < 60) r.passed = false;
           if (r.passed) clearResume(opts.lesson && opts.lesson.id);
           pendingResult = opts.onResult(r);
-          sys(r.passed ? '✅ Ema įvertino: pamoka išmokta!' : '⏳ Ema įvertino: dar reikia pasipraktikuoti.');
+          sys(opts.mode === 'practice' ? '✅ Sesija baigta ir įrašyta.' : r.passed ? '✅ Ema įvertino: pamoka išmokta!' : '⏳ Ema įvertino: dar reikia pasipraktikuoti.');
           response = { result: 'saved', passed: r.passed, score: r.score };
           setTimeout(flushResult, 20000); // jei Ema nieko nebepasakytų
         } else {
@@ -1057,9 +1147,15 @@ function viewSprint() {
 
 // ---------- Laisvas pokalbis ----------
 function viewFreeTalk() {
+  const level = currentLevel();
+  if (!['a2plus', 'b1'].includes(level.id)) {
+    // A1+–A2: vietoj laisvo pokalbio – vedamas pokalbis paskutinės išlaikytos pamokos tema.
+    const last = ALL.filter((x) => isPassed(x.lesson.id) && x.lesson.type !== 'checkpoint').pop();
+    location.hash = last ? `#/practice/${last.lesson.id}/talk` : '#/path';
+    return;
+  }
   setHeader('Laisvas pokalbis', '#/path');
   setTab('path');
-  const level = currentLevel();
   $view.innerHTML = `<div class="card"><h3>💬 Pasikalbėk su Ema apie bet ką</h3>
     <p>Čia nėra testo – tiesiog kalbiesi ir pratiniesi. Ema prisitaikys prie tavo lygio (<b>${esc(level.name)}</b>) ir naudos jau išmoktą gramatiką.</p>
     <label class="field"><span>Tema (nebūtina)</span><input type="text" id="topic" placeholder="pvz.: kelionės, darbas, filmai, savaitgalis"></label>
@@ -1086,6 +1182,8 @@ function viewStats() {
       <div class="stat"><b>${esc(currentLevel().name)}</b><span>dabartinis lygis</span></div>
       <div class="stat"><b>🔥 ${store.streakCount()}</b><span>dienų iš eilės</span></div>
       <div class="stat"><b>🗣️ ${p.speakingTurns || 0}</b><span>pasakytų replikų</span></div>
+      <div class="stat"><b>⏱ ${((p.minutes || 0) / 60).toFixed(1)} val.</b><span>mokymosi laiko (iš ~${TOTAL_HOURS} iki B1)</span></div>
+      <div class="stat"><b>🏋️ ${Object.values(p.lessons).reduce((n, l) => n + ((l.practice && (l.practice.drill || 0) + (l.practice.talk || 0)) || 0), 0)}</b><span>pratybų ir vedamų pokalbių</span></div>
     </div>
     <div class="card" style="margin-top:12px"><h3>Lygiai</h3>${LEVELS.map((lv) => {
       const items = ALL.filter((x) => x.level === lv);

@@ -35,6 +35,18 @@ Kursas savarankiškas: visa reikalinga medžiaga yra pačiose pamokose, į kitas
   Cambridge A2 Key ir B1 Preliminary specifikacijomis bei populiarių vadovėlių struktūra (`docs/SYLLABUS.md`).
   Šie šaltiniai naudoti tik kurso planui sudaryti; pačios pamokos parašytos atskirai ir yra savarankiškos.
 
+## Trys sesijos vienai pamokai (kad susidarytų 200–300 val.)
+Viena 30 min. pamoka neišmoko: Cambridge vertinimu nuo A1+ iki B1 reikia 200–300 mokymosi valandų. Todėl kiekviena
+pamoka turi tris sesijas su Ema, visos vedamos ir su pagalba ekrane (laisvas pokalbis atsirakina tik nuo A2+):
+1. **Pamoka** (~30 min.) – nauja medžiaga, užduotys, rašymas, vaidmenų žaidimas, įvertinimas.
+2. **Pratybos** (~15 min., kitą dieną / kai laikas kartoti) – greiti vedami pratimai: pakeitimo pratimai,
+   vertimas iš lietuvių, klausimų grandinė, diktantas, kalbėjimas „dar kartą greičiau“ (automatizavimas).
+3. **Vedamas pokalbis** (~15 min.) – pokalbis pamokos tema su sakinių rėmais ekrane, po vieną klausimą,
+   trumpi atsakymai išplečiami (saugi aplinka drovesnei mokinei).
+Skaičiavimas: 172 × 60 min. ≈ 172 val. + kartojimo pamokos ir egzaminai (~13 val.) + sprintai ir pratimai
+(~25–50 val.) ≈ **210–235 val.** Dienos planas: pamoka + pratybos + vedamas pokalbis + sprintas (~45–60 min.).
+Programėlė skaičiuoja mokymosi laiką ir rodo kelią iki ~220 val.
+
 ## Vienos pamokos eiga (su Ema)
 1. **Pašildymas (1–2 min.)**: atsiminimo klausimai iš ankstesnių pamokų.
 2. **Nauja tema**: Ema leidžia pabandyti, tada parodo taisyklę ar lentelę ir trumpai paaiškina.
