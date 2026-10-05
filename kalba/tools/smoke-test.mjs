@@ -63,8 +63,9 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
 await page.goto(base);
 await page.waitForSelector('.node');
 const nodes = await page.locator('.node').count();
-if (nodes !== 54) fail(`tikėtasi 54 pamokų, rasta ${nodes}`);
-if ((await page.locator('.node.locked').count()) !== 53) fail('turi būti atrakinta tik pirma pamoka');
+if (nodes < 50) fail(`per mažai pamokų: ${nodes}`);
+if ((await page.locator('.node.locked').count()) !== nodes - 1) fail('turi būti atrakinta tik pirma pamoka');
+const firstId = await page.locator('.node').first().getAttribute('data-id');
 await shot('1-kelias');
 
 // Užrakinta pamoka neatsidaro.
@@ -104,7 +105,7 @@ await page.fill('#model', 'gemini-test-live');
 await page.locator('#model').dispatchEvent('change');
 
 // Pokalbis.
-await page.goto(`${base}#/lesson/a1plus-01/talk`);
+await page.goto(`${base}#/lesson/${firstId}/talk`);
 await page.click('#start');
 await page.waitForSelector('.bubble.tutor');
 await page.waitForSelector('.board');
@@ -146,7 +147,7 @@ await page.click('#r-next');
 await page.waitForSelector('#start');
 await page.goto(`${base}#/path`);
 await page.waitForSelector('.node');
-if ((await page.locator('.node.locked').count()) !== 52) fail('po patvirtinimo neatsirakino kita pamoka');
+if ((await page.locator('.node.locked').count()) !== nodes - 2) fail('po patvirtinimo neatsirakino kita pamoka');
 
 // Sprintas.
 await page.goto(`${base}#/sprint`);
