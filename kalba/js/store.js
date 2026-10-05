@@ -80,6 +80,12 @@ export function recordQuiz(id, correct, total) {
   saveProgress();
 }
 
+export function recordExercise(ok) {
+  if (ok) progress.xp += 2;
+  touchStreak();
+  saveProgress();
+}
+
 export function recordSpeakingTurn() {
   progress.speakingTurns = (progress.speakingTurns || 0) + 1;
   saveProgress();

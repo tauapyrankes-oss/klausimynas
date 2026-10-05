@@ -29,7 +29,7 @@ const browser = await chromium.launch({ args: ['--use-fake-device-for-media-stre
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, permissions: ['microphone'] });
 const page = await ctx.newPage();
 const errors = [];
-page.on('pageerror', (e) => errors.push(e.message));
+page.on('pageerror', (e) => { errors.push(e.message); if (process.env.DEBUG) console.log('PAGEERR', e.message); });
 const shot = async (name) => shots && page.screenshot({ path: `${shots}/${name}.png` });
 
 // Imituotas Gemini Live serveris.
@@ -45,7 +45,12 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
       if (/start now/i.test(text)) {
         reply({ serverContent: { modelTurn: { parts: [{ inlineData: { mimeType: 'audio/pcm;rate=24000', data: 'AAAAAAAAAAA=' } }] }, outputTranscription: { text: "Hi! I'm Ema. What's your name?" } } });
         reply({ toolCall: { functionCalls: [{ id: 'c1', name: 'show_on_screen', args: { title: 'Pattern', lines: ["I'm Ona — Aš esu Ona"] } }] } });
-        reply({ serverContent: { turnComplete: true } });
+        reply({ toolCall: { functionCalls: [{ id: 't1', name: 'show_theory', args: { part: 'table' } }] } });
+        reply({ toolCall: { functionCalls: [{ id: 'e0', name: 'give_exercise', args: { type: 'choice', options: ['only one'] } }] } });
+        reply({ toolCall: { functionCalls: [{ id: 'e1', name: 'give_exercise', args: { type: 'order', sentence: 'Where are you from?', translation_lt: 'Iš kur tu?', seconds: 30 } }] } });
+        reply({ serverContent: { outputTranscription: { text: ' Take your time!' }, turnComplete: true } });
+      } else if (/^\[EXERCISE RESULT\]/.test(text)) {
+        reply({ serverContent: { outputTranscription: { text: 'Great job! Now tell me about you.' }, turnComplete: true } });
       } else {
         reply({ serverContent: { inputTranscription: { text: '' } } });
         reply({ toolCall: { functionCalls: [{ id: 'c2', name: 'complete_lesson', args: { passed: true, score: 88, summary_lt: 'Puikiai prisistatei!', strengths_lt: ['Teisingai vartoji am/is/are'], mistakes: [{ wrong: 'I from Lithuania', correct: "I'm from Lithuania", note_lt: 'Nepamiršk „am“.' }], advice_lt: 'Pakartok klausimus su „Are you…?“' } }] } });
@@ -71,9 +76,9 @@ await page.click('[data-close]');
 await page.locator('.node').first().click();
 await page.waitForSelector('.explain');
 await shot('2-teorija');
-await page.click('#next');
+await page.click('#quiz');
 await page.waitForSelector('.quiz-q');
-for (let k = 0; k < 20 && (await page.locator('#check').count()); k++) {
+for (let k = 0; k < 20 && (await page.locator('.check').count()); k++) {
   if (await page.locator('.match').count()) {
     // Sujungiame poras pagal data-k.
     const ks = await page.locator('.match [data-side="en"]').evaluateAll((els) => els.map((e) => e.dataset.k));
@@ -82,11 +87,12 @@ for (let k = 0; k < 20 && (await page.locator('#check').count()); k++) {
       await page.click(`.match [data-side="lt"][data-k="${key}"]`);
     }
   } else if (await page.locator('.options .option').count()) await page.locator('.options .option').first().click();
-  else if (await page.locator('#inp').count()) await page.fill('#inp', 'test');
-  else while (await page.locator('#bank .word:not(.used)').count()) await page.locator('#bank .word:not(.used)').first().click();
+  else if (await page.locator('.inp').count()) await page.fill('.inp', 'test');
+  else while (await page.locator('.bank .word:not(.used)').count()) await page.locator('.bank .word:not(.used)').first().click();
   if (k === 1) await shot('3-pratimai');
-  if (!(await page.locator('#check').getAttribute('data-next'))) await page.click('#check');
-  await page.click('#check');
+  if (process.env.DEBUG) console.log(k, await page.locator('.quiz-q').innerText().catch(() => '-'), await page.locator('.check').innerText());
+  if ((await page.locator('.check').innerText()) === 'Tikrinti') await page.click('.check');
+  await page.click('.check');
 }
 await page.waitForSelector('#go');
 
@@ -102,6 +108,26 @@ await page.goto(`${base}#/lesson/a1plus-01/talk`);
 await page.click('#start');
 await page.waitForSelector('.bubble.tutor');
 await page.waitForSelector('.board');
+await page.waitForSelector('.theory-inline .gtable');
+// Užduotis pokalbio viduryje: sudėliojame teisingai.
+await page.waitForSelector('.inline-exercise .bank .word');
+if ((await page.locator('.inline-exercise').count()) !== 1) fail('neteisinga užduotis turėjo būti atmesta');
+for (const w of ['Where', 'are', 'you', 'from']) {
+  const variants = [w, w.toLowerCase()];
+  for (const v of variants) {
+    const b = page.locator('.inline-exercise .bank .word:not(.used)', { hasText: new RegExp(`^${v}$`) });
+    if (await b.count()) { await b.first().click(); break; }
+  }
+}
+await shot('4a-uzduotis-pokalbyje');
+await page.click('.inline-exercise .check');
+await page.waitForSelector('.inline-exercise .feedback.right');
+await page.waitForFunction(() => document.querySelectorAll('.bubble.tutor').length >= 2);
+await shot('4b-po-uzduoties');
+const exMsg = sent.find((m) => m.clientContent && /^\[EXERCISE RESULT\].*CORRECT/.test(m.clientContent.turns[0].parts[0].text));
+if (!exMsg) fail('užduoties rezultatas nenusiųstas Emai');
+const errResp = sent.find((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'e0');
+if (!errResp || !errResp.toolResponse.functionResponses[0].response.error) fail('klaidinga užduotis negrąžino klaidos');
 await page.waitForSelector('#txt');
 await page.fill('#txt', "Hi, I'm Ona. I'm from Lithuania.");
 await page.click('#send');
@@ -117,7 +143,7 @@ if (!/Pamoka išmokta/.test(txt)) fail('rezultate nėra „Pamoka išmokta“');
 
 // Po patvirtinimo atsirakina kita pamoka.
 await page.click('#r-next');
-await page.waitForSelector('.explain');
+await page.waitForSelector('#start');
 await page.goto(`${base}#/path`);
 await page.waitForSelector('.node');
 if ((await page.locator('.node.locked').count()) !== 52) fail('po patvirtinimo neatsirakino kita pamoka');

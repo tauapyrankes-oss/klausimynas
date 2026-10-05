@@ -46,6 +46,40 @@ export const TOOL_SHOW = {
   },
 };
 
+export const TOOL_EXERCISE = {
+  name: 'give_exercise',
+  description:
+    'Put an interactive exercise on the learner\'s screen (tap/type/build/listen). Either use a prepared exercise by quiz_index, or create your own by giving type and its fields. The app checks the answer and sends you an [EXERCISE RESULT] message.',
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      quiz_index: { type: 'INTEGER', description: 'Number of a prepared exercise from the lesson list (1-based). If set, other fields are ignored.' },
+      type: { type: 'STRING', enum: ['choice', 'input', 'order', 'listen', 'match'], description: 'choice = pick one option; input = type the answer (e.g. translate or fill the gap); order = build a sentence from shuffled words; listen = dictation of a sentence; match = match English words with Lithuanian.' },
+      question: { type: 'STRING', description: 'Instruction or question shown on screen. For input/choice in Lithuanian or English, with ___ for a gap.' },
+      options: { type: 'ARRAY', items: { type: 'STRING' }, description: 'choice: 2-4 options.' },
+      correct_option: { type: 'INTEGER', description: 'choice: 0-based index of the correct option.' },
+      accepted_answers: { type: 'ARRAY', items: { type: 'STRING' }, description: 'input: all acceptable answers (include contractions and variants).' },
+      sentence: { type: 'STRING', description: 'order/listen: the correct English sentence (4-10 words).' },
+      translation_lt: { type: 'STRING', description: 'order/listen: Lithuanian translation shown as a hint.' },
+      pairs: { type: 'ARRAY', items: { type: 'STRING' }, description: 'match: 3-6 items like "yesterday = vakar".' },
+      explanation_lt: { type: 'STRING', description: 'Optional short rule in Lithuanian shown after answering.' },
+      seconds: { type: 'INTEGER', description: 'Optional time limit 15-60 s to make it a challenge. Omit for no timer.' },
+    },
+  },
+};
+
+export const TOOL_THEORY = {
+  name: 'show_theory',
+  description: 'Show a prepared part of this lesson\'s theory on the learner\'s screen (rule explanation in Lithuanian, table, examples with audio, common mistakes, vocabulary, phrases).',
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      part: { type: 'STRING', enum: ['rule', 'table', 'examples', 'pitfalls', 'vocab', 'phrases'] },
+    },
+    required: ['part'],
+  },
+};
+
 const PACE = {
   slow: 'Speak slowly and clearly, with short pauses between sentences, like a patient teacher for a beginner.',
   normal: 'Speak at a natural but clear pace.',
@@ -82,7 +116,7 @@ ${done}
 ${mistakes}`;
 }
 
-export function lessonPrompt(lesson, level, settings, memory) {
+export function lessonPrompt(lesson, level, settings, memory, prepared = []) {
   const g = lesson.grammar || {};
   const s = lesson.speaking || {};
   const isCheckpoint = lesson.type === 'checkpoint';
@@ -103,13 +137,32 @@ Success criteria:
 ${(s.successCriteria || []).map((c) => `- ${c}`).join('\n')}
 Minimum learner turns before assessment: ${s.minLearnerTurns || 8}
 
-LESSON FLOW
-1. Greet the learner warmly and in 1-2 sentences say (in simple English, with a short Lithuanian line) what we practise today.
+Prepared on-screen exercises (use with give_exercise quiz_index; answers are for you only – never say them before the learner answers):
+${prepared.join('\n')}
+
+ONE CONTINUOUS INTERACTIVE ${isCheckpoint ? 'EXAM' : 'LESSON'}
+This is not "talk first, exercises later". Weave talking and on-screen exercises together, like a lively private lesson:
+talk a little → exercise → react → talk again → exercise → … Keep the rhythm varied and fun.
 ${isCheckpoint
-    ? '2. Explain this is a level exam. Give little help during tasks: no explanations, only repeat or rephrase questions.\n3. Go through all tasks, covering all topics of the level.'
-    : '2. Quick warm-up: elicit 2-3 example sentences with the target grammar. If the learner clearly does not understand the rule, explain it very briefly in Lithuanian with one example on screen.\n3. Work through the tasks in order. Use role-play where the scenario suggests it. Give the learner many chances to use the target grammar and vocabulary.'}
-4. When the tasks are done and the minimum number of learner turns is reached, tell the learner you will now give feedback, then call complete_lesson.
-5. After calling it, tell them the result briefly and kindly (in English plus one Lithuanian sentence). If they did not pass, tell them what to practise and that they can try again.
+    ? `1. Greet, say this is the ${level.name} level exam and that you will help less than usual.
+2. Alternate: 2-4 conversational exchanges on one topic of the level, then an exercise (give_exercise), then a new topic. Cover all topics of the level.
+3. Use at least 6 exercises in total, mixing prepared ones and your own, all types (choice, input, order, listen, match); give 2-3 of them a time limit (seconds: 20-45).
+4. Finish with the speaking tasks above (no explanations during the exam, only repeat or rephrase).`
+    : `1. Greet warmly; in 1-2 sentences (simple English + a short Lithuanian line) say what we learn today.
+2. Discover the rule: ask 1-2 easy questions that make the learner try the new structure. Then call show_theory (part "rule" or "table") and explain it in 2-3 short sentences (Lithuanian allowed). Later use show_theory for "examples", "pitfalls" or "vocab" when useful.
+3. Main part – repeat this cycle 4-6 times:
+   a) 2-4 short conversational exchanges where the learner must use the target grammar/vocabulary in their own sentences;
+   b) one give_exercise (start easy with prepared ones, then your own, personalised with things the learner told you);
+   c) react to the [EXERCISE RESULT]: praise specifically, or explain the mistake in 1-2 sentences and ask the learner to say the correct sentence aloud.
+   Use at least 4 exercises in total and at least 3 different types (include order and listen). Give 1-2 later exercises a time limit (seconds: 20-40) as a fun challenge.
+4. Final part: the role-play / speaking tasks above, with little help.`}
+5. When the tasks are done and the minimum number of learner turns is reached, say you will now give feedback, then call complete_lesson. Exercise results count, but speaking matters most.
+6. After calling it, tell the result briefly and kindly (English + one Lithuanian sentence). If not passed, say what to practise and that they can try again.
+
+EXERCISE ETIQUETTE
+- After calling give_exercise, say only a very short encouragement ("Take your time!") and then stay silent until the [EXERCISE RESULT] message arrives.
+- Never call give_exercise twice in a row without talking in between. Never reveal the answer before the result.
+- Messages starting with [EXERCISE RESULT] come from the app, not from the learner's mouth – do not count them as speaking turns.
 
 ASSESSMENT RULES (STRICT)
 - You alone decide whether the lesson is learned. Pass (passed=true) only if every success criterion is met by the learner's OWN spontaneous sentences, with the target structure correct in roughly 80% or more of attempts. Repeating after you does not count.
@@ -128,5 +181,6 @@ FREE CONVERSATION PRACTICE
 There is no test. Have a friendly, natural conversation ${topic ? `about: ${topic}` : 'about the learner\'s life, interests, plans and opinions'}.
 Ask open questions, react with interest, share a little about "yourself" to keep it natural, and push gently for longer answers ("Why?", "Tell me more", "What happened next?").
 Recycle the already learned grammar. Correct only important or repeated errors, using show_on_screen for the correct sentence.
+About every 5-6 exchanges, make it playful with a quick give_exercise of your own (type, question, answers – based on what the learner just said or a mistake they made), then continue the conversation.
 Start now by greeting the learner and asking an easy first question.`;
 }
