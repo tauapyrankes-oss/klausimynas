@@ -858,8 +858,7 @@
           "Uses too/enough correctly at least 3 times",
           "Uses at least 4 indefinite pronouns with no double negation",
           "Produces at least 4 correct first conditional sentences with no 'will' after if/when/unless",
-          "Uses at least 6 money/shopping words correctly, including lend or borrow",
-          "Uses natural rising intonation in yes/no questions and requests"
+          "Uses at least 6 money/shopping words correctly, including lend or borrow, and natural rising intonation in yes/no questions"
         ],
         minLearnerTurns: 12
       }

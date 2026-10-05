@@ -38,7 +38,7 @@
           { en: "Trakai Island Castle was built in the 14th and 15th centuries.", lt: "Trakų salos pilis pastatyta XIV–XV amžiais." },
           { en: "English is spoken in most hotels in the city.", lt: "Daugumoje miesto viešbučių kalbama angliškai." },
           { en: "Amber is often found on the beaches after a storm.", lt: "Po audros paplūdimiuose dažnai randama gintaro." },
-          { en: "The euro has been used in Lithuania since 2015, but before that the litas was used.", lt: "Lietuvoje euras naudojamas nuo 2015 m., o prieš tai buvo naudojamas litas." },
+          { en: "Today the euro is used in Lithuania, but before 2015 the litas was used.", lt: "Dabar Lietuvoje naudojamas euras, o iki 2015 m. buvo naudojamas litas." },
           { en: "Our room was cleaned every morning.", lt: "Mūsų kambarys būdavo tvarkomas kiekvieną rytą." },
           { en: "Were you met at the airport?", lt: "Ar tave pasitiko oro uoste?" },
           { en: "The old bridge was destroyed in the war and rebuilt in the 1950s.", lt: "Senasis tiltas buvo sugriautas per karą ir atstatytas šeštajame dešimtmetyje." }
@@ -178,10 +178,10 @@
         { en: "to rebook", lt: "perregistruoti, iš naujo užsakyti" }
       ],
       phrases: [
-        { en: "Our flight has been delayed.", lt: "Mūsų skrydis vėluoja." },
+        { en: "Our flight is delayed.", lt: "Mūsų skrydis vėluoja." },
         { en: "I've missed my connection.", lt: "Nespėjau į persėdimą." },
         { en: "My suitcase didn't arrive.", lt: "Mano lagaminas neatvyko." },
-        { en: "I think I've been pickpocketed.", lt: "Atrodo, mane apvogė kišenvagis." },
+        { en: "I think my wallet was stolen.", lt: "Atrodo, pavogė mano piniginę." },
         { en: "We got lost on the way.", lt: "Pakeliui pasiklydome." },
         { en: "Am I entitled to compensation?", lt: "Ar man priklauso kompensacija?" }
       ],
@@ -516,8 +516,8 @@
           explain: "Žmogus → <b>who</b>." },
         { type: "choice", q: "In 2004, ___ Lithuania joined the EU, I was still at school.", options: ["which", "where", "when"], answer: 2,
           explain: "Laikas → <b>when</b>." },
-        { type: "choice", q: "Kuriame sakinyje skyryba teisinga?", options: ["Riga which is in Latvia is beautiful.", "Riga, which is in Latvia, is beautiful.", "Riga, which is in Latvia is beautiful."], answer: 1,
-          explain: "Papildoma informacija atskiriama kableliais iš abiejų pusių." },
+        { type: "choice", q: "Turiu tik vieną brolį. Kur reikia kablelių? “My brother who lives in Oslo is a doctor.”", options: ["after “brother” and after “Oslo”", "only after “brother”", "no commas"], answer: 0,
+          explain: "Brolis vienas, todėl <i>who lives in Oslo</i> – papildoma informacija ir atskiriama kableliais iš abiejų pusių: My brother, who lives in Oslo, is a doctor." },
         { type: "input", q: "Sujunk su which: The train was late. That was annoying. → The train was late, …", answer: ["which was annoying", "The train was late, which was annoying"],
           explain: "<b>which</b> gali komentuoti visą ankstesnį sakinį." },
         { type: "order", words: ["my", "aunt", "who", "lives", "in", "london", "is", "a", "nurse"], answer: "my aunt who lives in london is a nurse",
@@ -560,7 +560,7 @@
           "<b>Skaitymas: pirma bendras vaizdas.</b> Pirmą kartą perskaityk tekstą greitai, nesustodamas ties nežinomais žodžiais (<i>skimming</i>). Užduok sau klausimą: apie kokias šventes rašoma ir kuo jos panašios? Tik antrą kartą skaityk atidžiai ir ieškok detalių (<i>scanning</i>) – datų, vietų, papročių.",
           "<b>Spėk žodžių reikšmę iš konteksto.</b> Jei nežinai žodžio <i>bonfire</i>, pažiūrėk aplinkui: <i>people jump over bonfires… the fire burns all night</i> – vadinasi, tai didelis laužas. Dažnai užtenka suprasti, ar tai daiktas, veiksmas ar savybė.",
           "<b>Šventės žodynas.</b> <i>celebrate</i> – švęsti (<i>we celebrate Christmas</i>, ne <i>celebrate on Christmas</i>); <i>take place</i> – vykti (<i>The festival takes place in June</i>); <i>tradition</i> ir <i>custom</i> – tradicija ir paprotys; <i>decorate</i> – puošti; <i>public holiday</i> – valstybinė nedarbo diena.",
-          "<b>Kaip pristatyti tradiciją (1–2 min.):</b> 1) Kas ir kada: <i>Joninės is celebrated on 23–24 June.</i> 2) Istorija (passive): <i>It has been celebrated for centuries. It was originally a pagan festival.</i> 3) Ką žmonės daro: <i>People light bonfires, which…</i> 4) Maistas ir simboliai. 5) Asmeninė patirtis: <i>Last year, I…</i>",
+          "<b>Kaip pristatyti tradiciją (1–2 min.):</b> 1) Kas ir kada: <i>Joninės is celebrated on 23–24 June.</i> 2) Istorija (passive): <i>It is very old. It was originally a pagan festival.</i> 3) Ką žmonės daro: <i>People light bonfires, which…</i> 4) Maistas ir simboliai. 5) Asmeninė patirtis: <i>Last year, I…</i>",
           "Naudok šio skyriaus gramatiką: <b>passive</b> (<i>is celebrated, are decorated, is eaten</i>) ir <b>neapibrėžiamuosius sakinius</b> (<i>Užgavėnės, which takes place in February, …</i>). Tai skamba kaip tikras gidas ar egzamino atsakymas."
         ],
         table: [
@@ -588,7 +588,7 @@
       },
       reading: {
         title: "Three festivals, one idea",
-        text: "People all over the world celebrate the turning points of the year. Here are three festivals which show how similar we really are.\n\nIn Lithuania, the shortest night of the year is celebrated on 23–24 June. The festival is called Joninės or Rasos, and it is a public holiday. It was originally a pagan festival of the sun, and many old customs are still followed today. Bonfires are lit near lakes and rivers, and young people jump over the flames for good luck. Girls make wreaths, which are made of wild flowers, and float them on the water. Some people walk into the forest at midnight to look for the magic fern flower, which, according to legend, brings happiness. Nobody has ever found one, of course!\n\nIn the USA, Thanksgiving takes place on the fourth Thursday of November. It is often connected with a harvest meal which was shared by early settlers and Native Americans in 1621. Today it is a family festival: people travel hundreds of kilometres to be at home, and the airports are incredibly busy. A large turkey is cooked, and pumpkin pie is served for dessert. Before the meal, many families say what they are thankful for.\n\nIn Lithuania again, Užgavėnės marks the end of winter. It takes place in February or early March, just before Lent. People wear scary masks, children go from house to house, and a big straw figure called Morė, who represents winter, is burnt. Lots of pancakes are eaten, because it is the last day before the fasting period.\n\nFire, food and family: maybe these are the things which every culture needs to celebrate.",
+        text: "People all over the world celebrate the turning points of the year. Here are three festivals which show how similar we really are.\n\nIn Lithuania, the shortest night of the year is celebrated on 23–24 June. The festival is called Joninės or Rasos, and it is a public holiday. It was originally a pagan festival of the sun, and many old customs are still followed today. Bonfires are lit near lakes and rivers, and young people jump over the flames for good luck. Girls make wreaths, which are made of wild flowers, and float them on the water. Some people walk into the forest at midnight to look for the magic fern flower, which, according to legend, brings happiness. Nobody has ever found one, of course!\n\nIn the USA, Thanksgiving takes place on the fourth Thursday of November. It is often connected with a harvest meal which was shared by early settlers and Native Americans in 1621. Today it is a family festival: people travel hundreds of kilometres to be at home, and the airports are incredibly busy. A large turkey is cooked, and pumpkin pie is served for dessert. Before the meal, many families say what they are thankful for.\n\nIn Lithuania again, Užgavėnės marks the end of winter. It takes place in February or early March, just before Lent. People wear scary masks and go from house to house, and a big straw figure called Morė, who represents winter, is burnt. Lots of pancakes are eaten, because it is the last day before the fasting period.\n\nFire, food and family: maybe these are the things which every culture needs to celebrate.",
         glossary: [
           { en: "turning point", lt: "lūžio taškas" },
           { en: "pagan", lt: "pagoniškas" },
@@ -705,7 +705,7 @@
         ],
         examples: [
           { en: "I'm afraid my suitcase hasn't arrived. It was checked in in Vilnius.", lt: "Deja, mano lagaminas neatvyko. Jis buvo užregistruotas Vilniuje." },
-          { en: "Could you tell me when it will be delivered to my hotel?", lt: "Gal galėtumėte pasakyti, kada jis bus pristatytas į mano viešbutį?" },
+          { en: "Could you tell me when it will arrive at my hotel?", lt: "Gal galėtumėte pasakyti, kada jis atkeliaus į mano viešbutį?" },
           { en: "It's a large black suitcase, which has a red ribbon on the handle.", lt: "Tai didelis juodas lagaminas su raudonu kaspinu ant rankenos." },
           { en: "Do you know if I'm entitled to compensation?", lt: "Ar žinote, ar man priklauso kompensacija?" },
           { en: "Our flight was delayed, so we missed the connection in Warsaw.", lt: "Mūsų skrydis vėlavo, todėl nespėjome į persėdimą Varšuvoje." },
@@ -730,7 +730,7 @@
       phrases: [
         { en: "My suitcase didn't come out on the carousel.", lt: "Mano lagaminas neatvažiavo bagažo juosta." },
         { en: "Could you tell me what happens next?", lt: "Gal galite pasakyti, kas bus toliau?" },
-        { en: "Can it be delivered to my hotel?", lt: "Ar jį galima pristatyti į mano viešbutį?" },
+        { en: "Could you deliver it to my hotel?", lt: "Ar galėtumėte jį pristatyti į mano viešbutį?" },
         { en: "Do you know how long it will take?", lt: "Ar žinote, kiek tai užtruks?" },
         { en: "Can I buy essentials and claim the money back?", lt: "Ar galiu nusipirkti būtiniausių daiktų ir susigrąžinti pinigus?" }
       ],
