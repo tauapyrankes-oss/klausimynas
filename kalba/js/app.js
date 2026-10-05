@@ -6,6 +6,8 @@ import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
 
 const { settings } = store;
+// Gemini Live modeliai (2026 m. spalis): numatytasis – gemini-3.8-live.
+const KNOWN_LIVE = ['gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.1-flash-live-preview'];
 setSfx(settings.sfx !== 'off');
 // Kursas: curriculum/course.js (lygiai ir skyriai) + kiekvieno skyriaus failas curriculum/<lygis>/<skyrius>.js.
 function loadScript(src) {
@@ -609,9 +611,8 @@ function mountTalk($el, opts) {
     $controls.innerHTML = '<button class="btn block" disabled>Jungiamasi…</button>';
     try {
       if (!settings.model) {
-        const models = await listLiveModels(settings.apiKey);
-        if (!models.length) throw new Error('Su šiuo raktu nerasta jokio Live modelio.');
-        store.saveSettings({ model: models[0].id });
+        const models = await listLiveModels(settings.apiKey).catch(() => []);
+        store.saveSettings({ model: models.length ? models[0].id : KNOWN_LIVE[0] });
       }
       session = new LiveSession({
         apiKey: settings.apiKey,
@@ -948,8 +949,8 @@ function viewSettings() {
       <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="AIza…" autocomplete="off"></label>
       <label class="field"><span>Live modelis</span>
         <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
-        <datalist id="models"></datalist>
-        <small>Paspausk „Rasti modelius“ – programėlė paklaus Google, kokie Live modeliai prieinami, ir parinks naujausią (pirmenybė 3.8).</small></label>
+        <datalist id="models">${KNOWN_LIVE.map((m) => `<option value="${m}">`).join('')}</datalist>
+        <small>Rekomenduojama <b>gemini-3.8-live</b> (greičiausia). „extended-thinking“ – protingesnė, bet lėtesnė. „Rasti modelius“ parodys, kas prieinama tavo raktui.</small></label>
       <div class="row wrap"><button class="btn secondary" id="find">🔎 Rasti modelius</button><span class="small muted" id="find-out"></span></div>
     </div>
     <div class="card"><h3>👩‍🏫 Mokytoja Ema</h3>
