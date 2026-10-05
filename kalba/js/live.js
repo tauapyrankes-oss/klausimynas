@@ -23,6 +23,9 @@ function modelRank(id) {
   const v = id.match(/gemini-(\d+(?:\.\d+)?)/);
   let r = v ? parseFloat(v[1]) * 100 : 0;
   if (/3\.8/.test(id)) r += 10000;
+  if (id === 'gemini-3.8-live') r += 1000;
+  if (/extended-thinking/.test(id)) r -= 500; // lėtesnis – tik jei pasirinktas ranka
+  if (/translate|transcribe/.test(id)) r -= 20000; // ne pokalbiui
   if (/live/.test(id)) r += 5;
   if (/native-audio/.test(id)) r += 4;
   if (/flash/.test(id)) r += 2;
@@ -34,6 +37,11 @@ export class LiveSession extends EventTarget {
   constructor({ apiKey, model, systemInstruction, tools, voice }) {
     super();
     Object.assign(this, { apiKey, model, systemInstruction, tools, voice });
+    // 3.8 Live įrankius pagal nutylėjimą kviečia neblokuojančiai; mūsų pamokai reikia, kad Ema palauktų
+    // atsakymo (BLOCKING). „Extended thinking“ modelis palaiko tik NON_BLOCKING – tada atsakymui
+    // nurodome „scheduling“.
+    this.nonBlocking = /extended-thinking/.test(model);
+    this.blockingField = !this.nonBlocking && /gemini-3\.(8|9)|gemini-[4-9]/.test(model);
     this.ws = null;
     this.resumeHandle = null;
     this.closedByUser = false;
@@ -62,7 +70,10 @@ export class LiveSession extends EventTarget {
           contextWindowCompression: { slidingWindow: {} },
           sessionResumption: this.resumeHandle ? { handle: this.resumeHandle } : {},
         };
-        if (this.tools && this.tools.length) setup.tools = [{ functionDeclarations: this.tools }];
+        if (this.tools && this.tools.length) {
+          const decls = this.blockingField ? this.tools.map((t) => ({ ...t, behavior: 'BLOCKING' })) : this.tools;
+          setup.tools = [{ functionDeclarations: decls }];
+        }
         ws.send(JSON.stringify({ setup }));
       };
 
@@ -130,11 +141,16 @@ export class LiveSession extends EventTarget {
     this.send({ realtimeInput: { audioStreamEnd: true } });
   }
 
+  // realtimeInput.text – rekomenduojamas būdas; clientContent su turnComplete visada nutrauktų Emą.
   sendText(text) {
-    this.send({ clientContent: { turns: [{ role: 'user', parts: [{ text }] }], turnComplete: true } });
+    this.send({ realtimeInput: { text } });
   }
 
-  sendToolResponse(functionResponses) {
+  // scheduling: SILENT | WHEN_IDLE | INTERRUPT – naudojamas tik neblokuojančiam režimui.
+  sendToolResponse(functionResponses, scheduling = 'WHEN_IDLE') {
+    if (this.nonBlocking) {
+      functionResponses = functionResponses.map((r) => ({ ...r, response: { ...r.response, scheduling } }));
+    }
     this.send({ toolResponse: { functionResponses } });
   }
 

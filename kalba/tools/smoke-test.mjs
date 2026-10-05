@@ -40,8 +40,8 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
     sent.push(msg);
     const reply = (o) => ws.send(JSON.stringify(o));
     if (msg.setup) return reply({ setupComplete: {} });
-    if (msg.clientContent) {
-      const text = msg.clientContent.turns[0].parts[0].text;
+    if (msg.realtimeInput && msg.realtimeInput.text) {
+      const text = msg.realtimeInput.text;
       if (/start now/i.test(text)) {
         reply({ serverContent: { modelTurn: { parts: [{ inlineData: { mimeType: 'audio/pcm;rate=24000', data: 'AAAAAAAAAAA=' } }] }, outputTranscription: { text: "Hi! I'm Ema. What's your name?" } } });
         reply({ toolCall: { functionCalls: [{ id: 'c1', name: 'show_on_screen', args: { title: 'Pattern', lines: ["I'm Ona — Aš esu Ona"] } }] } });
@@ -101,7 +101,7 @@ await page.waitForSelector('#go');
 await page.goto(`${base}#/settings`);
 await page.fill('#key', 'test-key');
 await page.locator('#key').dispatchEvent('change');
-await page.fill('#model', 'gemini-test-live');
+await page.fill('#model', 'gemini-3.8-live');
 await page.locator('#model').dispatchEvent('change');
 
 // Pokalbis.
@@ -125,7 +125,7 @@ await page.click('.inline-exercise .check');
 await page.waitForSelector('.inline-exercise .feedback.right');
 await page.waitForFunction(() => document.querySelectorAll('.bubble.tutor').length >= 2);
 await shot('4b-po-uzduoties');
-const exMsg = sent.find((m) => m.clientContent && /^\[EXERCISE RESULT\].*CORRECT/.test(m.clientContent.turns[0].parts[0].text));
+const exMsg = sent.find((m) => m.realtimeInput && /^\[EXERCISE RESULT\].*CORRECT/.test(m.realtimeInput.text || ''));
 if (!exMsg) fail('užduoties rezultatas nenusiųstas Emai');
 const errResp = sent.find((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'e0');
 if (!errResp || !errResp.toolResponse.functionResponses[0].response.error) fail('klaidinga užduotis negrąžino klaidos');
@@ -135,7 +135,8 @@ await page.click('#send');
 await page.waitForSelector('.modal', { timeout: 10000 });
 await shot('4-rezultatas');
 const setup = sent.find((m) => m.setup);
-if (!setup || setup.setup.model !== 'models/gemini-test-live') fail('setup be teisingo modelio');
+if (!setup || setup.setup.model !== 'models/gemini-3.8-live') fail('setup be teisingo modelio');
+if (!setup.setup.tools[0].functionDeclarations.every((f) => f.behavior === 'BLOCKING')) fail('3.8 Live įrankiai turi būti BLOCKING');
 if (!setup.setup.tools[0].functionDeclarations.some((f) => f.name === 'complete_lesson')) fail('nėra complete_lesson įrankio');
 if (!sent.some((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'c2')) fail('negautas toolResponse');
 if (!sent.some((m) => m.realtimeInput && m.realtimeInput.audio)) console.warn('WARN: mikrofono garsas nesiųstas (gali būti normalu be garso įrenginio)');

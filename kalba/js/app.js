@@ -708,7 +708,7 @@ function mountTalk($el, opts) {
           response = { result: 'already saved' };
         }
       }
-      s.sendToolResponse([{ id: fc.id, name: fc.name, response }]);
+      s.sendToolResponse([{ id: fc.id, name: fc.name, response }], fc.name === 'complete_lesson' ? 'WHEN_IDLE' : 'SILENT');
     });
     s.addEventListener('go-away', async () => {
       if (reconnecting || stopped) return;
@@ -892,7 +892,7 @@ function viewSettings() {
       → „Create API key“. Raktas saugomas tik šiame telefone.</p>
       <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="AIza…" autocomplete="off"></label>
       <label class="field"><span>Live modelis</span>
-        <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="pvz.: gemini-3.8-flash-live">
+        <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
         <datalist id="models"></datalist>
         <small>Paspausk „Rasti modelius“ – programėlė paklaus Google, kokie Live modeliai prieinami, ir parinks naujausią (pirmenybė 3.8).</small></label>
       <div class="row wrap"><button class="btn secondary" id="find">🔎 Rasti modelius</button><span class="small muted" id="find-out"></span></div>
