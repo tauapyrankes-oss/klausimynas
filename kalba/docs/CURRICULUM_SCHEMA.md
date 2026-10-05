@@ -1,4 +1,44 @@
-# Pamokų duomenų schema
+# Pamokų duomenų schema (v2: lygiai → skyriai → pamokos)
+
+Kurso planas: `docs/syllabus.json` (lygiai, skyriai, pamokų temos ir šaltiniai).
+Iš jo sugeneruojamas `curriculum/course.js` (`node tools/build-course.mjs`), kuriame yra lygių ir skyrių
+metaduomenys bei šaltinių sąrašas. Kiekvienas skyrius – atskiras failas `curriculum/<lygis>/<skyriaus-id>.js`:
+
+```js
+(window.UNITS = window.UNITS || {})["a2-u03"] = {
+  id: "a2-u03",
+  lessons: [ /* Lesson[] – ta pati tvarka ir tie patys id kaip syllabus.json */ ]
+};
+```
+
+Programėlė pati įkelia visus skyrių failus pagal `course.js`. Pamokų tvarka visame kurse = atrakinimo tvarka.
+
+## Lesson papildomi laukai (v2)
+
+```js
+{
+  id: "a2-u03-l02",
+  type: "lesson",            // "lesson" | "checkpoint"
+  kind: "grammar",           // grammar | vocabulary | functional | skills | pronunciation | review | checkpoint
+  sources: ["bc-grammar"],   // šaltinių id iš syllabus.json → rodomi kaip nuorodos „Šaltiniai“
+  reading: {                 // NEPRIVALOMA (ypač „skills“ pamokoms): trumpas tekstas
+    title: "A weekend in Vilnius",
+    text: "120–300 žodžių tekstas angliškai, lygiui pritaikytas. Pastraipos atskirtos \n\n.",
+    glossary: [{ en: "crowded", lt: "perpildytas" }],
+    questions: [ /* quiz užduotys (choice/input) apie tekstą */ ]
+  },
+  // …kiti laukai – kaip žemiau (icon, title, titleEn, canDo, grammar, vocab, phrases, quiz, speaking)
+}
+```
+
+- `grammar` laukas naudojamas visoms rūšims kaip „teorija“: gramatikos pamokoje – taisyklė; žodyno – kaip
+  vartoti žodžius (kolokacijos, dažnos klaidos); funkcinėje – situacijos taisyklės (mandagumas, struktūra);
+  tarimo – garsai, burnos padėtis, minimalios poros (`table`), lietuvių klaidos; kartojimo – ką kartojame.
+- `vocab` turi ≥ 6 žodžius visoms rūšims išskyrus `review`/`checkpoint`.
+
+---
+
+## Ankstesnė (v1) Lesson schema – galioja toliau
 
 Kiekvienas lygis – atskiras failas `kalba/curriculum/<lygis>.js`, kraunamas kaip paprastas
 `<script>` (be build žingsnio). Failas prideda vieną objektą į `window.LEVELS`:

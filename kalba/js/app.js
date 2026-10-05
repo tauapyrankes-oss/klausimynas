@@ -6,7 +6,33 @@ import { esc, rich, norm, shuffle, speak } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
 
 const { settings } = store;
-const LEVELS = window.LEVELS || [];
+// Kursas: curriculum/course.js (lygiai ir skyriai) + kiekvieno skyriaus failas curriculum/<lygis>/<skyrius>.js.
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const el = document.createElement('script');
+    el.src = src;
+    el.onload = el.onerror = resolve;
+    document.head.appendChild(el);
+  });
+}
+async function loadCourse() {
+  const C = window.COURSE;
+  if (!C) {
+    // Senas formatas (v1): vienas failas lygiui.
+    for (const f of ['a1plus', 'a2', 'a2plus', 'b1']) await loadScript(`curriculum/${f}.js`);
+    return window.LEVELS || [];
+  }
+  await Promise.all(C.levels.flatMap((l) => l.units.map((u) => loadScript(`curriculum/${u.file}`))));
+  const units = window.UNITS || {};
+  return C.levels
+    .map((l) => ({
+      ...l,
+      lessons: l.units.flatMap((u, n) => ((units[u.id] && units[u.id].lessons) || []).map((x) => ({ ...x, unit: { ...u, n: n + 1 } }))),
+    }))
+    .filter((l) => l.lessons.length);
+}
+const LEVELS = await loadCourse();
+const SOURCES = (window.COURSE && window.COURSE.sources) || {};
 const LEVEL_COLORS = { a1plus: '#1f9d8a', a2: '#5b4fd6', a2plus: '#d9632b', b1: '#c23b7a' };
 
 // Visas kursas viena eile: atrakinimas eina griežtai iš eilės.
@@ -156,8 +182,16 @@ function viewPath() {
       <div class="level-head"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
       <div class="progressbar"><span style="width:${(passed / items.length) * 100}%"></span></div>
       <div class="small" style="margin-top:6px">${passed} / ${items.length} pamokų</div></div><div class="path">`;
+    let unitId = null;
     items.forEach((x, k) => {
       const l = x.lesson;
+      if (l.unit && l.unit.id !== unitId) {
+        unitId = l.unit.id;
+        const ul = items.filter((y) => y.lesson.unit && y.lesson.unit.id === unitId);
+        const ud = ul.filter((y) => isPassed(y.lesson.id)).length;
+        html += `<div class="unit-head"><span>${esc(level.name)} · ${l.unit.n} skyrius</span><b>${esc(l.unit.title)}</b>
+          <span class="small">${ud}/${ul.length}</span></div>`;
+      }
       const unlocked = isUnlocked(x.index);
       const done = isPassed(l.id);
       const isCur = x.index === cur && !done;
@@ -244,6 +278,16 @@ function theoryHtml(l, part) {
       .map((v) => `<div><b>${esc(v.en)} ${sayBtn(v.en)}</b><span>${esc(v.lt)}</span></div>`)
       .join('')}</div>`,
     phrases: () => `<h3>🗣️ Frazės</h3>${exList(l.phrases || [])}`,
+    reading: () => {
+      const r = l.reading;
+      if (!r) return parts.examples();
+      return `<h3>📖 ${esc(r.title)} ${sayBtn(r.text)}</h3>${r.text
+        .split(/\n\s*\n/)
+        .map((p) => `<p class="reading">${esc(p)}</p>`)
+        .join('')}${(r.glossary || []).length ? `<div class="vocab">${r.glossary
+        .map((v) => `<div><b>${esc(v.en)}</b><span>${esc(v.lt)}</span></div>`)
+        .join('')}</div>` : ''}`;
+    },
   };
   return (parts[part] || parts.rule)();
 }
@@ -260,6 +304,11 @@ function renderLearn($el, x) {
     ${(g.examples || []).length ? card(theoryHtml(l, 'examples')) : ''}
     ${(l.vocab || []).length ? card(theoryHtml(l, 'vocab')) : ''}
     ${(l.phrases || []).length ? card(theoryHtml(l, 'phrases')) : ''}
+    ${l.reading ? card(theoryHtml(l, 'reading')) : ''}
+    ${(l.sources || []).filter((id) => SOURCES[id]).length ? `<div class="card small"><h3>📚 Šaltiniai</h3><ul>${l.sources
+      .filter((id) => SOURCES[id])
+      .map((id) => `<li><a href="${esc(SOURCES[id].url)}" target="_blank" rel="noopener">${esc(SOURCES[id].title)}</a></li>`)
+      .join('')}</ul></div>` : ''}
     <div class="stack" style="margin-top:16px"><button class="btn block" id="next">💬 Į pamoką su Ema →</button>
     <button class="btn secondary block" id="quiz">✏️ Pratimai be interneto</button></div>`;
   bindSay($el);
@@ -278,7 +327,7 @@ function extraExercises(l) {
 }
 
 function renderQuiz($el, { lesson: l }) {
-  const qs = [...(l.quiz || []), ...extraExercises(l)];
+  const qs = [...(l.quiz || []), ...((l.reading && l.reading.questions) || []), ...extraExercises(l)];
   let i = 0;
   let correct = 0;
   const draw = () => {
@@ -318,7 +367,7 @@ function renderLessonTalk($el, x) {
   const st = store.lessonState(l.id) || {};
   const s = l.speaking || {};
   const exam = l.type === 'checkpoint';
-  const prepared = [...(l.quiz || []), ...extraExercises(l)];
+  const prepared = [...(l.quiz || []), ...((l.reading && l.reading.questions) || []), ...extraExercises(l)];
   $el.innerHTML = `<div class="card"><div class="row">${ema('wave', 56)}<div class="grow">
     <h3>${exam ? `🏆 ${esc(level.name)} lygio egzaminas` : '💬 Pamoka su Ema'}</h3>
     <ul class="cando small">${(l.canDo || []).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div></div>

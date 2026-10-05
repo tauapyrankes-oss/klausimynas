@@ -74,7 +74,7 @@ export const TOOL_THEORY = {
   parameters: {
     type: 'OBJECT',
     properties: {
-      part: { type: 'STRING', enum: ['rule', 'table', 'examples', 'pitfalls', 'vocab', 'phrases'] },
+      part: { type: 'STRING', enum: ['rule', 'table', 'examples', 'pitfalls', 'vocab', 'phrases', 'reading'] },
     },
     required: ['part'],
   },
@@ -116,6 +116,20 @@ ${done}
 ${mistakes}`;
 }
 
+const KIND_TIPS = {
+  grammar: 'Focus on using the grammar point in real communication.',
+  vocabulary:
+    'Teach the word set through personal questions, collocations and quick games; make the learner use each new word in their own sentence; recycle the words several times.',
+  functional:
+    'This is real-life "Everyday English": practise the situation as role-plays (you play the other person), with the useful phrases; repeat the role-play with a twist (a problem, a change of plan).',
+  skills:
+    'Pre-teach 2-3 key words, then show the reading with show_theory part "reading" (offer to read it aloud), check understanding with exercises, then discuss the topic and ask the learner to retell the text in their own words.',
+  pronunciation:
+    'Model each sound or pattern slowly, ask the learner to repeat words and sentences, use minimal pairs. Judge pronunciation from the AUDIO you hear, not from the transcript (the transcript may auto-correct). Give concrete mouth/tongue tips in Lithuanian.',
+  review: 'Mixed review of the whole unit: quick-fire questions, exercises from different lessons, one longer speaking task that combines the unit grammar and vocabulary.',
+  checkpoint: 'Level exam.',
+};
+
 export function lessonPrompt(lesson, level, settings, memory, prepared = []) {
   const g = lesson.grammar || {};
   const s = lesson.speaking || {};
@@ -130,7 +144,8 @@ Can-do goals (Lithuanian): ${(lesson.canDo || []).join(' ')}
 Grammar focus: ${g.title || ''}. ${(g.examples || []).map((e) => e.en).join(' ')}
 Target vocabulary: ${vocab}
 Useful phrases: ${phrases}
-Scenario: ${s.scenario || ''}
+Lesson kind: ${lesson.kind || 'grammar'}. ${KIND_TIPS[lesson.kind] || ''}
+${lesson.reading ? `Reading text "${lesson.reading.title}" (show it with show_theory part "reading"):\n${lesson.reading.text}\n` : ''}Scenario: ${s.scenario || ''}
 Tasks:
 ${(s.tasks || []).map((t, i) => `${i + 1}. ${t}`).join('\n')}
 Success criteria:
