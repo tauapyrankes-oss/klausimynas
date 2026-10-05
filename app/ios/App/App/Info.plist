@@ -51,6 +51,8 @@
 	<array>
 		<string>arm64</string>
 	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Mikrofonas reikalingas kalbėtis su AI mokytoja Ema angliškai.</string>
 	<key>UIBackgroundModes</key>

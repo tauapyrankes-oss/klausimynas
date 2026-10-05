@@ -21,6 +21,12 @@ const server = createServer(async (req, res) => {
 }).listen(0);
 const base = `http://localhost:${server.address().port}/`;
 
+// Teksto eilutė doke paslėpta – atidaroma rašiklio mygtuku.
+const showText = async () => {
+  await page.waitForSelector('#txt', { state: 'attached' });
+  if (await page.locator('#textrow.hidden').count()) await page.click('#texttoggle');
+  await page.waitForSelector('#txt', { state: 'visible' });
+};
 const fail = (m) => {
   console.error('FAIL:', m);
   process.exitCode = 1;
@@ -191,7 +197,7 @@ const solveNewest = async () => {
 };
 await solveNewest();
 await solveNewest();
-await page.waitForSelector('#txt');
+await showText();
 // Pirmas „complete_lesson“ ateina per anksti – programa turi jį atmesti ir Ema tęsia.
 await page.fill('#txt', "Hi, I'm Ona. I'm from Lithuania.");
 await page.click('#send');
@@ -236,7 +242,7 @@ if ((await page.locator('.node.locked').count()) !== nodes - 2 - exams) fail('po
 // Pratybos (antra pamokos sesija): atskiras Emos scenarijus, rezultatas įrašomas kaip pratybos.
 await page.goto(`${base}#/practice/${firstId}/drill`);
 await page.click('#start');
-await page.waitForSelector('#txt');
+await showText();
 const drillSetup = sent.filter((m) => m.setup).pop();
 if (!/PRACTICE SESSION/.test(drillSetup.setup.systemInstruction.parts[0].text)) fail('pratybos be savo scenarijaus');
 await page.click('#assess'); // „Baigti sesiją“

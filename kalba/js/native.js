@@ -66,3 +66,54 @@ export async function scheduleReminders({ time, doneToday, streak }) {
     lastKey = '';
   }
 }
+
+// ---------- Live Activity (iOS 16.2+): viena Activity vienam pamokos pokalbiui ----------
+// Siunčiama tik mokymosi būsena; atnaujinimai sujungiami (ne dažniau kaip kas 1,5 s, fazės pokytis – iškart).
+let actActive = false;
+let actLast = { phase: '', learnerTurns: -1, exercisesDone: -1 };
+let actTimer = null;
+let actPending = null;
+const act = () => plugin('ActivityBridge');
+
+export async function activityStart(attrs, state) {
+  const p = act();
+  if (!p) return;
+  try {
+    const r = await p.start({ ...attrs, ...state });
+    actActive = !!(r && r.started);
+    actLast = { phase: state.phase, learnerTurns: state.learnerTurns, exercisesDone: state.exercisesDone };
+  } catch (_) {
+    actActive = false;
+  }
+}
+
+export function activityUpdate(state) {
+  const p = act();
+  if (!p || !actActive) return;
+  const phaseChanged = state.phase !== actLast.phase;
+  const changed = phaseChanged || state.learnerTurns !== actLast.learnerTurns || state.exercisesDone !== actLast.exercisesDone;
+  if (!changed) return;
+  actPending = state;
+  const flush = () => {
+    actTimer = null;
+    if (!actPending) return;
+    const s = actPending;
+    actPending = null;
+    actLast = { phase: s.phase, learnerTurns: s.learnerTurns, exercisesDone: s.exercisesDone };
+    p.update(s).catch(() => {});
+  };
+  if (phaseChanged) {
+    clearTimeout(actTimer);
+    flush();
+  } else if (!actTimer) actTimer = setTimeout(flush, 1500);
+}
+
+export function activityEnd(state) {
+  const p = act();
+  clearTimeout(actTimer);
+  actTimer = null;
+  actPending = null;
+  if (!p || !actActive) return;
+  actActive = false;
+  p.end(state).catch(() => {});
+}

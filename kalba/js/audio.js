@@ -69,6 +69,7 @@ export class PcmPlayer {
     this.pending = [];
     this.buffered = 0; // sekundės, likusios groti (pranešama iš worklet'o)
     this.lastAudio = 0;
+    this.level = 0;
   }
 
   // Kviesti iš vartotojo paspaudimo, kad iOS/Android leistų groti garsą.
@@ -99,7 +100,14 @@ export class PcmPlayer {
     const bytes = base64ToBytes(b64);
     const pcm = new Int16Array(bytes.buffer, 0, bytes.length >> 1);
     const f = new Float32Array(pcm.length);
-    for (let i = 0; i < pcm.length; i++) f[i] = pcm[i] / 0x8000;
+    let sum = 0;
+    for (let i = 0; i < pcm.length; i++) {
+      f[i] = pcm[i] / 0x8000;
+      sum += f[i] * f[i];
+    }
+    // Garso lygis (RMS) – bangoms ekrane; švelniai išlyginamas.
+    const rms = Math.sqrt(sum / (pcm.length || 1));
+    this.level = this.level * 0.5 + rms * 0.5;
     this.lastAudio = performance.now();
     if (this.node) this.node.port.postMessage(f, [f.buffer]);
     else this.pending.push(f);

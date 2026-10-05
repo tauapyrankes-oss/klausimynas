@@ -4,7 +4,9 @@ import { lessonPrompt, freeTalkPrompt, drillPrompt, guidedTalkPrompt, TOOLS_LESS
 import * as store from './store.js';
 import { esc, rich, norm, shuffle, speak, sfx, setSfx } from './util.js';
 import { mountExercise, exerciseFromTool, describeExercise } from './exercise.js';
-import { isNative, updateWidget, scheduleReminders, onDeepLink } from './native.js';
+import { isNative, updateWidget, scheduleReminders, onDeepLink, activityStart, activityUpdate, activityEnd } from './native.js';
+import { ICON_SPRITE, icon } from './icons.js';
+document.getElementById('icon-sprite').innerHTML = ICON_SPRITE;
 
 const { settings } = store;
 // Native programėlėje raktas įdiegiamas kompiliuojant (app/.env → www/js/config.js, į GitHub nepatenka).
@@ -97,8 +99,8 @@ function memory() {
 }
 
 function updateChips() {
-  document.getElementById('xp').textContent = `⭐ ${store.progress.xp}`;
-  document.getElementById('streak').textContent = `🔥 ${store.streakCount()}`;
+  document.querySelector('#xp span').textContent = store.progress.xp;
+  document.querySelector('#streak span').textContent = store.streakCount();
   if (isNative) syncNative();
 }
 
@@ -120,6 +122,11 @@ function syncNative() {
   });
   scheduleReminders({ time: settings.reminder, doneToday, streak: store.streakCount() });
 }
+
+// Pamokos rūšis → SVG ikona (UI be emoji; kurso duomenys nekeičiami).
+const KIND_ICON = { grammar: 'book', vocabulary: 'spark', functional: 'chat', skills: 'coffee', pronunciation: 'volume', review: 'repeat', checkpoint: 'cup' };
+const lessonIcon = (l) => icon(KIND_ICON[l.kind] || 'book');
+const starsHtml = (n, cls = '') => `<span class="stars ${cls}">${[0, 1, 2].map((i) => icon('star', i < n ? 'on' : 'off')).join('')}</span>`;
 
 // ---------- Veikėja Ema ----------
 // Codex gali įkelti paveikslėlius/animacijas į assets/ema/ (žr. codex/README.md).
@@ -149,7 +156,13 @@ function setEma(el, state) {
 }
 
 function setHeader(title, back) {
-  $title.textContent = title;
+  if (title === 'Kalbėk!') {
+    $title.className = 'wordmark';
+    $title.innerHTML = 'kalbėk<span>!</span>';
+  } else {
+    $title.className = '';
+    $title.textContent = title;
+  }
   $back.classList.toggle('hidden', !back);
   $back.onclick = back ? () => (location.hash = back) : null;
 }
@@ -204,18 +217,18 @@ function dailyPlanHtml(cur, due) {
   const talkFor = passedList.filter((x) => pr(x).drill && !pr(x).talk).slice(-1)[0] || passedList.slice(-2)[0];
   const freeOk = ['a2plus', 'b1'].includes(ALL[cur].level.id);
   const items = [
-    ['📘', `Nauja pamoka: ${esc(ALL[cur].lesson.title)}`, doneLesson, `#/lesson/${ALL[cur].lesson.id}`],
-    drillFor ? ['🏋️', `Pratybos: ${esc(drillFor.lesson.title)}`, pr(drillFor).drillAt === t, `#/practice/${drillFor.lesson.id}/drill`] : null,
-    talkFor ? ['🗨️', `Vedamas pokalbis: ${esc(talkFor.lesson.title)}`, pr(talkFor).talkAt === t, `#/practice/${talkFor.lesson.id}/talk`] : freeOk ? ['💬', 'Laisvas pokalbis (10 min.)', p.talkLast === t, '#/talk'] : null,
-    ['⚡', 'Žodžių sprintas (1 min.)', p.sprintLast === t, '#/sprint'],
+    ['mic', `Nauja pamoka: ${esc(ALL[cur].lesson.title)}`, doneLesson, `#/lesson/${ALL[cur].lesson.id}`],
+    drillFor ? ['repeat', `Pratybos: ${esc(drillFor.lesson.title)}`, pr(drillFor).drillAt === t, `#/practice/${drillFor.lesson.id}/drill`] : null,
+    talkFor ? ['chat', `Vedamas pokalbis: ${esc(talkFor.lesson.title)}`, pr(talkFor).talkAt === t, `#/practice/${talkFor.lesson.id}/talk`] : freeOk ? ['chat', 'Laisvas pokalbis · 10 min.', p.talkLast === t, '#/talk'] : null,
+    ['bolt', 'Žodžių sprintas · 1 min.', p.sprintLast === t, '#/sprint'],
   ].filter(Boolean);
   const done = items.filter((i) => i[2]).length;
   const hours = (p.minutes || 0) / 60;
-  return `<div class="card plan"><div class="row"><h3 class="grow">📅 Šiandien</h3><span class="chip small">${done}/${items.length}</span></div>
-    ${items.map(([ico, label, ok, href]) => `<a class="plan-item ${ok ? 'done' : ''}" href="${href}"><span>${ok ? '✅' : ico}</span><span class="grow">${label}</span><span>›</span></a>`).join('')}
-    <div class="row" style="margin-top:10px"><div class="progressbar grow"><span style="width:${Math.min(100, (hours / TOTAL_HOURS) * 100)}%"></span></div>
-    <span class="small muted">${hours < 1 ? `${Math.round(hours * 60)} min.` : `${hours.toFixed(1)} val.`} / ~${TOTAL_HOURS} val. iki B1</span></div>
-    <p class="small muted" style="margin:8px 0 0">Kiekviena pamoka – trys sesijos su Ema: pamoka → pratybos → vedamas pokalbis. ~45–60 min. per dieną.</p></div>`;
+  return `<div class="card plan"><div class="card-label">${icon('clock')} Šiandien <span>${done}/${items.length}</span></div>
+    ${items.map(([ico, label, ok, href]) => `<a class="plan-item ${ok ? 'done' : ''}" href="${href}"><span class="square-icon">${icon(ok ? 'check' : ico)}</span><span class="grow">${label}</span>${icon('chevron')}</a>`).join('')}
+    <div class="row" style="margin-top:12px"><div class="progressbar grow"><span style="width:${Math.min(100, (hours / TOTAL_HOURS) * 100)}%"></span></div>
+    <span class="tiny muted">${hours < 1 ? `${Math.round(hours * 60)} min.` : `${hours.toFixed(1)} val.`} / ~${TOTAL_HOURS} val. iki B1</span></div>
+    <p class="tiny muted" style="margin:8px 0 0">Kiekviena pamoka – trys sesijos su Ema: pamoka → pratybos → vedamas pokalbis. ~45–60 min. per dieną.</p></div>`;
 }
 
 // ---------- Kelias ----------
@@ -228,27 +241,16 @@ function viewPath() {
   }
   const cur = currentIndex();
   const due = ALL.filter((x) => store.isDue(x.lesson.id)).slice(0, 6);
-  const offsets = [0, 46, 70, 46, 0, -46, -70, -46];
-  let html = '';
+  let html = `<div class="greeting"><div><p>Anglų kalba · ${esc(ALL[cur].level.name)} → B1</p><h1>Po truputį.<br>Bet kasdien.</h1></div>${ema('wave', 96)}</div>`;
   if (!apiKey()) {
-    html += `<div class="notice" style="margin-bottom:16px">👋 Sveika! Kad galėtum kalbėtis su AI mokytoja Ema,
-      įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div>`;
+    html += `<div class="notice" style="margin-bottom:16px">${icon('key')}<div>Sveika! Kad galėtum kalbėtis su AI mokytoja Ema,
+      įvesk nemokamą Gemini API raktą <a href="#/settings">nustatymuose</a>. Teoriją ir pratimus gali daryti ir be jo.</div></div>`;
   }
   html += dailyPlanHtml(cur, due);
-  if (['a2plus', 'b1'].includes(ALL[cur].level.id)) {
-    html += `<button class="card sprint-cta" data-go="#/talk">${ema('wave', 48)}<span class="grow"><b>💬 Laisvas pokalbis su Ema</b>
-      <span class="small muted">Be testo – tiesiog pasikalbėk apie bet ką</span></span><span>→</span></button>`;
-  }
-  html += `<button class="card sprint-cta" data-go="#/sprint">${ema('idle', 48)}<span class="grow"><b>⚡ Žodžių sprintas</b>
-    <span class="small muted">${(() => {
-      const n = sprintPool().filter((v) => store.isWordDue(v.en)).length;
-      return n ? `🔁 ${n} žodž. laukia kartojimo` : '60 sekundžių – kiek žodžių spėsi išversti?';
-    })()} · Rekordas: ${store.progress.sprintBest || 0}</span></span><span>→</span></button>`;
   if (due.length) {
-    html += `<div class="card" style="margin-bottom:20px"><h3>🔁 Laikas pakartoti</h3>
-      <p class="small muted">Trumpas pakartojimas padeda neužmiršti (kartojimas su didėjančiais intervalais).</p>
+    html += `<div class="card" style="margin-bottom:16px"><div class="card-label">${icon('repeat')} Laikas pakartoti</div>
       <div class="due-list">${due
-        .map((x) => `<button class="due-item" data-go="#/practice/${x.lesson.id}/drill">🏋️ ${esc(x.lesson.title)}</button>`)
+        .map((x) => `<button class="due-item" data-go="#/practice/${x.lesson.id}/drill">${icon('repeat')} ${esc(x.lesson.title)}</button>`)
         .join('')}</div></div>`;
   }
   for (const level of LEVELS) {
@@ -256,35 +258,57 @@ function viewPath() {
     const passed = items.filter((x) => isPassed(x.lesson.id)).length;
     const levelLocked = !isUnlocked(items[0].index);
     const examPending = !levelPassed(level);
-    html += `<section class="level ${levelLocked ? 'locked' : ''}" style="--lvl:${LEVEL_COLORS[level.id] || 'var(--accent)'}">
-      <div class="level-head"><img class="level-art" src="assets/levels/${esc(level.id)}.svg" alt="" onerror="this.remove()"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
+    html += `<section class="level ${levelLocked ? 'locked' : ''}">
+      <div class="level-head"><img class="level-art" src="assets/levels/${esc(level.id)}.svg" alt="" onerror="this.remove()">
+      <div class="grow"><h2>${esc(level.name)} · ${esc(level.title)}</h2><p>${esc(level.description)}</p>
       <div class="progressbar"><span style="width:${(passed / items.length) * 100}%"></span></div>
-      <div class="small" style="margin-top:6px">${passed} / ${items.length} pamokų</div></div><div class="path">`;
-    let unitId = null;
-    items.forEach((x, k) => {
-      const l = x.lesson;
-      if (l.unit && l.unit.id !== unitId) {
-        unitId = l.unit.id;
-        const ul = items.filter((y) => y.lesson.unit && y.lesson.unit.id === unitId);
-        const ud = ul.filter((y) => isPassed(y.lesson.id)).length;
-        html += `<div class="unit-head"><span>${esc(level.name)} · ${l.unit.n} skyrius</span><b>${esc(l.unit.title)}</b>
-          <span class="small">${ud}/${ul.length}</span></div>`;
-      }
-      const unlocked = isUnlocked(x.index);
-      const done = isPassed(l.id);
-      const isCur = x.index === cur && !done;
-      const st = store.stars(l.id);
-      const cls = ['node', l.type === 'checkpoint' ? 'checkpoint' : '', done ? 'done' : '', !unlocked ? 'locked' : '', isCur ? 'current' : '']
-        .filter(Boolean)
-        .join(' ');
-      html += `<div class="node-wrap" style="--x:${l.type === 'checkpoint' ? 0 : offsets[k % offsets.length]}px">
-        ${isCur ? '<div class="start-bubble">PRADĖK ČIA</div>' : ''}
-        <button class="${cls}" data-id="${esc(l.id)}" aria-label="${esc(l.title)}${unlocked ? '' : ' (užrakinta)'}">${unlocked ? esc(l.icon) : '🔒'}</button>
-        <div class="node-label ${unlocked ? '' : 'locked'}">${esc(l.title)}${done ? `<span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}${(() => { const pr = (store.lessonState(l.id) || {}).practice || {}; return ` <span class="muted">${pr.drill ? '🏋️' : ''}${pr.talk ? '🗨️' : ''}</span>`; })()}</span>` : ''}${
-          l.type === 'checkpoint' && !done && examPending && !isPassed(items[items.length - 2].lesson.id) ? '<span class="small muted" style="display:block;font-weight:600">Gali laikyti iš anksto – išlaikius atsirakina kitas lygis</span>' : ''}</div>
-      </div>`;
+      <div class="tiny muted" style="margin-top:6px">${passed} / ${items.length} pamokų</div></div></div>`;
+    // Skyriai – „salos“; pamokos jose išdėstytos pakaitomis kairėje ir dešinėje.
+    const units = [];
+    for (const x of items) {
+      const uid = x.lesson.unit ? x.lesson.unit.id : level.id;
+      let u = units[units.length - 1];
+      if (!u || u.id !== uid) units.push((u = { id: uid, meta: x.lesson.unit, items: [] }));
+      u.items.push(x);
+    }
+    units.forEach((u) => {
+      const ud = u.items.filter((y) => isPassed(y.lesson.id)).length;
+      const exam = u.items.find((y) => y.lesson.type === 'checkpoint');
+      html += `<section class="island"><div class="unit-title"><span class="level-tag">${esc(level.name)}</span>
+        <div class="grow"><span class="tiny muted">${u.meta ? `${u.meta.n} skyrius · ` : ''}${ud} iš ${u.items.length} pamokų</span><h2>${esc(u.meta ? u.meta.title : level.title)}</h2></div>${icon('book')}</div><div class="path">`;
+      u.items.forEach((x, k) => {
+        const l = x.lesson;
+        const unlocked = isUnlocked(x.index);
+        const done = isPassed(l.id);
+        const isCur = x.index === cur && !done;
+        const st = store.stars(l.id);
+        const pr = (store.lessonState(l.id) || {}).practice || {};
+        const cls = ['node', l.type === 'checkpoint' ? 'checkpoint' : '', done ? 'done' : '', !unlocked ? 'locked' : '', isCur ? 'current' : '']
+          .filter(Boolean)
+          .join(' ');
+        const testOut = l.type === 'checkpoint' && !done && examPending && k > 0 && !isPassed(u.items[k - 1].lesson.id);
+        html += `<div class="path-stop ${k % 2 ? 'right' : ''}">
+          <button class="${cls}" data-id="${esc(l.id)}" aria-label="${esc(l.title)}${unlocked ? '' : ' (užrakinta)'}">${unlocked ? lessonIcon(l) : icon('lock')}</button>
+          <div class="node-label ${unlocked ? '' : 'locked'}">
+            ${isCur ? '<span class="start-bubble">PRADĖK ČIA</span>' : ''}
+            <b>${esc(l.title)}</b>
+            <span class="tiny">${esc(l.titleEn || '')}</span>
+            ${done ? `${starsHtml(st)}${pr.drill || pr.talk ? `<span class="tiny muted">${pr.drill ? `pratybos ×${pr.drill}` : ''}${pr.drill && pr.talk ? ' · ' : ''}${pr.talk ? `pokalbis ×${pr.talk}` : ''}</span>` : ''}` : ''}
+            ${testOut ? '<span class="tiny muted">Gali laikyti iš anksto – išlaikius atsirakina kitas lygis</span>' : ''}
+          </div></div>`;
+      });
+      html += `</div>${exam ? `<div class="unit-footer">${icon('cup')} ${isPassed(exam.lesson.id) ? 'Lygio egzaminas išlaikytas' : 'Skyriaus pabaigoje – lygio egzaminas'} ${icon('chevron')}</div>` : '<div style="height:16px"></div>'}</section>`;
     });
-    html += '</div></section>';
+    html += '</section>';
+  }
+  html += `<button class="sprint-cta" data-go="#/sprint"><span class="square-icon honey">${icon('bolt')}</span><span class="grow"><b>Žodžių sprintas</b>
+    <span class="small">${(() => {
+      const n = sprintPool().filter((v) => store.isWordDue(v.en)).length;
+      return n ? `${n} žodž. laukia kartojimo` : '60 sekundžių praktikos';
+    })()} · rekordas ${store.progress.sprintBest || 0}</span></span>${icon('arrow')}</button>`;
+  if (['a2plus', 'b1'].includes(ALL[cur].level.id)) {
+    html += `<button class="sprint-cta" data-go="#/talk"><span class="square-icon">${icon('chat')}</span><span class="grow"><b>Laisvas pokalbis su Ema</b>
+      <span class="small">Be testo – tiesiog pasikalbėk apie bet ką</span></span>${icon('arrow')}</button>`;
   }
   $view.innerHTML = html;
   $view.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => (location.hash = b.dataset.go)));
@@ -292,10 +316,13 @@ function viewPath() {
     b.onclick = () => {
       const x = byId[b.dataset.id];
       if (!isUnlocked(x.index)) {
+        const c = ALL[cur];
         modal(
-          `<div class="big-emoji">🔒</div><h2 style="text-align:center">Pamoka dar užrakinta</h2>
-          <p style="text-align:center">Pirmiau išmok ankstesnę pamoką – ją patvirtina AI mokytoja po pokalbio.</p>
-          <button class="btn block" data-close>Gerai</button>`,
+          `<div class="locked-modal">${ema('encourage', 150)}<span class="lock-symbol">${icon('lock')}</span>
+          <h2>Viskas savo laiku.</h2>
+          <p>Ši pamoka dar užrakinta. Pirmiau baik ankstesnę – Ema patvirtins, kai ją išmoksi.</p>
+          <div class="locked-next"><span class="square-icon">${lessonIcon(c.lesson)}</span><div><span class="tiny muted">Tavo dabartinė pamoka</span><b>${esc(c.lesson.title)}</b></div></div>
+          <button class="btn block" data-close>Gerai</button></div>`,
           (m, close) => (m.querySelector('[data-close]').onclick = close)
         );
         return;
@@ -303,12 +330,12 @@ function viewPath() {
       if (isPassed(x.lesson.id) && x.lesson.type !== 'checkpoint') {
         const pr = (store.lessonState(x.lesson.id) || {}).practice || {};
         modal(
-          `<div class="row">${ema('idle', 56)}<div class="grow"><h2 style="margin:0">${esc(x.lesson.title)}</h2><div class="stars" style="color:var(--gold)">${'★'.repeat(store.stars(x.lesson.id))}${'☆'.repeat(3 - store.stars(x.lesson.id))}</div></div></div>
+          `<div class="row">${ema('idle', 56)}<div class="grow"><h2 style="margin:0">${esc(x.lesson.title)}</h2>${starsHtml(store.stars(x.lesson.id))}</div></div>
           <div class="stack" style="margin-top:14px">
-            <a class="btn block" href="#/practice/${x.lesson.id}/drill" data-close>🏋️ Pratybos (15 min.)${pr.drill ? ` · ${pr.drill} k.` : ''}</a>
-            <a class="btn block" href="#/practice/${x.lesson.id}/talk" data-close>🗨️ Vedamas pokalbis (15 min.)${pr.talk ? ` · ${pr.talk} k.` : ''}</a>
-            <a class="btn secondary block" href="#/lesson/${x.lesson.id}" data-close>📘 Pamoka iš naujo</a>
-            <a class="btn secondary block" href="#/lesson/${x.lesson.id}/learn" data-close>Teorija ir pratimai</a>
+            <a class="btn block" href="#/practice/${x.lesson.id}/drill" data-close>${icon('repeat')} Pratybos · 15 min.${pr.drill ? ` · ${pr.drill} k.` : ''}</a>
+            <a class="btn block" href="#/practice/${x.lesson.id}/talk" data-close>${icon('chat')} Vedamas pokalbis · 15 min.${pr.talk ? ` · ${pr.talk} k.` : ''}</a>
+            <a class="btn secondary block" href="#/lesson/${x.lesson.id}" data-close>${icon('mic')} Pamoka iš naujo</a>
+            <a class="btn secondary block" href="#/lesson/${x.lesson.id}/learn" data-close>${icon('book')} Teorija ir pratimai</a>
           </div>`,
           (m, close) => m.querySelectorAll('[data-close]').forEach((b) => (b.onclick = close))
         );
@@ -344,9 +371,9 @@ function viewLesson(x, step) {
 function showTheoryModal(l) {
   const g = l.grammar || {};
   modal(
-    `<div class="row"><h2 class="grow">📘 ${esc(g.title || l.title)}</h2><button class="btn secondary" data-close>✕</button></div>
+    `<div class="row"><h2 class="grow">${esc(g.title || l.title)}</h2><button class="icon-btn" data-close aria-label="Uždaryti">${icon('close')}</button></div>
     <div class="explain">${theoryHtml(l, 'rule')}${g.table ? theoryHtml(l, 'table').replace(/^<h3>.*?<\/h3>/, '') : ''}
-    ${(g.pitfalls || []).map((p) => `<div class="pitfall">⚠️ ${rich(p)}</div>`).join('')}</div>
+    ${(g.pitfalls || []).map((p) => `<div class="pitfall">${rich(p)}</div>`).join('')}</div>
     ${(g.examples || []).length ? theoryHtml(l, 'examples') : ''}
     ${(l.vocab || []).length ? theoryHtml(l, 'vocab') : ''}
     ${(l.phrases || []).length ? theoryHtml(l, 'phrases') : ''}
@@ -358,7 +385,7 @@ function showTheoryModal(l) {
   );
 }
 
-const sayBtn = (en) => `<button class="speak" data-say="${esc(en)}" aria-label="Paklausyti">🔊</button>`;
+const sayBtn = (en) => `<button class="speak" data-say="${esc(en)}" aria-label="Paklausyti">${icon('volume')}</button>`;
 const bindSay = ($el) => $el.querySelectorAll('[data-say]').forEach((b) => (b.onclick = () => speak(b.dataset.say)));
 
 // Teorijos dalys – rodomos ir „Teorijos“ skiltyje, ir kai Ema iškviečia show_theory.
@@ -372,18 +399,18 @@ function theoryHtml(l, part) {
     .map((e) => `<li><div class="row"><span class="en grow">${esc(e.en)}</span>${sayBtn(e.en)}</div><div class="lt">${esc(e.lt)}</div></li>`)
     .join('')}</ul>`;
   const parts = {
-    rule: () => `<h3>📘 ${esc(g.title || 'Taisyklė')}</h3>${(g.explanation || []).map((p) => `<p>${rich(p)}</p>`).join('')}`,
-    table: () => (table ? `<h3>📊 ${esc(g.title || 'Lentelė')}</h3>${table}` : parts.rule()),
-    pitfalls: () => `<h3>⚠️ Dažnos klaidos</h3>${(g.pitfalls || []).map((p) => `<div class="pitfall">${rich(p)}</div>`).join('')}`,
-    examples: () => `<h3>💡 Pavyzdžiai</h3>${exList(g.examples || [])}`,
-    vocab: () => `<h3>🧠 Žodžiai</h3><div class="vocab">${(l.vocab || [])
+    rule: () => `<h3>${esc(g.title || 'Taisyklė')}</h3>${(g.explanation || []).map((p) => `<p>${rich(p)}</p>`).join('')}`,
+    table: () => (table ? `<h3>${esc(g.title || 'Lentelė')}</h3>${table}` : parts.rule()),
+    pitfalls: () => `<h3>Dažnos klaidos</h3>${(g.pitfalls || []).map((p) => `<div class="pitfall">${rich(p)}</div>`).join('')}`,
+    examples: () => `<h3>Pavyzdžiai</h3>${exList(g.examples || [])}`,
+    vocab: () => `<h3>Žodžiai</h3><div class="vocab">${(l.vocab || [])
       .map((v) => `<div><b>${esc(v.en)} ${sayBtn(v.en)}</b><span>${esc(v.lt)}</span></div>`)
       .join('')}</div>`,
-    phrases: () => `<h3>🗣️ Frazės</h3>${exList(l.phrases || [])}`,
+    phrases: () => `<h3>Frazės</h3>${exList(l.phrases || [])}`,
     reading: () => {
       const r = l.reading;
       if (!r) return parts.examples();
-      return `<h3>📖 ${esc(r.title)} ${sayBtn(r.text)}</h3>${r.text
+      return `<h3>${esc(r.title)} ${sayBtn(r.text)}</h3>${r.text
         .split(/\n\s*\n/)
         .map((p) => `<p class="reading">${esc(p)}</p>`)
         .join('')}${(r.glossary || []).length ? `<div class="vocab">${r.glossary
@@ -394,21 +421,28 @@ function theoryHtml(l, part) {
   return (parts[part] || parts.rule)();
 }
 
+// Pamokos skirtukai: Pamoka su Ema / Teorija / Pratimai (ta pati pamoka, ne atskiri žingsniai).
+function lessonTabs(l, active) {
+  const tab = (key, label, ico) => `<a href="#/lesson/${esc(l.id)}${key === 'talk' ? '' : `/${key}`}" class="${key === active ? 'selected' : ''}">${icon(ico)} ${label}</a>`;
+  return `<div class="lesson-tabs">${tab('talk', 'Pamoka su Ema', 'mic')}${tab('learn', 'Teorija', 'book')}${tab('quiz', 'Pratimai', 'pen')}</div>`;
+}
+
 function renderLearn($el, x) {
   const { lesson: l } = x;
   const g = l.grammar || {};
   const card = (html) => `<div class="card">${html}</div>`;
   $el.innerHTML = `
-    <div class="card"><div style="font-size:40px">${esc(l.icon)}</div><h2>${esc(l.title)}</h2>
-      <p class="muted">${esc(l.titleEn)}</p><ul class="cando">${(l.canDo || []).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
+    ${lessonTabs(l, 'learn')}
+    <div class="card"><div class="row"><span class="square-icon">${lessonIcon(l)}</span><div class="grow"><h2>${esc(l.title)}</h2>
+      <p class="muted tiny" style="margin:0">${esc(l.titleEn)}</p></div></div><ul class="cando" style="margin-top:12px">${(l.canDo || []).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div>
     <div class="card explain">${theoryHtml(l, 'rule')}${g.table ? theoryHtml(l, 'table').replace(/^<h3>.*?<\/h3>/, '') : ''}
-      ${(g.pitfalls || []).map((p) => `<div class="pitfall">⚠️ ${rich(p)}</div>`).join('')}</div>
+      ${(g.pitfalls || []).map((p) => `<div class="pitfall">${rich(p)}</div>`).join('')}</div>
     ${(g.examples || []).length ? card(theoryHtml(l, 'examples')) : ''}
     ${(l.vocab || []).length ? card(theoryHtml(l, 'vocab')) : ''}
     ${(l.phrases || []).length ? card(theoryHtml(l, 'phrases')) : ''}
     ${l.reading ? card(theoryHtml(l, 'reading')) : ''}
-    <div class="stack" style="margin-top:16px"><button class="btn block" id="next">💬 Į pamoką →</button>
-    <button class="btn secondary block" id="quiz">✏️ Pratimai be interneto</button></div>`;
+    <div class="stack" style="margin-top:16px"><button class="btn block" id="next">${icon('mic')} Į pamoką su Ema</button>
+    <button class="btn secondary block" id="quiz">${icon('pen')} Pratimai be interneto</button></div>`;
   bindSay($el);
   document.getElementById('next').onclick = () => (location.hash = `#/lesson/${l.id}`);
   document.getElementById('quiz').onclick = () => (location.hash = `#/lesson/${l.id}/quiz`);
@@ -433,11 +467,11 @@ function renderQuiz($el, { lesson: l }) {
       store.recordQuiz(l.id, correct, qs.length || 1);
       updateChips();
       const pct = Math.round((correct / (qs.length || 1)) * 100);
-      $el.innerHTML = `<div class="card" style="text-align:center">${ema(pct >= 80 ? 'happy' : 'encourage', 80)}
+      $el.innerHTML = `${lessonTabs(l, 'quiz')}<div class="card" style="text-align:center">${ema(pct >= 80 ? 'happy' : 'encourage', 80)}
         <h2>Pratimai baigti: ${correct} / ${qs.length}</h2>
         <p class="muted">Pamoką išmokta patvirtina tik Ema – eik į pamoką su ja.</p>
-        <div class="stack"><button class="btn block" id="go">💬 Pamoka su Ema →</button>
-        <button class="btn secondary block" id="again">Kartoti pratimus</button></div></div>`;
+        <div class="stack"><button class="btn block" id="go">${icon('mic')} Pamoka su Ema</button>
+        <button class="btn secondary block" id="again">${icon('repeat')} Kartoti pratimus</button></div></div>`;
       document.getElementById('go').onclick = () => (location.hash = `#/lesson/${l.id}`);
       document.getElementById('again').onclick = () => {
         i = 0;
@@ -446,8 +480,10 @@ function renderQuiz($el, { lesson: l }) {
       };
       return;
     }
-    const head = `<div class="row" style="margin-bottom:6px"><div class="progressbar grow"><span style="width:${(i / qs.length) * 100}%"></span></div>
-      <span class="small muted">${i + 1}/${qs.length}</span></div>`;
+    const head = `<div class="card-label">${icon('pen')} Pratimas <span>${i + 1} / ${qs.length}</span></div>
+      <div class="progressbar" style="margin-bottom:14px"><span style="width:${(i / qs.length) * 100}%"></span></div>`;
+    const tabs = document.createElement('div');
+    tabs.innerHTML = lessonTabs(l, 'quiz');
     mountExercise($el, qs[i], {
       head,
       onDone: (r) => r.ok && correct++,
@@ -456,6 +492,7 @@ function renderQuiz($el, { lesson: l }) {
         draw();
       },
     });
+    $el.prepend(tabs.firstElementChild);
   };
   draw();
 }
@@ -489,18 +526,15 @@ function renderLessonTalk($el, x) {
     ...extraExercises(l),
     ...(review ? review.exercises : []),
   ];
-  $el.innerHTML = `<div class="card"><div class="row">${ema('wave', 56)}<div class="grow">
-    <h3>${exam ? `🏆 ${esc(level.name)} lygio egzaminas` : '💬 Pamoka su Ema'}</h3>
-    <ul class="cando small">${(l.canDo || []).map((c) => `<li>${esc(c)}</li>`).join('')}</ul></div></div>
-    <p class="small">${exam
-      ? 'Ema kalbins tave apie visas lygio temas ir duos užduočių ekrane. Pagalbos bus mažiau – parodyk, ką moki!'
-      : 'Ema pakalbins, paaiškins taisyklę, duos užduočių ekrane (kai kurios – su laikmačiu), vėl pakalbins… Pabaigoje ji <b>pati nuspręs</b>, ar pamoka išmokta – tik tada atsirakins kita.'}</p>
-    <p class="small muted">Kalbėk balsu arba rašyk. Ausinės padeda, kad Ema negirdėtų pati savęs.</p>
-    <div class="row wrap"><button class="chip" id="theory">📘 Teorija</button><a class="chip" href="#/lesson/${esc(l.id)}/quiz">✏️ Pratimai be interneto</a></div>
-    ${resumeFor(l.id) ? `<div class="notice small">🔄 Pamoka buvo nutrūkusi – Ema pratęs nuo tos vietos (${resumeFor(l.id).turns} replikos, ${resumeFor(l.id).exDone} užduotys jau padarytos).</div>` : ''}
-    ${review ? `<div class="notice review-card small">🔁 Šiandien Ema pakartos ir: ${review.lessons.map((y) => esc(y.lesson.title)).join(' · ')}</div>` : ''}
-    ${st.last ? `<div class="notice">Paskutinis bandymas: ${st.last.passed ? '✅ išmokta' : '⏳ dar neišmokta'}, ${st.last.score ?? '–'} / 100. ${esc(st.last.advice_lt || '')}</div>` : ''}
-    </div><div id="talk"></div>`;
+  $el.innerHTML = `${lessonTabs(l, 'talk')}
+    <div class="lesson-head"><span class="square-icon ${exam ? 'honey' : ''}">${lessonIcon(l)}</span><div class="grow">
+      <h2 style="font-size:17px">${exam ? `${esc(level.name)} lygio egzaminas` : esc(l.title)}</h2>
+      <p class="tiny muted">${exam ? 'Ema patikrins tavo žinias per pokalbį, užduotis ir rašymą. Pagalbos bus mažiau.' : esc((l.canDo || [])[0] || l.titleEn)}</p></div>
+      <button class="icon-btn" id="theory" aria-label="Teorija">${icon('book')}</button></div>
+    ${resumeFor(l.id) ? `<div class="notice small" style="margin-bottom:10px">${icon('repeat')}<div>Pamoka buvo nutrūkusi – Ema pratęs nuo tos vietos (${resumeFor(l.id).turns} replikos, ${resumeFor(l.id).exDone} užduotys jau padarytos).</div></div>` : ''}
+    ${review ? `<div class="notice small" style="margin-bottom:10px">${icon('repeat')}<div>Šiandien Ema pakartos ir: ${review.lessons.map((y) => esc(y.lesson.title)).join(' · ')}</div></div>` : ''}
+    ${st.last && !st.passed ? `<div class="notice small" style="margin-bottom:10px">${icon('spark')}<div>Paskutinis bandymas: ${st.last.score ?? '–'} / 100. ${esc(st.last.advice_lt || '')}</div></div>` : ''}
+    <div id="talk"></div>`;
   document.getElementById('theory').onclick = () => showTheoryModal(l);
   mountTalk(document.getElementById('talk'), {
     prompt: () =>
@@ -535,33 +569,39 @@ function showResult(x, r) {
   const { lesson: l } = x;
   const next = ALL[x.index + 1];
   const stars = r.passed ? (r.score >= 90 ? 3 : r.score >= 75 ? 2 : 1) : 0;
+  const exam = l.type === 'checkpoint';
+  const confetti = `<div class="confetti" aria-hidden="true">${[['10%', '70deg', 'var(--honey)'], ['20%', '140deg', 'var(--accent)'], ['38%', '266deg', 'var(--ok)'], ['65%', '455deg', 'var(--honey)'], ['78%', '546deg', 'var(--ok)'], ['90%', '630deg', 'var(--accent)']]
+    .map(([x, rot, c]) => `<i style="--x:${x};--rot:${rot};--c:${c}"></i>`).join('')}</div>`;
   return () => {
     if (r.passed) sfx('levelup');
     return modal(
-      `<div class="big-emoji">${ema(r.passed ? 'happy' : 'encourage', 96)}${r.passed && l.type === 'checkpoint' ? '🏆' : ''}</div>
-      <h2 style="text-align:center">${r.passed ? (l.type === 'checkpoint' ? 'Lygis įveiktas!' : 'Pamoka išmokta!') : 'Dar ne visai – bet jau arti!'}</h2>
-      ${r.passed ? `<div class="result-stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>` : ''}
-      <div class="score">${esc(r.score)}<span class="muted" style="font-size:18px"> / 100</span></div>
-      <p>${esc(r.summary_lt || '')}</p>
-      ${r.judge ? `<p class="small" style="text-align:center">🧑‍⚖️ Nepriklausomas vertinimas${r.judge.error ? ': nepavyko (įskaitytas tik Emos vertinimas)' : ` (${esc(r.judge.model || 'Gemini')}): ${r.judge.passed ? 'išlaikyta' : 'dar ne'}`}</p>` : ''}
-      ${r.attempts ? `<p class="small muted" style="text-align:center">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
-      ${(r.criteria || []).length ? `<div class="criteria">${r.criteria.map((c) => `<div class="crit ${c.met ? 'ok' : 'no'}">${c.met ? '✅' : '◻️'} ${esc(c.criterion)}${c.evidence ? `<div class="small muted">„${esc(c.evidence)}“</div>` : ''}</div>`).join('')}</div>` : ''}
-      ${(r.strengths_lt || []).length ? `<h3>👍 Sekėsi</h3><ul>${r.strengths_lt.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
-      ${(r.mistakes || []).length ? `<h3>✏️ Klaidos</h3>${r.mistakes
-        .map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="small muted">${esc(m.note_lt)}</div>` : ''}</div>`)
-        .join('')}` : ''}
-      ${r.advice_lt ? `<div class="notice" style="margin:12px 0">💡 ${esc(r.advice_lt)}</div>` : ''}
-      <div class="stack" style="margin-top:16px">
-        ${r.passed && next ? `<button class="btn block" id="r-next">Kita pamoka: ${esc(next.lesson.title)} →</button>` : ''}
-        ${!r.passed ? `<button class="btn block" id="r-learn">Peržiūrėti teoriją</button>` : ''}
-        <button class="btn secondary block" id="r-close">Uždaryti</button>
+      `<div class="celebration">${r.passed ? confetti : ''}${ema(r.passed ? 'happy' : 'encourage', 146)}
+        <span class="success-pill ${r.passed ? '' : 'pending'}">${icon(r.passed ? 'check' : 'repeat')} ${r.passed ? (exam ? 'Lygis įveiktas' : 'Pamoka išmokta') : 'Dar ne – bet jau arti'}</span>
+        <h2>${r.passed ? (exam ? `${esc(x.level.name)} lygis tavo!` : `Jau gali: ${esc(((l.canDo || [])[0] || l.title).replace(/^Galiu /i, '').replace(/\.$/, ''))}`) : 'Pakartosime ir pavyks'}</h2>
+        <p class="muted">${esc(r.summary_lt || '')}</p></div>
+      <div class="score-row"><div class="score">${esc(r.score)}<span>/ 100</span></div>
+        <div class="result-stars">${[0, 1, 2].map((i) => icon('star', i < stars ? 'on' : 'off')).join('')}<b>${stars === 3 ? 'Puikiai padirbėjai' : stars === 2 ? 'Labai gerai' : stars === 1 ? 'Išmokta' : 'Dar vienas bandymas'}</b></div></div>
+      <div class="result-note">
+        ${r.judge ? `<p class="tiny muted">${r.judge.error ? 'Nepriklausomas vertinimas nepavyko – įskaitytas Emos vertinimas.' : `Nepriklausomas vertinimas (${esc(r.judge.model || 'Gemini')}): ${r.judge.passed ? 'išlaikyta' : 'dar ne'}.`}${r.attempts ? ` Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%).` : ''}</p>` : r.attempts ? `<p class="tiny muted">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
+        ${(r.criteria || []).length ? `<div class="criteria">${r.criteria.map((c) => `<div class="crit ${c.met ? 'ok' : 'no'}">${icon(c.met ? 'check' : 'lock')}<div>${esc(c.criterion)}${c.evidence ? `<div class="tiny muted">„${esc(c.evidence)}“</div>` : ''}</div></div>`).join('')}</div>` : ''}
+        ${(r.strengths_lt || []).length ? `<h3>${icon('check')} Kas pavyko</h3>${r.strengths_lt.map((t) => `<p>${esc(t)}</p>`).join('')}` : ''}
+        ${(r.mistakes || []).length ? `<h3 class="fix">${icon('pen')} ${r.mistakes.length === 1 ? 'Viena pataisa kitam kartui' : 'Pataisos kitam kartui'}</h3>${r.mistakes
+          .map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="tiny muted">${esc(m.note_lt)}</div>` : ''}</div>`)
+          .join('')}` : ''}
+        ${r.advice_lt ? `<div class="notice" style="margin-top:12px">${icon('spark')}<div>${esc(r.advice_lt)}</div></div>` : ''}
+      </div>
+      ${r.passed && next ? `<p class="next-unlock">${icon('lock')} Atrakinta: ${esc(next.lesson.title)}</p>` : ''}
+      <div class="stack">
+        ${r.passed && next ? `<button class="btn block" id="r-next">Tęsti mokymąsi ${icon('arrow')}</button>` : ''}
+        ${!r.passed ? `<button class="btn block" id="r-learn">${icon('book')} Peržiūrėti teoriją</button>` : ''}
+        <button class="text-link" id="r-close">Grįžti į pamokų kelią</button>
       </div>`,
       (m, close) => {
         const go = (h) => {
           close();
           location.hash = h;
         };
-        m.querySelector('#r-close').onclick = close;
+        m.querySelector('#r-close').onclick = () => go('#/path');
         const n = m.querySelector('#r-next');
         if (n) n.onclick = () => go(`#/lesson/${next.lesson.id}`);
         const lr = m.querySelector('#r-learn');
@@ -574,8 +614,8 @@ function showResult(x, r) {
 // ---------- Pratybos ir vedamas pokalbis ----------
 // Trys sesijos vienai pamokai: pamoka (30 min) → pratybos (15 min) → vedamas pokalbis (15 min).
 const PRACTICE = {
-  drill: { icon: '🏋️', title: 'Pratybos', desc: 'Greiti vedami pratimai su Ema: pakeitimai, vertimas iš lietuvių, klausimų grandinė, diktantas, minutė kalbėjimo. Beveik be aiškinimų – kad gramatika taptų automatiška.', min: 10 },
-  talk: { icon: '🗨️', title: 'Vedamas pokalbis', desc: 'Pokalbis pamokos tema su pagalba: Ema ekrane parodo sakinių rėmus, klausia po vieną paprastą klausimą ir padeda lietuviškai. Saugu – gali skaityti nuo ekrano.', min: 10 },
+  drill: { icon: 'repeat', title: 'Pratybos', desc: 'Greiti vedami pratimai su Ema: pakeitimai, vertimas iš lietuvių, klausimų grandinė, diktantas, minutė kalbėjimo. Beveik be aiškinimų – kad gramatika taptų automatiška.', min: 10 },
+  talk: { icon: 'chat', title: 'Vedamas pokalbis', desc: 'Pokalbis pamokos tema su pagalba: Ema ekrane parodo sakinių rėmus, klausia po vieną paprastą klausimą ir padeda lietuviškai. Saugu – gali skaityti nuo ekrano.', min: 10 },
 };
 function practiceCount(id, kind) {
   const l = store.lessonState(id);
@@ -591,12 +631,14 @@ function viewPractice(x, kind) {
   setHeader(`${P.title}: ${l.title}`, '#/path');
   setTab('path');
   const prepared = [...(l.quiz || []), ...extraExercises(l)];
-  $view.innerHTML = `<div class="card"><div class="row">${ema('wave', 56)}<div class="grow"><h3>${P.icon} ${P.title}</h3>
-    <p class="small muted" style="margin:0">${esc(l.title)} · ${practiceCount(l.id, kind) ? `jau darei ${practiceCount(l.id, kind)} k.` : 'pirmas kartas'}</p></div></div>
-    <p class="small">${P.desc}</p>
-    <div class="row wrap"><button class="chip" id="theory">📘 Teorija</button>
-      <a class="chip" href="#/practice/${esc(l.id)}/${kind === 'drill' ? 'talk' : 'drill'}">${kind === 'drill' ? '🗨️ Vedamas pokalbis' : '🏋️ Pratybos'}</a></div>
-    </div><div id="talk"></div>`;
+  $view.innerHTML = `<div class="lesson-tabs"><a href="#/practice/${esc(l.id)}/drill" class="${kind === 'drill' ? 'selected' : ''}">${icon('repeat')} Pratybos</a>
+      <a href="#/practice/${esc(l.id)}/talk" class="${kind === 'talk' ? 'selected' : ''}">${icon('chat')} Vedamas pokalbis</a>
+      <a href="#/lesson/${esc(l.id)}/learn">${icon('book')} Teorija</a></div>
+    <div class="lesson-head"><span class="square-icon">${icon(kind === 'drill' ? 'repeat' : 'chat')}</span><div class="grow">
+      <h2 style="font-size:17px">${P.title}: ${esc(l.title)}</h2>
+      <p class="tiny muted">${practiceCount(l.id, kind) ? `Jau darei ${practiceCount(l.id, kind)} k. · ` : ''}${P.desc}</p></div>
+      <button class="icon-btn" id="theory" aria-label="Teorija">${icon('book')}</button></div>
+    <div id="talk"></div>`;
   document.getElementById('theory').onclick = () => showTheoryModal(l);
   const describe = prepared.map((q, n) => describeExercise(q, n + 1));
   mountTalk(document.getElementById('talk'), {
@@ -611,13 +653,14 @@ function viewPractice(x, kind) {
       updateChips();
       return () =>
         modal(
-          `<div class="big-emoji">${ema(r.passed ? 'happy' : 'encourage', 96)}</div>
-          <h2 style="text-align:center">${P.title} baigtos</h2>
-          <div class="score">${esc(r.score)}<span class="muted" style="font-size:18px"> / 100</span></div>
-          <p>${esc(r.summary_lt || '')}</p>
-          ${(r.mistakes || []).length ? `<h3>✏️ Įsimink</h3>${r.mistakes.map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="small muted">${esc(m.note_lt)}</div>` : ''}</div>`).join('')}` : ''}
-          ${r.advice_lt ? `<div class="notice" style="margin:12px 0">💡 ${esc(r.advice_lt)}</div>` : ''}
-          <div class="stack" style="margin-top:16px"><a class="btn block" href="#/path" data-close>Į pamokas</a></div>`,
+          `<div class="celebration">${ema(r.passed ? 'happy' : 'encourage', 120)}
+            <span class="success-pill">${icon('check')} ${P.title} baigtos</span>
+            <h2>${kind === 'drill' ? 'Dar tvirčiau' : 'Dar drąsiau'}</h2><p class="muted">${esc(r.summary_lt || '')}</p></div>
+          <div class="score-row"><div class="score">${esc(r.score)}<span>/ 100</span></div></div>
+          <div class="result-note">
+          ${(r.mistakes || []).length ? `<h3 class="fix">${icon('pen')} Įsimink</h3>${r.mistakes.map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="tiny muted">${esc(m.note_lt)}</div>` : ''}</div>`).join('')}` : ''}
+          ${r.advice_lt ? `<div class="notice" style="margin-top:12px">${icon('spark')}<div>${esc(r.advice_lt)}</div></div>` : ''}</div>
+          <div class="stack" style="margin-top:16px"><a class="btn block" href="#/path" data-close>Į pamokų kelią ${icon('arrow')}</a></div>`,
           (m, close) => m.querySelectorAll('[data-close]').forEach((b) => (b.onclick = close))
         );
     },
@@ -637,16 +680,25 @@ function resumeFor(id) {
 // ---------- Balso pokalbis (bendras pamokai ir laisvam pokalbiui) ----------
 function mountTalk($el, opts) {
   $el.innerHTML = `<div class="talk">
-    <div class="card"><div class="talk-status">${ema('wave', 56)}<span class="dot" id="dot"></span><span id="status" class="grow">Pasiruošusi pradėti</span>
-      ${opts.minTurns ? `<span class="chip small" id="turns">🗣️ 0 / ${opts.minTurns}</span>` : ''}
-      <span class="chip small hidden" id="exs">🧩 0</span></div></div>
+    <section class="ema-stage" id="stage">${ema('wave', 122)}
+      <div class="stage-label"><span class="status-dot" id="dot"></span><b id="status">Pasiruošusi pradėti</b></div>
+      <p id="hint">Paspausk „Pradėti“ – Ema pasisveikins.</p>
+      <div class="waveform" id="wave" aria-hidden="true">${Array.from({ length: 12 }, () => '<i></i>').join('')}</div>
+      <div class="row" style="margin-top:8px;gap:8px">${opts.minTurns ? `<span class="chip" id="turns">${icon('chat')}<span>0 / ${opts.minTurns}</span></span>` : ''}
+      <span class="chip hidden" id="exs">${icon('spark')}<span>0</span></span></div>
+    </section>
     <div class="transcript" id="tr"></div>
     <div class="controls" id="controls">
-      <button class="btn block" id="start">🎙️ Pradėti pokalbį</button>
+      <button class="btn block" id="start">${icon('mic')} Pradėti pokalbį</button>
     </div></div>`;
   const $tr = $el.querySelector('#tr');
   const $status = $el.querySelector('#status');
   const $dot = $el.querySelector('#dot');
+  const $stage = $el.querySelector('#stage');
+  const $hint = $el.querySelector('#hint');
+  const waveBars = [...$el.querySelectorAll('#wave i')];
+  let micLevel = 0;
+  const HINTS = { speaking: 'Klausyk. Netrukus galėsi atsakyti.', live: 'Kalbėk laisvai – Ema klauso.', thinking: 'Palauk akimirką.', '': '' };
   const $controls = $el.querySelector('#controls');
   const $turns = $el.querySelector('#turns');
   const $exs = $el.querySelector('#exs');
@@ -666,6 +718,7 @@ function mountTalk($el, opts) {
   let pendingResult = null;
   let resultShown = false;
   let userWantsStop = false;
+  let lastPassed = false;
   const transcriptLog = []; // paskutinės replikos – pamokai pratęsti nutrūkus ryšiui
   const fullLog = []; // visas pokalbis – nepriklausomam vertintojui
   const exLog = [];
@@ -675,8 +728,26 @@ function mountTalk($el, opts) {
   const $ema = $el.querySelector('.ema');
   const status = (text, kind, face) => {
     $status.textContent = text;
-    $dot.className = `dot ${kind || ''}`;
+    $stage.classList.toggle('speaking', kind === 'speaking');
+    $stage.classList.toggle('live', kind === 'live');
+    if ($hint && HINTS[face === 'thinking' ? 'thinking' : kind || ''] !== undefined) $hint.textContent = HINTS[face === 'thinking' ? 'thinking' : kind || ''];
     setEma($ema, face || (kind === 'speaking' ? 'talking' : kind === 'live' ? 'listening' : 'idle'));
+    const micBtn = $controls.querySelector('#mic');
+    if (micBtn) {
+      micBtn.classList.toggle('wait', kind === 'speaking' || face === 'thinking');
+      const cap = $controls.querySelector('.mic-caption');
+      if (cap) cap.textContent = kind === 'speaking' ? 'Palauk, kol Ema baigs' : !micOn ? (settings.micMode === 'tap' ? 'Paspausk ir kalbėk' : 'Mikrofonas išjungtas') : 'Kalbėk – Ema klauso';
+    }
+  };
+  // Garso bangos – iš tikro garso: Emos balso lygis (grotuvas) arba mikrofono lygis.
+  const drawWave = () => {
+    const speaking = player && player.playing;
+    const lvl = speaking ? (player.level || 0) * 3 : micOn ? micLevel * 10 : 0;
+    waveBars.forEach((b, i) => {
+      const shape = Math.sin((i / 11) * Math.PI);
+      const jitter = speaking || micOn ? (Math.sin(Date.now() / 90 + i * 1.7) + 1) / 2 : 0;
+      b.style.height = `${Math.max(4, Math.min(29, 4 + lvl * 26 * (0.5 + shape) * (0.6 + 0.4 * jitter)))}px`;
+    });
   };
   const scroll = () => $controls.scrollIntoView({ block: 'end', behavior: 'smooth' });
   const sys = (text) => {
@@ -690,16 +761,18 @@ function mountTalk($el, opts) {
   };
   const addText = (role, text) => {
     if (bubbleRole !== role || !bubble) {
-      bubble = document.createElement('div');
-      bubble.className = `bubble ${role}`;
+      const wrap = document.createElement('div');
+      wrap.className = `bubble ${role}`;
+      wrap.innerHTML = `<span class="speaker">${role === 'me' ? 'Tu' : 'Ema'}</span><span class="text"></span>`;
+      $tr.appendChild(wrap);
+      bubble = wrap.querySelector('.text');
       bubble.textContent = '';
-      $tr.appendChild(bubble);
       bubbleRole = role;
       if (role === 'me') {
         turns++;
         store.recordSpeakingTurn();
         if (!opts.canAssess && turns === 3) store.recordTalk();
-        if ($turns) $turns.textContent = `🗣️ ${turns} / ${opts.minTurns}`;
+        if ($turns) $turns.querySelector('span').textContent = `${turns} / ${opts.minTurns}`;
       }
     }
     bubble.textContent += text;
@@ -727,7 +800,7 @@ function mountTalk($el, opts) {
   const board = ({ title, lines }) => {
     const d = document.createElement('div');
     d.className = 'board';
-    d.innerHTML = `${title ? `<h4>${esc(title)}</h4>` : ''}${(lines || []).map((t) => `<div>${esc(t)}</div>`).join('')}`;
+    d.innerHTML = `${icon('volume')}<div class="lines">${title ? `<h4>${esc(title)}</h4>` : ''}${(lines || []).map((t) => `<div>${esc(t)}</div>`).join('')}</div>`;
     $tr.appendChild(d);
     bubble = null;
     bubbleRole = '';
@@ -741,9 +814,19 @@ function mountTalk($el, opts) {
   };
 
   let startedAt = 0;
+  // Live Activity būsena – tik mokymosi eiga, be jautrių duomenų.
+  const actState = (phase, passed = false) => ({
+    phase,
+    learnerTurns: turns,
+    requiredTurns: opts.minTurns || 0,
+    exercisesDone: exDone,
+    exercisesRequired: opts.canAssess ? Math.min(3, (opts.prepared || []).length) : 0,
+    passed,
+  });
   const stop = () => {
     stopped = true;
     clearInterval(tick);
+    if (isNative && opts.lesson) activityEnd(actState(pendingResult && lastPassed ? 'completed' : 'ended', !!lastPassed));
     if (startedAt) {
       store.addMinutes(Math.round((Date.now() - startedAt) / 60000));
       startedAt = 0;
@@ -757,13 +840,19 @@ function mountTalk($el, opts) {
 
   const drawControls = () => {
     const tap = settings.micMode === 'tap';
-    $controls.innerHTML = `<div class="row">
-        <button class="mic ${micOn ? '' : 'off'}" id="mic" aria-label="Mikrofonas">${micOn ? '🎙️' : '🔇'}<span class="ring" id="ring"></span></button>
-        <div class="grow small muted">${tap ? (micOn ? 'Kalbėk… Baigusi paspausk mygtuką.' : 'Paspausk mikrofoną ir kalbėk.') : micOn ? 'Mikrofonas įjungtas – tiesiog kalbėk.' : 'Mikrofonas išjungtas.'}</div>
-        <button class="btn secondary" id="end">Baigti</button></div>
-      <div class="textrow"><input type="text" id="txt" placeholder="…arba parašyk" autocomplete="off">
-        <button class="btn" id="send" aria-label="Siųsti">➤</button></div>
-      ${opts.canAssess ? '<button class="btn secondary block" id="assess" style="margin-top:10px">✅ Noriu įvertinimo</button>' : opts.mode === 'practice' ? '<button class="btn secondary block" id="assess" style="margin-top:10px">🏁 Baigti sesiją</button>' : ''}`;
+    $controls.innerHTML = `<div class="mic-line">
+        <button class="icon-btn" id="texttoggle" aria-label="Rašyti tekstu">${icon('pen')}</button>
+        <div><button class="mic ${micOn ? '' : 'off'}" id="mic" aria-label="Mikrofonas">${icon('mic')}<span class="ring" id="ring"></span></button>
+        <span class="mic-caption">${tap ? (micOn ? 'Kalbėk… baigusi paspausk' : 'Paspausk ir kalbėk') : micOn ? 'Kalbėk – Ema klauso' : 'Mikrofonas išjungtas'}</span></div>
+        <button class="icon-btn" id="end" aria-label="Baigti pokalbį">${icon('close')}</button></div>
+      <div class="textrow hidden" id="textrow"><input type="text" id="txt" placeholder="…arba parašyk" autocomplete="off" aria-label="Žinutė Emai">
+        <button class="btn" id="send" aria-label="Siųsti">${icon('send')}</button></div>
+      ${opts.canAssess ? `<button class="text-link" id="assess">${icon('check')} Noriu įvertinimo</button>` : opts.mode === 'practice' ? `<button class="text-link" id="assess">${icon('check')} Baigti sesiją</button>` : ''}`;
+    $controls.querySelector('#texttoggle').onclick = () => {
+      const row = $controls.querySelector('#textrow');
+      row.classList.toggle('hidden');
+      if (!row.classList.contains('hidden')) row.querySelector('input').focus();
+    };
     $controls.querySelector('#mic').onclick = () => {
       if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
       micOn = !micOn;
@@ -773,7 +862,7 @@ function mountTalk($el, opts) {
     $controls.querySelector('#end').onclick = () => {
       stop();
       status('Pokalbis baigtas', '');
-      $controls.innerHTML = '<button class="btn block" id="restart">🔄 Pradėti iš naujo</button>';
+      $controls.innerHTML = `<button class="btn block" id="restart">${icon('repeat')} Pradėti iš naujo</button>`;
       $controls.querySelector('#restart').onclick = () => mountTalk($el, opts);
       flushResult();
     };
@@ -813,25 +902,32 @@ function mountTalk($el, opts) {
       if (!session || stopped) return clearInterval(tick);
       if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
       const speaking = player && player.playing;
+      drawWave();
+      $stage.classList.toggle('compact', !!openExercise);
+      if (isNative && opts.lesson) {
+        activityUpdate(actState(reconnecting ? 'reconnecting' : speaking ? 'speaking' : openExercise ? 'exercise' : micOn || !mic ? 'listening' : 'thinking'));
+      }
       if (speaking) {
         listenSince = Date.now();
-        status('Ema kalba… (palauk)', 'speaking');
+        status('Ema kalba', 'speaking');
+      } else if (openExercise) {
+        status('Užduotis ekrane', 'live', 'thinking');
       } else if (micOn) {
-        status('Tavo eilė – kalbėk 🎙️', 'live');
+        status('Tavo eilė – kalbėk', 'live');
       } else {
-        status(settings.micMode === 'tap' ? 'Paspausk 🎙️ ir kalbėk' : 'Mikrofonas išjungtas', 'live');
+        status(settings.micMode === 'tap' ? 'Paspausk mikrofoną ir kalbėk' : 'Mikrofonas išjungtas', 'live');
       }
       if (mic && micOn && !speaking && !heardSound && !micWarned && Date.now() - listenSince > 10000) {
         micWarned = true;
-        sys('🎙️ Negaunu garso iš mikrofono. Patikrink, ar programėlei leistas mikrofonas (iPhone: Nustatymai → Kalbėk!/Safari → Mikrofonas), arba rašyk tekstu.');
+        sys('Negaunu garso iš mikrofono. Patikrink, ar programėlei leistas mikrofonas (iPhone: Nustatymai → Kalbėk!/Safari → Mikrofonas), arba rašyk tekstu.');
       }
-    }, 250);
+    }, 120);
   };
 
   const start = async () => {
     if (!apiKey()) {
       sys('Pirmiau įvesk Gemini API raktą nustatymuose.');
-      $controls.innerHTML = '<a class="btn block" href="#/settings">⚙️ Į nustatymus</a>';
+      $controls.innerHTML = `<a class="btn block" href="#/settings">${icon('gear')} Į nustatymus</a>`;
       return;
     }
     // Vienas garso kontekstas garsui ir mikrofonui – sukuriamas PASPAUDIMO metu (iPhone reikalavimas).
@@ -850,6 +946,7 @@ function mountTalk($el, opts) {
           },
           onLevel: (lvl) => {
             if (lvl > 0.004) heardSound = true;
+            micLevel = lvl;
             const ring = document.getElementById('ring');
             if (ring) {
               const v = micOn ? Math.min(1, lvl * 12) : 0;
@@ -884,7 +981,7 @@ function mountTalk($el, opts) {
     } catch (e) {
       status('Nepavyko prisijungti', '');
       sys(`Klaida: ${e.message}. Patikrink API raktą ir modelį nustatymuose (${settings.model || 'modelis nepasirinktas'}).`);
-      $controls.innerHTML = '<button class="btn block" id="retry">🔄 Bandyti dar kartą</button>';
+      $controls.innerHTML = `<button class="btn block" id="retry">${icon('repeat')} Bandyti dar kartą</button>`;
       $controls.querySelector('#retry').onclick = () => mountTalk($el, opts);
       mic && mic.stop();
       player && player.close();
@@ -901,6 +998,12 @@ function mountTalk($el, opts) {
     drawControls();
     startStatusLoop();
     startedAt = Date.now();
+    if (isNative && opts.lesson) {
+      activityStart(
+        { lessonID: opts.lesson.id, lessonTitle: opts.lesson.title, level: (opts.level && opts.level.name) || '' },
+        actState('starting')
+      );
+    }
     session.sendText('(The learner has just opened the lesson. Please start now.)');
   };
 
@@ -924,7 +1027,7 @@ function mountTalk($el, opts) {
       } else if (fc.name === 'show_theory' && opts.lesson) {
         const d = document.createElement('div');
         d.className = 'card theory-inline';
-        d.innerHTML = theoryHtml(opts.lesson, args.part);
+        d.innerHTML = `<div class="card-label">${icon('book')} Trumpai apie taisyklę</div>${theoryHtml(opts.lesson, args.part)}`;
         bindSay(d);
         $tr.appendChild(d);
         bubble = null;
@@ -946,6 +1049,8 @@ function mountTalk($el, opts) {
           const label = describeExercise(q, args.quiz_index || '').replace(/^#\S* /, '');
           openExercise = mountExercise(d, q, {
             seconds: secs,
+            label: q.type === 'write' ? 'Rašymo užduotis' : 'Ema tau skyrė užduotį',
+            counter: q.type === 'write' ? 'Vertins Ema' : `${exDone + 1}${opts.minTurns ? '' : ''}`,
             onDone: (r) => {
               openExercise = null;
               if (q.type === 'write') {
@@ -968,7 +1073,7 @@ function mountTalk($el, opts) {
               updateChips();
               if ($exs) {
                 $exs.classList.remove('hidden');
-                $exs.textContent = `🧩 ${exRight}/${exDone}`;
+                $exs.querySelector('span').textContent = `${exRight}/${exDone}`;
               }
               const msg = `[EXERCISE RESULT] ${label} | learner answered: "${r.given || '(nothing)'}" | correct: "${r.right}" | ${
                 r.ok ? 'CORRECT' : r.timedOut ? 'WRONG (time ran out)' : 'WRONG'
@@ -998,7 +1103,7 @@ function mountTalk($el, opts) {
         }
         if (args.passed && opts.mode === 'practice' && turns < minTurns && !userWantsStop) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
         if (args.passed && missing.length && !pendingResult && !userWantsStop) {
-          sys(`⏳ Dar ne viskas: ${missing.length === 1 && /spoken only/.test(missing[0]) ? 'per mažai kalbėjai – Ema tęsia pamoką' : 'Ema tęsia pamoką, kad būtum tikrai pasiruošusi'}.`);
+          sys(`Dar ne viskas: ${missing.length === 1 && /spoken only/.test(missing[0]) ? 'per mažai kalbėjai – Ema tęsia pamoką' : 'Ema tęsia pamoką, kad būtum tikrai pasiruošusi'}.`);
           response = { error: `Not accepted yet: ${missing.join('; ')}. Do not end the lesson. Continue practising the weak points for a few more turns, then call complete_lesson again.` };
         } else if (!pendingResult) {
           const r = {
@@ -1016,7 +1121,7 @@ function mountTalk($el, opts) {
           // Nepriklausomas vertintojas (Gemini 3.8 Flash per REST) – pamoka užskaitoma tik sutikus abiem.
           if (opts.mode !== 'practice' && opts.lesson && apiKey()) {
             status('Vertinama…', '', 'thinking');
-            sys('🧑‍⚖️ Nepriklausomas vertinimas (viso pokalbio peržiūra)…');
+            sys('Nepriklausomas vertinimas – viso pokalbio peržiūra…');
             try {
               const v = await judgeLesson({
                 apiKey: apiKey(),
@@ -1045,8 +1150,10 @@ function mountTalk($el, opts) {
             }
           }
           if (r.passed) clearResume(opts.lesson && opts.lesson.id);
+          lastPassed = r.passed;
+          if (isNative && opts.lesson) activityUpdate(actState(r.passed ? 'completed' : 'listening', r.passed));
           pendingResult = opts.onResult(r);
-          sys(opts.mode === 'practice' ? '✅ Sesija baigta ir įrašyta.' : r.passed ? '✅ Įvertinta: pamoka išmokta!' : '⏳ Įvertinta: dar reikia pasipraktikuoti.');
+          sys(opts.mode === 'practice' ? 'Sesija baigta ir įrašyta.' : r.passed ? 'Įvertinta: pamoka išmokta!' : 'Įvertinta: dar reikia pasipraktikuoti.');
           response = {
             result: 'saved',
             passed: r.passed,
@@ -1086,7 +1193,7 @@ function mountTalk($el, opts) {
       sys(`Ryšys nutrūko (${e.detail.reason}).`);
       mic && mic.stop();
       mic = null;
-      $controls.innerHTML = '<button class="btn block" id="retry">🔄 Pradėti iš naujo</button>';
+      $controls.innerHTML = `<button class="btn block" id="retry">${icon('repeat')} Pradėti iš naujo</button>`;
       $controls.querySelector('#retry').onclick = () => mountTalk($el, opts);
       flushResult();
     });
@@ -1112,13 +1219,13 @@ function viewSprint() {
   const pool = sprintPool();
   const strip = (s) => norm(s).replace(/^(to|a|an|the) /, '');
   const intro = () => {
-    $view.innerHTML = `<div class="card" style="text-align:center">${ema('wave', 96)}
-      <h2>⚡ Žodžių sprintas</h2><p>Matysi žodį lietuviškai – rašyk angliškai. Turi <b>60 sekundžių</b>.
+    $view.innerHTML = `<div class="card" style="text-align:center"><div class="sprint-emblem">${icon('bolt')}</div>
+      <h2>Žodžių sprintas</h2><p class="small">Matysi žodį lietuviškai – rašyk angliškai. Turi <b>60 sekundžių</b>.
       Teisingas atsakymas: +1 taškas ir +2 sek.</p>
       <p class="small muted">Pirmiausia gausi žodžius, kuriuos laikas pakartoti (šiandien: <b>${pool.filter((v) => store.isWordDue(v.en)).length}</b>).
       Žinomi žodžiai grįžta vis rečiau – po 1, 3, 7, 14, 30 dienų, o pamiršti – iškart.</p>
       <p class="muted">Rekordas: <b>${store.progress.sprintBest || 0}</b></p>
-      <button class="btn block" id="go">Pradėti!</button></div>`;
+      <button class="btn block" id="go">Pradėti ${icon('arrow')}</button></div>`;
     document.getElementById('go').onclick = run;
   };
   const run = () => {
@@ -1130,12 +1237,12 @@ function viewSprint() {
     let score = 0;
     let time = 60;
     const missed = [];
-    $view.innerHTML = `<div class="card"><div class="row"><b class="chip" id="t">⏱ 60</b><span class="grow"></span><b class="chip" id="sc">✅ 0</b></div>
+    $view.innerHTML = `<div class="sprint-top"><span class="chip honey timer" id="t">${icon('clock')}<span>60</span></span><span class="chip" id="sc">${icon('check')}<span>0</span></span></div>
       <div class="progressbar" style="margin:12px 0"><span id="bar" style="width:100%"></span></div>
-      <div class="quiz-q" id="w" style="text-align:center;font-size:28px"></div>
-      <input type="text" id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="angliškai…">
-      <div class="row" style="margin-top:12px"><button class="btn secondary grow" id="skip">Praleisti</button><button class="btn grow" id="ok">Tikrinti</button></div>
-      <div id="flash" class="small" style="min-height:24px;margin-top:10px;text-align:center"></div></div>`;
+      <div class="word-prompt"><p class="muted">Kaip pasakytum angliškai?</p><h1 id="w"></h1></div>
+      <input type="text" id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Rašyk angliškai…" aria-label="Vertimas angliškai">
+      <div class="stack" style="margin-top:12px"><button class="btn block" id="ok">Tikrinti ${icon('check')}</button><button class="text-link" id="skip">Praleisti šį žodį</button></div>
+      <div id="flash" class="small" style="min-height:24px;margin-top:6px;text-align:center"></div>`;
     const $w = document.getElementById('w');
     const $inp = document.getElementById('inp');
     const $flash = document.getElementById('flash');
@@ -1150,12 +1257,12 @@ function viewSprint() {
       if (ok) {
         score++;
         time += 2;
-        $flash.innerHTML = `<span style="color:var(--ok)">✅ ${esc(v.en)}</span>`;
+        $flash.innerHTML = `<b style="color:var(--ok)">${esc(v.en)}</b> · teisingai`;
       } else {
         missed.push(v);
-        $flash.innerHTML = `<span style="color:var(--bad)">➡️ ${esc(v.en)}</span>`;
+        $flash.innerHTML = `<span style="color:var(--bad)">Teisingai: <b>${esc(v.en)}</b></span>`;
       }
-      document.getElementById('sc').textContent = `✅ ${score}`;
+      document.querySelector('#sc span').textContent = score;
       i++;
       show();
     };
@@ -1173,13 +1280,13 @@ function viewSprint() {
     const timer = setInterval(() => {
       if (!document.body.contains($w)) return clearInterval(timer);
       time--;
-      document.getElementById('t').textContent = `⏱ ${time}`;
+      document.querySelector('#t span').textContent = time;
       document.getElementById('bar').style.width = `${Math.min(100, (time / 60) * 100)}%`;
       if (time <= 0) {
         clearInterval(timer);
         const best = store.recordSprint(score);
         $view.innerHTML = `<div class="card" style="text-align:center">${ema(score >= 10 ? 'happy' : 'encourage', 96)}
-          <h2>${score} ${score === 1 ? 'žodis' : 'žodžiai'}!</h2>${best ? '<p><b>🏆 Naujas rekordas!</b></p>' : ''}
+          <h2>${score} ${score === 1 ? 'žodis' : 'žodžiai'}!</h2>${best ? `<p><span class="success-pill">${icon('star')} Naujas rekordas</span></p>` : ''}
           ${missed.length ? `<h3>Pasikartok:</h3><ul class="ex" style="text-align:left">${missed.slice(0, 10)
             .map((v) => `<li><span class="en">${esc(v.en)}</span> <span class="lt">– ${esc(v.lt)}</span></li>`).join('')}</ul>` : ''}
           <div class="stack" style="margin-top:12px"><button class="btn block" id="again">Dar kartą</button>
@@ -1203,8 +1310,8 @@ function viewFreeTalk() {
   }
   setHeader('Laisvas pokalbis', '#/path');
   setTab('path');
-  $view.innerHTML = `<div class="card"><h3>💬 Pasikalbėk su Ema apie bet ką</h3>
-    <p>Čia nėra testo – tiesiog kalbiesi ir pratiniesi. Ema prisitaikys prie tavo lygio (<b>${esc(level.name)}</b>) ir naudos jau išmoktą gramatiką.</p>
+  $view.innerHTML = `<div class="card"><div class="card-label">${icon('chat')} Laisvas pokalbis</div><h3>Pasikalbėk su Ema apie bet ką</h3>
+    <p class="small">Čia nėra testo – tiesiog kalbiesi ir pratiniesi. Ema prisitaikys prie tavo lygio (<b>${esc(level.name)}</b>) ir naudos jau išmoktą gramatiką.</p>
     <label class="field"><span>Tema (nebūtina)</span><input type="text" id="topic" placeholder="pvz.: kelionės, darbas, filmai, savaitgalis"></label>
     <div class="row wrap">${['My day', 'Travel', 'Food & cooking', 'Work', 'Films & series', 'Plans for the weekend']
       .map((t) => `<button class="chip" data-topic="${esc(t)}">${esc(t)}</button>`)
@@ -1224,31 +1331,35 @@ function viewStats() {
   const p = store.progress;
   const passed = ALL.filter((x) => isPassed(x.lesson.id)).length;
   const results = ALL.filter((x) => (store.lessonState(x.lesson.id) || {}).last);
-  $view.innerHTML = `<div class="stats">
-      <div class="stat"><b>${passed}/${ALL.length}</b><span>išmoktos pamokos</span></div>
-      <div class="stat"><b>${esc(currentLevel().name)}</b><span>dabartinis lygis</span></div>
-      <div class="stat"><b>🔥 ${store.streakCount()}</b><span>dienų iš eilės</span></div>
-      <div class="stat"><b>🗣️ ${p.speakingTurns || 0}</b><span>pasakytų replikų</span></div>
-      <div class="stat"><b>⏱ ${((p.minutes || 0) / 60).toFixed(1)} val.</b><span>mokymosi laiko (iš ~${TOTAL_HOURS} iki B1)</span></div>
-      <div class="stat"><b>🏋️ ${Object.values(p.lessons).reduce((n, l) => n + ((l.practice && (l.practice.drill || 0) + (l.practice.talk || 0)) || 0), 0)}</b><span>pratybų ir vedamų pokalbių</span></div>
+  const lv = currentLevel();
+  const lvItems = ALL.filter((x) => x.level === lv);
+  const lvDone = lvItems.filter((x) => isPassed(x.lesson.id)).length;
+  const practiceCountAll = Object.values(p.lessons).reduce((n, l) => n + ((l.practice && (l.practice.drill || 0) + (l.practice.talk || 0)) || 0), 0);
+  $view.innerHTML = `<div class="page-title"><p class="muted">Kiekvienas pokalbis skaičiuojasi</p><h1>Tavo pažanga</h1></div>
+    <section class="progress-story"><div class="progress-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43"/><circle class="ring-value" cx="50" cy="50" r="43" style="stroke-dashoffset:${270 - 270 * (lvDone / lvItems.length)}"/></svg><b>${esc(lv.name)}</b></div>
+      <div><span class="tiny muted">Dabartinis lygis</span><h2>${esc(lv.title)}</h2><p><b>${passed}</b> iš ${ALL.length} pamokų išmokta</p></div></section>
+    <div class="stats">
+      <div class="stat">${icon('flame')}<b>${store.streakCount()}</b><span>dienos iš eilės</span></div>
+      <div class="stat">${icon('chat')}<b>${p.speakingTurns || 0}</b><span>pasakytos replikos</span></div>
+      <div class="stat">${icon('clock')}<b>${((p.minutes || 0) / 60).toFixed(1)} val.</b><span>mokymosi laiko iš ~${TOTAL_HOURS}</span></div>
+      <div class="stat">${icon('repeat')}<b>${practiceCountAll}</b><span>pratybų ir vedamų pokalbių</span></div>
     </div>
-    <div class="card" style="margin-top:12px"><h3>Lygiai</h3>${LEVELS.map((lv) => {
-      const items = ALL.filter((x) => x.level === lv);
+    <section class="flat-section"><h3>Mokymosi kelias</h3>${LEVELS.map((L) => {
+      const items = ALL.filter((x) => x.level === L);
       const d = items.filter((x) => isPassed(x.lesson.id)).length;
-      return `<div style="margin:10px 0"><div class="row"><b class="grow">${esc(lv.name)} · ${esc(lv.title)}</b><span class="small muted">${d}/${items.length}</span></div>
-        <div class="progressbar"><span style="width:${(d / items.length) * 100}%;background:${LEVEL_COLORS[lv.id]}"></span></div></div>`;
-    }).join('')}</div>
-    <div class="card"><h3>✏️ Mano dažniausios klaidos</h3>${p.mistakes.length
-      ? p.mistakes.slice(0, 20).map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="small muted">${esc(m.note_lt)}</div>` : ''}</div>`).join('')
-      : '<p class="muted">Kol kas tuščia. Čia atsiras klaidos, kurias Ema pastebės pokalbiuose – ji jas prisimins ir kartos su tavimi.</p>'}</div>
-    <div class="card"><h3>📋 Pamokų rezultatai</h3>${results.length
+      const locked = !isUnlocked(items[0].index);
+      return `<div class="level-row"><b>${esc(L.name)}</b><span class="grow">${esc(L.title)}</span>${locked ? icon('lock') : `<span class="muted">${d} / ${items.length}</span>`}</div>
+        <div class="level-track"><span style="width:${(d / items.length) * 100}%"></span></div>`;
+    }).join('')}</section>
+    <section class="memory-card"><h3>${icon('repeat')} Prisimink kitam kartui</h3>${p.mistakes.length
+      ? p.mistakes.slice(0, 12).map((m) => `<div class="mistake"><s>${esc(m.wrong)}</s> → <b>${esc(m.correct)}</b>${m.note_lt ? `<div class="tiny muted">${esc(m.note_lt)}</div>` : ''}</div>`).join('') + '<p class="tiny" style="margin:8px 0 0">Ema šias klaidas pakartos su tavimi.</p>'
+      : '<p class="tiny" style="margin:8px 0 0">Kol kas tuščia. Čia atsiras klaidos, kurias Ema pastebės pokalbiuose – ji jas prisimins ir kartos su tavimi.</p>'}</section>
+    <section class="flat-section" style="margin-top:20px"><h3>Pamokų rezultatai</h3>${results.length
       ? results.map((x) => {
-          const s = store.lessonState(x.lesson.id);
-          return `<div class="row" style="padding:6px 0;border-bottom:1px dashed var(--line)"><span>${esc(x.lesson.icon)}</span>
-            <a class="grow" href="#/lesson/${x.lesson.id}/learn">${esc(x.lesson.title)}</a>
-            <span class="small">${s.passed ? `✅ ${s.bestScore}` : `⏳ ${s.last.score}`}</span></div>`;
+          const st = store.lessonState(x.lesson.id);
+          return `<a class="list-link" href="#/lesson/${x.lesson.id}/learn"><span class="row">${lessonIcon(x.lesson)} ${esc(x.lesson.title)}</span><span class="row">${st.passed ? `${icon('check')} ${st.bestScore}` : `${icon('repeat')} ${st.last.score}`}</span></a>`;
         }).join('')
-      : '<p class="muted">Dar nėra įvertintų pamokų.</p>'}</div>`;
+      : '<p class="muted small">Dar nėra įvertintų pamokų.</p>'}</section>`;
 }
 
 // ---------- Nustatymai ----------
@@ -1258,8 +1369,9 @@ function viewSettings() {
   const voices = ['Kore', 'Aoede', 'Leda', 'Zephyr', 'Puck', 'Charon', 'Fenrir', 'Orus'];
   const opt = (v, cur, label) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(label || v)}</option>`;
   $view.innerHTML = `
-    <div class="card"><h3>🔑 Gemini ryšys</h3>
-      ${BUILTIN_KEY ? `<p class="small">✅ Raktas jau įdiegtas programėlėje – nieko įvesti nereikia.</p>
+    <section class="profile-row">${ema('idle', 69)}<div><h2>Tu ir Ema</h2><p>Lėtai, aiškiai, be skubėjimo.</p></div></section>
+    <div class="card settings"><h3>${icon('key')} Gemini ryšys</h3>
+      ${BUILTIN_KEY ? `<p class="small">Raktas jau įdiegtas programėlėje – nieko įvesti nereikia.</p>
       <details><summary class="small muted">Naudoti kitą raktą</summary>` : `<p class="small">Nemokamą raktą gausi <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>
       → „Create API key“. Raktas saugomas tik šiame telefone.</p>`}
       <label class="field"><span>API raktas</span><input type="password" id="key" value="${esc(settings.apiKey)}" placeholder="${BUILTIN_KEY ? 'palik tuščią – naudojamas įdiegtas' : 'AIza…'}" autocomplete="off"></label>
@@ -1268,9 +1380,9 @@ function viewSettings() {
         <input type="text" id="model" value="${esc(settings.model)}" list="models" placeholder="gemini-3.8-live">
         <datalist id="models">${KNOWN_LIVE.map((m) => `<option value="${m}">`).join('')}</datalist>
         <small>Rekomenduojama <b>gemini-3.8-live</b> (greičiausia). „extended-thinking“ – protingesnė, bet lėtesnė. „Rasti modelius“ parodys, kas prieinama tavo raktui. Lygių egzaminams automatiškai naudojamas „extended-thinking“, o pamokos pabaigoje visą pokalbį dar kartą įvertina Gemini 3.8 Flash.</small></label>
-      <div class="row wrap"><button class="btn secondary" id="find">🔎 Rasti modelius</button><span class="small muted" id="find-out"></span></div>
+      <div class="row wrap"><button class="btn secondary" id="find">${icon('spark')} Rasti modelius</button><span class="small muted" id="find-out"></span></div>
     </div>
-    <div class="card"><h3>👩‍🏫 Mokytoja Ema</h3>
+    <div class="card settings"><h3>${icon('user')} Mokytoja Ema</h3>
       <label class="field"><span>Kaip į tave kreiptis (vardas)</span><input type="text" id="name" value="${esc(settings.name)}"></label>
       <label class="field"><span>Balsas</span><select id="voice">${voices.map((v) => opt(v, settings.voice)).join('')}</select></label>
       <label class="field"><span>Kalbėjimo tempas</span><select id="pace">${opt('auto', settings.pace, 'Pagal lygį (rekomenduojama)')}${opt('slow', settings.pace, 'Lėtai ir aiškiai')}${opt('normal', settings.pace, 'Natūraliai')}</select>
@@ -1286,19 +1398,19 @@ function viewSettings() {
         <small>Ištrink laiką, jei priminimų nenori. Vakare (21:30) dar kartą primins, jei tą dieną nesimokei.</small></label>` : ''}
       <label class="field"><span>Garso efektai</span><select id="sfx">${opt('on', settings.sfx, 'Įjungti')}${opt('off', settings.sfx, 'Išjungti')}</select></label>
     </div>
-    <div class="card"><h3>🔧 Garso testas</h3>
+    <div class="card settings"><h3>${icon('volume')} Garso testas</h3>
       <p class="small muted">Patikrina mikrofoną ir garsiakalbį tuo pačiu keliu, kuriuo kalba Ema. Jei kas nors neveikia – parašyk, ką čia rodo.</p>
-      <button class="btn secondary" id="audiotest">▶️ Pradėti testą (5 s)</button>
+      <button class="btn secondary" id="audiotest">${icon('mic')} Pradėti testą (5 s)</button>
       <div class="progressbar" style="margin-top:10px"><span id="miclevel" style="width:0%"></span></div>
       <pre class="small" id="audio-out" style="white-space:pre-wrap;margin:8px 0 0"></pre>
     </div>
-    <div class="card"><h3>💾 Pažanga</h3>
+    <div class="card settings"><h3>${icon('download')} Pažanga</h3>
       <p class="small muted">Pažanga saugoma telefone. Kartais pasidaryk atsarginę kopiją.</p>
-      <div class="row wrap"><button class="btn secondary" id="export">⬇️ Eksportuoti</button>
-      <label class="btn secondary">⬆️ Importuoti<input type="file" id="import" accept="application/json" hidden></label>
+      <div class="row wrap"><button class="btn secondary" id="export">${icon('download')} Eksportuoti</button>
+      <label class="btn secondary">${icon('repeat')} Importuoti<input type="file" id="import" accept="application/json" hidden></label>
       <button class="btn bad" id="reset">Ištrinti pažangą</button></div>
     </div>
-    <p class="small muted" style="text-align:center;margin-top:16px">Kalbėk! · ${ALL.length} pamokos nuo A1+ iki B1</p>`;
+    <p class="tiny muted" style="text-align:center;margin-top:16px">${icon('shield', 'xs')} Pažanga ir raktas saugomi tik šiame telefone · ${ALL.length} pamokos nuo A1+ iki B1</p>`;
   const bind = (id, key) => (document.getElementById(id).onchange = (e) => store.saveSettings({ [key]: e.target.value.trim() }));
   bind('key', 'apiKey');
   bind('model', 'model');
@@ -1357,19 +1469,19 @@ function viewSettings() {
       const st = track.getSettings ? track.getSettings() : {};
       log(`Mikrofonas: ${track.label || 'įrenginys'}; ${st.sampleRate ? st.sampleRate + ' Hz, ' : ''}aido slopinimas ${st.echoCancellation}`);
     } catch (e) {
-      log(`❌ Mikrofonas: ${e.name} – ${e.message}`);
+      log(`KLAIDA – mikrofonas: ${e.name} – ${e.message}`);
     }
-    log('🔊 Groju toną… turi girdėtis lygus 1 s pyptelėjimas (be traškesio)');
+    log('Groju toną… turi girdėtis lygus 1 s pyptelėjimas (be traškesio)');
     await player.ready;
     const tone = new Int16Array(24000);
     for (let i = 0; i < tone.length; i++) tone[i] = Math.round(Math.sin((2 * Math.PI * 440 * i) / 24000) * 0.4 * 32767 * Math.min(1, i / 2000, (tone.length - i) / 2000));
     for (let o = 0; o < tone.length; o += 960) player.play(bytesToBase64(tone.slice(o, o + 960).buffer));
-    log('🎙️ Kalbėk ką nors 5 sekundes…');
+    log('Kalbėk ką nors 5 sekundes…');
     await new Promise((r) => setTimeout(r, 5000));
     mic.stop();
     player.close();
     bar.style.width = '0%';
-    log(peak > 0.01 ? `✅ Mikrofonas girdi (lygis ${peak.toFixed(3)}, ${chunks} gabaliukų)` : `❌ Iš mikrofono garso negauta (lygis ${peak.toFixed(4)}, ${chunks} gabaliukų)`);
+    log(peak > 0.01 ? `OK – mikrofonas girdi (lygis ${peak.toFixed(3)}, ${chunks} gabaliukų)` : `KLAIDA – iš mikrofono garso negauta (lygis ${peak.toFixed(4)}, ${chunks} gabaliukų)`);
   };
   document.getElementById('export').onclick = () => {
     const a = document.createElement('a');

@@ -16,6 +16,16 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 - `js/store.js` – pažanga `localStorage` (`kalba.progress.v1`), nustatymai, kartojimo intervalai.
 - `sw.js` – talpykla (keisk `VERSION` keisdamas failus). `codex/` – užduotys vaizdiniams ištekliams.
 
+## Dizainas
+- Patvirtinta tik šviesi tema („Po truputį“, `codex/design/DESIGN.md`): tokenai `styles.css` `:root`, Manrope, SVG ikonos
+  (`js/icons.js` sprite, `icon('name')`, simboliai `#i-<name>`), be emoji UI valdikliuose. Temos perjungimo nedėti.
+- Pamokos rūšis → ikona: `KIND_ICON` (`js/app.js`). Kelias – skyrių „salos“ (`.island`, `.path-stop`).
+
+## Native (app/)
+- Valdiklis: `KalbekWidget.swift` (4 šeimos, PNG Ema iš `KalbekWidget/Assets.xcassets`), Live Activity:
+  `Shared/LessonActivityAttributes.swift` + `App/ActivityBridgePlugin.swift` + `LessonLiveActivity`; JS – `js/native.js`
+  (`activityStart/Update/End`, fazės iš tikros būsenos `mountTalk`). `ruby scripts/add-ios-widget.rb` sutvarko Xcode projektą.
+
 ## Taisyklės
 - Be build žingsnio ir be priklausomybių – grynas HTML/CSS/JS, kad veiktų GitHub Pages ir iPhone Safari.
 - Pamoka atrakinama TIK kai AI iškviečia `complete_lesson` su `passed: true` IR programa patvirtina saitus

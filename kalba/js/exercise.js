@@ -1,6 +1,7 @@
 // Viena interaktyvi užduotis (pasirinkimas, įrašymas, dėliojimas, diktantas, poros).
 // Naudojama ir atskiruose pratimuose, ir Emos pamokoje (kai ji iškviečia give_exercise).
 import { esc, rich, norm, shuffle, speak, sfx } from './util.js';
+import { icon } from './icons.js';
 
 const INPUT = 'type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"';
 
@@ -15,16 +16,16 @@ export function mountExercise($el, q, opts = {}) {
   } else if (q.type === 'input') {
     body = `<div class="quiz-q">${esc(q.q)}</div><input ${INPUT} class="inp" placeholder="Rašyk angliškai…">`;
   } else if (q.type === 'listen') {
-    body = `<div class="quiz-q">🎧 ${esc(q.q || 'Paklausyk ir užrašyk angliškai')}</div>
-      <div class="row" style="margin-bottom:12px"><button class="btn secondary play">🔊 Groti</button>
-      <button class="btn secondary slow">🐢 Lėtai</button></div>
+    body = `<div class="quiz-q">${esc(q.q || 'Paklausyk ir užrašyk angliškai')}</div>
+      <div class="row" style="margin-bottom:12px"><button class="btn secondary grow play">${icon('volume')} Groti</button>
+      <button class="btn secondary grow slow">${icon('clock')} Lėtai</button></div>
       <input ${INPUT} class="inp" placeholder="Ką išgirdai?">`;
   } else if (q.type === 'write') {
-    body = `<div class="quiz-q">✍️ ${esc(q.q)}</div>
+    body = `<div class="quiz-q">${esc(q.q)}</div>
       <textarea class="inp write" rows="5" autocapitalize="sentences" spellcheck="false" placeholder="Rašyk angliškai…"></textarea>
       <div class="small muted wc">0 žodžių${q.minWords ? ` (reikia bent ${q.minWords})` : ''}</div>`;
   } else if (q.type === 'match') {
-    body = `<div class="quiz-q">🧩 ${esc(q.q || 'Sujunk poras')}</div><div class="match">
+    body = `<div class="quiz-q">${esc(q.q || 'Sujunk poras')}</div><div class="match">
       <div>${shuffle(q.pairs.map((p, k) => [p[0], k])).map(([t, k]) => `<button class="option" data-side="en" data-k="${k}">${esc(t)}</button>`).join('')}</div>
       <div>${shuffle(q.pairs.map((p, k) => [p[1], k])).map(([t, k]) => `<button class="option" data-side="lt" data-k="${k}">${esc(t)}</button>`).join('')}</div></div>`;
   } else {
@@ -34,9 +35,10 @@ export function mountExercise($el, q, opts = {}) {
         .join('')}</div>`;
   }
   const seconds = opts.seconds || 0;
-  $el.innerHTML = `<div class="card exercise">${opts.head || ''}
-    ${seconds ? `<div class="row" style="margin-bottom:6px"><span class="chip timer">⏱ ${seconds}</span><div class="progressbar grow"><span class="tbar" style="width:100%"></span></div></div>` : ''}
-    ${body}<div style="margin-top:18px"><button class="btn block check" disabled>Tikrinti</button></div><div class="fb"></div></div>`;
+  const kindLabel = { choice: 'Pasirink', input: 'Įrašyk', order: 'Sudėliok sakinį', listen: 'Paklausyk ir užrašyk', match: 'Sujunk poras', write: 'Rašymo užduotis' }[q.type] || 'Užduotis';
+  $el.innerHTML = `<div class="card exercise ${q.type === 'write' ? 'writing' : ''}">${opts.head || `<div class="card-label">${icon(q.type === 'write' ? 'pen' : q.type === 'listen' ? 'volume' : 'spark')} ${opts.label || kindLabel}${opts.counter ? `<span>${opts.counter}</span>` : ''}</div>`}
+    ${seconds ? `<div class="row" style="margin-bottom:10px"><span class="chip timer">${icon('clock')}<span>${seconds}</span></span><div class="progressbar grow"><span class="tbar" style="width:100%"></span></div></div>` : ''}
+    ${body}<div style="margin-top:16px"><button class="btn block check" disabled>${q.type === 'write' ? `Siųsti Emai ${icon('send')}` : `Tikrinti ${icon('check')}`}</button></div><div class="fb"></div></div>`;
   const $ = (s) => $el.querySelector(s);
   const $check = $('.check');
   let getAnswer;
@@ -88,7 +90,6 @@ export function mountExercise($el, q, opts = {}) {
       $('.wc').textContent = `${n} žodž.${q.minWords ? ` (reikia bent ${q.minWords})` : ''}`;
       $check.disabled = n < Math.max(1, q.minWords || 1);
     };
-    $check.textContent = 'Siųsti Emai';
     getAnswer = () => {
       inp.disabled = true;
       return { ok: null, given: inp.value.trim(), right: '' };
@@ -160,7 +161,7 @@ export function mountExercise($el, q, opts = {}) {
     clearInterval(timer);
     const r = { ...getAnswer(), timedOut: !!timedOut, seconds: Math.round((Date.now() - started) / 1000) };
     if (q.type === 'write') {
-      $('.fb').innerHTML = `<div class="feedback right"><h3>📨 Išsiųsta Emai</h3><p class="small">Ji perskaitys ir pataisys.</p></div>`;
+      $('.fb').innerHTML = `<div class="feedback right"><h3>Išsiųsta Emai</h3><p class="small">Ji perskaitys ir pataisys.</p></div>`;
       $check.remove();
       opts.onDone && opts.onDone(r);
       return;
@@ -168,11 +169,11 @@ export function mountExercise($el, q, opts = {}) {
     if (timedOut) r.ok = false;
     sfx(r.ok ? 'correct' : 'wrong');
     $('.fb').innerHTML = `<div class="feedback ${r.ok ? 'right' : 'wrong'}">
-      <h3>${r.ok ? '✅ Teisingai!' : timedOut ? '⏰ Laikas baigėsi' : '❌ Ne visai'}</h3>${r.ok ? '' : `<p>Teisingai: <b>${esc(r.right)}</b></p>`}
+      <h3>${r.ok ? 'Teisingai!' : timedOut ? 'Laikas baigėsi' : 'Ne visai'}</h3>${r.ok ? '' : `<p>Teisingai: <b>${esc(r.right)}</b></p>`}
       ${q.explain ? `<p class="small">${rich(q.explain)}</p>` : ''}</div>`;
     if (q.type === 'input' || q.type === 'order') speak(q.type === 'order' ? q.answer : r.right);
     if (opts.onNext) {
-      $check.textContent = opts.nextLabel || 'Toliau';
+      $check.innerHTML = `${opts.nextLabel || 'Toliau'} ${icon('arrow')}`;
       $check.className = `btn block check ${r.ok ? "ok" : "bad"}`;
       $check.disabled = false;
       $check.onclick = opts.onNext;
@@ -188,7 +189,7 @@ export function mountExercise($el, q, opts = {}) {
     timer = setInterval(() => {
       if (!document.body.contains($el)) return clearInterval(timer);
       left--;
-      $('.timer').textContent = `⏱ ${Math.max(0, left)}`;
+      $('.timer span').textContent = Math.max(0, left);
       $('.tbar').style.width = `${Math.max(0, (left / seconds) * 100)}%`;
       if (left <= 0) finish(true);
     }, 1000);

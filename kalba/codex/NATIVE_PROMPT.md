@@ -5,6 +5,15 @@ Repository `tauapyrankes-oss/klausimynas`, branch `claude/duolingo-style-languag
 The user has a paid Apple Developer account and Xcode. Install WITHOUT TestFlight – development signing,
 directly to the device over USB (later Wi-Fi). Do not change app logic; only fix build/signing problems.
 
+## New in this version (needs a real build – not compiled by Claude)
+- Approved light design applied to the web app; widget redesigned (PNG Ema in `KalbekWidget/Assets.xcassets`).
+- **Live Activity** (ActivityKit, iOS 16.2+): `Shared/LessonActivityAttributes.swift` is in BOTH targets,
+  `App/ActivityBridgePlugin.swift` (App), `LessonLiveActivity` in `KalbekWidget.swift` (`WidgetBundle`), `NSSupportsLiveActivities` in Info.plist.
+  If Xcode complains about missing files in targets, run `gem install xcodeproj && ruby scripts/add-ios-widget.rb` and retry.
+  Fix Swift compile errors minimally if any; do not change the data contract (App Group, `widget` key, URL scheme).
+- Check on device: widget (small/medium/lock screen), Live Activity appears when a lesson starts and ends when the talk ends;
+  Settings → Garso testas; mic + speaker during a lesson.
+
 ## Steps
 1. `git fetch && git checkout claude/duolingo-style-language-app-2mgqad && git pull`
 2. **Gemini key (built into the app, never committed):** ask the user for their Gemini API key and write it to
