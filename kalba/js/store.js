@@ -2,6 +2,10 @@
 
 const PROGRESS_KEY = 'kalba.progress.v1';
 const SETTINGS_KEY = 'kalba.settings.v1';
+const SESSIONS_KEY = 'kalba.sessions.v1';
+export const sessions = read(SESSIONS_KEY, {});
+export function saveSessions() { write(SESSIONS_KEY, sessions); }
+
 const REVIEW_DAYS = [1, 3, 7, 14, 30, 60];
 
 const DEFAULT_SETTINGS = {
@@ -155,17 +159,22 @@ export function isDue(id) {
 }
 
 export function exportData() {
-  return JSON.stringify({ app: 'kalbek', version: 1, progress, settings: { ...settings, apiKey: '' } }, null, 2);
+  return JSON.stringify({ app: 'kalbek', version: 1, progress, sessions, settings: { ...settings, apiKey: '' } }, null, 2);
 }
 
 export function importData(text) {
   const data = JSON.parse(text);
   if (!data || data.app !== 'kalbek' || !data.progress) throw new Error('Netinkamas failas');
   progress = { ...emptyProgress(), ...data.progress };
+  for (const key of Object.keys(sessions)) delete sessions[key];
+  Object.assign(sessions, data.sessions || {});
+  saveSessions();
   saveProgress();
 }
 
 export function resetProgress() {
+  for (const key of Object.keys(sessions)) delete sessions[key];
+  saveSessions();
   progress = emptyProgress();
   saveProgress();
 }

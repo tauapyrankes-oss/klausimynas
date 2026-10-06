@@ -110,6 +110,7 @@ export class PcmPlayer {
     this.pending = [];
     this.buffered = 0; // sekundės, likusios groti (pranešama iš worklet'o)
     this.lastAudio = 0;
+    this.playbackRate = 1;
     this.level = 0;
   }
 
@@ -130,6 +131,7 @@ export class PcmPlayer {
           if (this.closed) { await listener.remove(); return; }
           const info = await bridge.prepare();
           if (this.closed) { await bridge.close(); return; }
+          await bridge.setRate?.({ rate: this.playbackRate });
           context.sampleRate = info.sampleRate;
           context.state = info.running ? 'running' : 'suspended';
         });
@@ -146,11 +148,18 @@ export class PcmPlayer {
           this.node = new AudioWorkletNode(this.ctx, 'pcm-player', { outputChannelCount: [1] });
           this.node.port.onmessage = (e) => (this.buffered = e.data);
           this.node.connect(this.gain);
+          this.node.port.postMessage({ rate: this.playbackRate });
           for (const f of this.pending) this.node.port.postMessage(f, [f.buffer]);
           this.pending = [];
         });
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
+  }
+
+  setRate(rate) {
+    this.playbackRate = Math.max(0.85, Math.min(1.15, Number(rate) || 1));
+    if (this.native) this.ready.then(() => !this.closed && this.native.setRate?.({ rate: this.playbackRate })).catch(() => {});
+    else this.node?.port.postMessage({ rate: this.playbackRate });
   }
 
   setMuted(m) {

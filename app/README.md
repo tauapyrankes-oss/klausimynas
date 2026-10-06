@@ -52,3 +52,11 @@ Regresinė bridge patikra: `node kalba/tools/native-audio-test.mjs`. Galutinei g
 patvirtinti vis tiek reikia realaus telefono bandymo, ne vien naršyklės testų.
 
 Emos garsiakalbio mygtukas nutildo išvestį nepriklausomai nuo iOS pokalbio garso minimumo. Native balso maršrute žemiausias 1/16 sistemos garso žingsnis taip pat nutildo Emą; padidinus garsą ji vėl girdima.
+
+### Pokalbio ir rašymo patikros (1.0 build 4)
+
+Rašymo laukeliai neturi laikmačio. `give_exercise` atsakomas tik pateikus tikrą rezultatą; neužbaigta užduotis negali būti pakeista kitu AI iškvietimu. Rašant mikrofono PCM nesiunčiamas. Pradėtos pamokos tekstas ir juodraščiai saugomi atskirai (`kalba.sessions.v1`), o baigtų pamokų raktas `kalba.progress.v1` išlieka tas pats. Nepavykus nepriklausomam vertinimui galima pakartoti vertinimą, išsaugant sesiją.
+
+iOS balso tempą keičia `AVAudioUnitTimePitch` (0.85–1.15, išlaikomas balso aukštis). „Paspausk ir kalbėk“ siunčia rankines `activityStart` / `activityEnd` ribas; automatinis režimas toleruoja 1.4 s pauzę. Garsas siunčiamas tik po `setupComplete`.
+
+Papildomos regresijos iš saugyklos šaknies: `node kalba/tools/conversation-ux-test.mjs`, `BROWSER=webkit node kalba/tools/conversation-ux-test.mjs`, `node kalba/tools/live-turns-test.mjs`, `node kalba/tools/native-audio-test.mjs`, `node kalba/tools/talk-layout-test.mjs`. Naršyklių testuose Gemini imituotas; tikras Live API atskirai patikrintas laukiant 5 s prieš rašymo rezultato pateikimą.

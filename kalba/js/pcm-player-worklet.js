@@ -24,6 +24,10 @@ class PcmPlayer extends AudioWorkletProcessor {
         this.prebuffer = PREBUFFER;
         return;
       }
+      if (e.data && typeof e.data.rate === 'number') {
+        this.step = RATE / sampleRate * Math.max(0.85, Math.min(1.15, e.data.rate));
+        return;
+      }
       const d = e.data;
       for (let i = 0; i < d.length; i++) this.buf[(this.w + i) % SIZE] = d[i];
       this.w += d.length;

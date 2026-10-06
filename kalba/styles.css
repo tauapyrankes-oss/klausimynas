@@ -370,7 +370,7 @@ textarea.inp { resize: vertical; min-height: 103px; line-height: 1.7; }
 .mic.wait .ring { border-color: var(--line); }
 .mic-caption { position: absolute; bottom: 0; left: 0; width: 100%; white-space: nowrap; font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; }
 .textrow { display: flex; gap: 7px; margin-top: 10px; align-items: center; }
-.textrow input { flex: 1; min-width: 0; min-height: 44px; }
+.textrow input, .textrow textarea { flex: 1; min-width: 0; min-height: 44px; }
 .textrow .btn { padding: 10px 14px; min-height: 44px; }
 
 /* ---------- Pratimai ---------- */
@@ -599,7 +599,7 @@ body:has(#talk) { min-height: 0; }
 #talk { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .talk { flex: 1; min-height: 0; overflow: hidden; }
 .ema-stage { flex-shrink: 0; padding: 0 0 6px; }
-.ema-stage .ema { width: 82px; height: 82px; }
+.ema-stage .ema { width: 60px; height: 60px; }
 .ema-stage.compact .ema { width: 52px; height: 52px; }
 .ema-stage .waveform { height: 16px; margin-top: 3px; }
 .ema-stage > .row { margin-top: 3px !important; }
@@ -642,3 +642,12 @@ body:has(#talk) { min-height: 0; }
 .keyboard-open .app:has(#talk) .controls .mic { width: 48px; height: 48px; border-radius: 18px; }
 .keyboard-open .app:has(#talk) .controls .mic-caption,
 .keyboard-open .app:has(#talk) .controls #assess { display: none; }
+
+/* Keep text controls stable while typing; the keyboard must not move the Send target. */
+.textrow textarea { resize: none; height: 64px; padding: 8px 10px; }
+.stage-label { width: 100%; }
+.stage-label #status { flex: 1; min-width: 0; font-size: 14px; text-align: left; }
+#speech-rate { width: 98px; min-height: 44px; padding: 6px; font-size: 16px; flex-shrink: 0; }
+.keyboard-open #speech-rate { display: none; }
+.keyboard-open .mic-line { padding-bottom: 0; }
+@media(max-height:650px) { #speech-rate { display: none; } .mic-line { padding-bottom: 0; } }

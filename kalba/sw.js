@@ -1,6 +1,6 @@
 // Programėlės failai saugomi telefone, kad ji greitai atsidarytų (teorija ir pratimai veikia ir be interneto).
 // Pakeitus failus, padidink VERSION.
-const VERSION = 'kalbek-native-audio-v3-mute';
+const VERSION = 'kalbek-conversation-v4';
 const SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'js/app.js', 'js/icons.js', 'js/native.js', 'js/util.js', 'js/exercise.js', 'js/live.js', 'js/audio.js', 'js/prompt.js', 'js/store.js', 'js/pcm-worklet.js', 'js/pcm-player-worklet.js',

@@ -1,0 +1,48 @@
+import { chromium, webkit } from 'playwright';
+import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { extname, join } from 'node:path';
+import assert from 'node:assert/strict';
+const root = new URL('..', import.meta.url).pathname;
+const types = {'.js':'text/javascript','.html':'text/html','.css':'text/css','.svg':'image/svg+xml','.json':'application/json'};
+const server = createServer(async (req,res) => { const p=decodeURIComponent(new URL(req.url,'http://local').pathname); try {res.setHeader('content-type',types[extname(p)]||'text/html');res.end(await readFile(join(root,p==='/'?'index.html':p)));} catch {res.writeHead(404);res.end();} }).listen(0);
+await new Promise(r=>server.on('listening',r));
+const browser = await (process.env.BROWSER === 'webkit' ? webkit : chromium).launch();
+try {
+ const ctx = await browser.newContext({viewport:{width:390,height:844}});
+ await ctx.addInitScript(()=>{
+  if(!localStorage.getItem('kalba.settings.v1')) localStorage.setItem('kalba.settings.v1',JSON.stringify({apiKey:'test',model:'gemini-3.8-live',micMode:'auto',v2:true}));
+  const listeners = new Map();let timer;
+  window.__nativeRates=[];
+  const bridge={addListener(n,fn){listeners.set(n,fn);return {remove:()=>listeners.delete(n)};},async prepare(){return {sampleRate:48000,running:true};},async startCapture(){timer=setInterval(()=>listeners.get('audioChunk')?.({pcm:'AAAAAA==',level:0.1}),50);return {sampleRate:48000,running:true};},async stopCapture(){clearInterval(timer);},async play(){},async clear(){},async mute(){},async setRate({rate}){window.__nativeRates.push(rate);},async close(){clearInterval(timer);}};
+  window.Capacitor={isNativePlatform:()=>true,getPlatform:()=> 'ios',Plugins:{AudioBridge:bridge}};
+ });
+ let socket;const sent=[];
+ await ctx.routeWebSocket(/generativelanguage/,ws=>{socket=ws;ws.onMessage(raw=>{const m=JSON.parse(raw);sent.push(m);if(m.setup)ws.send(JSON.stringify({setupComplete:{}}));});});
+ const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE:',e.message);});
+ const base=`http://localhost:${server.address().port}/`;
+ await page.goto(base);await page.waitForSelector('.node');const id=await page.locator('.node').first().getAttribute('data-id');
+ await page.goto(`${base}#/lesson/${id}`);await page.click('#start');await page.waitForSelector('#mic');
+ const tool=(id,args)=>socket.send(JSON.stringify({toolCall:{functionCalls:[{id,name:'give_exercise',args}]}}));
+ tool('writing',{type:'write',question:'Write about yourself.',min_words:3,seconds:1});
+ const field=page.locator('.inline-exercise textarea');await field.fill('My name is Benita');
+ await page.waitForTimeout(1300);
+ assert(await field.isEnabled(),'Writing timed out while the learner was still typing');
+ tool('unexpected',{type:'order',sentence:'I am from Lithuania'});await page.waitForTimeout(200);
+ assert.equal(await page.locator('.inline-exercise').count(),1,'A new AI task replaced an unfinished answer');
+ assert.equal(await field.inputValue(),'My name is Benita');
+ const countAudio=()=>sent.filter(m=>m.realtimeInput?.audio).length;const before=countAudio();await page.waitForTimeout(250);assert.equal(countAudio(),before,'Microphone streamed while completing an exercise');
+ assert(!sent.some(m=>m.toolResponse?.functionResponses?.some(f=>f.id==='writing')),'Exercise was acknowledged before submission');
+ await page.setViewportSize({width:390,height:470});await field.pressSequentially(' and I live in Vilnius',{delay:20});await page.locator('.inline-exercise .check').click();
+ await page.waitForTimeout(150);
+ assert(sent.some(m=>m.toolResponse?.functionResponses?.some(f=>f.id==='writing' && /Benita.*Vilnius/.test(f.response.result))),'Written answer did not reach its pending tool call');
+ await page.setViewportSize({width:390,height:844});await page.click('#texttoggle');await page.fill('#txt','Do not lose this draft');await page.click('#mic');
+ assert.equal(await page.locator('#txt').inputValue(),'Do not lose this draft','Mic toggle destroyed the typed message');
+ tool('input',{type:'input',question:'I ___ Benita.',accepted_answers:['am'],seconds:1});await page.locator('.inline-exercise .inp').last().fill('a');
+ await page.reload();await page.waitForSelector('#start');await page.click('#start');await page.waitForSelector('.inline-exercise .inp');
+ assert.equal(await page.locator('.inline-exercise .inp').inputValue(),'a','Unfinished exercise draft was lost after reload');
+ assert.equal(await page.locator('#txt').inputValue(),'Do not lose this draft','Message draft lost after reload');
+ assert.equal(errors.length,0,errors.join('\n'));
+ const setup=sent.find(m=>m.setup).setup;assert(setup.realtimeInputConfig.automaticActivityDetection.silenceDurationMs>=1000);
+ await ctx.close();console.log('OK: writing stays editable, competing tasks rejected, mic paused, keyboard submission and drafts survive reload.');
+} finally { await browser.close();server.close(); }

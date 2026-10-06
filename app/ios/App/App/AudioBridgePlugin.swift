@@ -14,6 +14,7 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "stopCapture", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "play", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clear", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setRate", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "mute", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "close", returnType: CAPPluginReturnPromise),
     ]
@@ -22,6 +23,8 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     private var volumeObservation: NSKeyValueObservation?
     private var speakerMuted = false
     private var output: AVAudioPlayerNode?
+    private var tempo: AVAudioUnitTimePitch?
+    private var playbackRate: Float = 1
     private var converter: AVAudioConverter?
     private var captureFormat: AVAudioFormat?
     private var recording = false
@@ -45,7 +48,13 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             echo = false
             e.isAutoShutdownEnabled = false
             e.attach(p)
-            e.connect(p, to: e.mainMixerNode, format: playbackFormat)
+            let speed = AVAudioUnitTimePitch()
+            speed.rate = playbackRate
+            speed.pitch = 0
+            e.attach(speed)
+            e.connect(p, to: speed, format: playbackFormat)
+            e.connect(speed, to: e.mainMixerNode, format: playbackFormat)
+            tempo = speed
             engine = e
             output = p
             volumeObservation = session.observe(\.outputVolume, options: [.initial, .new]) { [weak self] _, _ in
@@ -244,6 +253,14 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         let floor: Float = voiceRoute ? 1.0 / 16.0 + 0.0001 : 0.001
         output?.volume = speakerMuted || session.outputVolume <= floor ? 0 : 1
     }
+    @objc func setRate(_ call: CAPPluginCall) {
+        let rate = Float(call.getDouble("rate") ?? 1)
+        audioQueue.async {
+            self.playbackRate = min(1.15, max(0.85, rate))
+            self.tempo?.rate = self.playbackRate
+            call.resolve()
+        }
+    }
     @objc func mute(_ call: CAPPluginCall) {
         audioQueue.async {
             self.speakerMuted = call.getBool("muted") == true
@@ -258,6 +275,7 @@ public class AudioBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             self.engine?.stop()
             self.engine = nil
             self.output = nil
+            self.tempo = nil
             self.volumeObservation = nil
             self.speakerMuted = false
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)

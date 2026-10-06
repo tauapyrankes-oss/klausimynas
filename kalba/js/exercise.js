@@ -22,7 +22,7 @@ export function mountExercise($el, q, opts = {}) {
       <input ${INPUT} class="inp" placeholder="Ką išgirdai?">`;
   } else if (q.type === 'write') {
     body = `<div class="quiz-q">${esc(q.q)}</div>
-      <textarea class="inp write" rows="5" autocapitalize="sentences" spellcheck="false" placeholder="Rašyk angliškai…"></textarea>
+      <textarea class="inp write" rows="5" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" placeholder="Rašyk angliškai…"></textarea>
       <div class="small muted wc">0 žodžių${q.minWords ? ` (reikia bent ${q.minWords})` : ''}</div>`;
   } else if (q.type === 'match') {
     body = `<div class="quiz-q">${esc(q.q || 'Sujunk poras')}</div><div class="match">
@@ -34,7 +34,7 @@ export function mountExercise($el, q, opts = {}) {
         .map(([w, k]) => `<button class="word" data-k="${k}">${esc(w)}</button>`)
         .join('')}</div>`;
   }
-  const seconds = opts.seconds || 0;
+  const seconds = ['input', 'listen', 'write'].includes(q.type) ? 0 : opts.seconds || 0;
   const kindLabel = { choice: 'Pasirink', input: 'Įrašyk', order: 'Sudėliok sakinį', listen: 'Paklausyk ir užrašyk', match: 'Sujunk poras', write: 'Rašymo užduotis' }[q.type] || 'Užduotis';
   $el.innerHTML = `<div class="card exercise ${q.type === 'write' ? 'writing' : ''}">${opts.head || `<div class="card-label">${icon(q.type === 'write' ? 'pen' : q.type === 'listen' ? 'volume' : 'spark')} ${opts.label || kindLabel}${opts.counter ? `<span>${opts.counter}</span>` : ''}</div>`}
     ${seconds ? `<div class="row" style="margin-bottom:10px"><span class="chip timer">${icon('clock')}<span>${seconds}</span></span><div class="progressbar grow"><span class="tbar" style="width:100%"></span></div></div>` : ''}
@@ -64,12 +64,12 @@ export function mountExercise($el, q, opts = {}) {
   } else if (q.type === 'input' || q.type === 'listen') {
     const inp = $('.inp');
     inp.oninput = () => ($check.disabled = !inp.value.trim());
-    inp.onkeydown = (e) => e.key === 'Enter' && !$check.disabled && $check.click();
+    inp.onkeydown = (e) => { if (e.key === 'Enter' && !e.isComposing && !$check.disabled) { e.preventDefault(); $check.click(); } };
     let answers;
     if (q.type === 'listen') {
       $('.play').onclick = () => speak(q.en);
       $('.slow').onclick = () => speak(q.en, 0.6);
-      setTimeout(() => speak(q.en), 300);
+      setTimeout(() => document.body.contains($el) && speak(q.en), 300);
       answers = [q.en];
     } else {
       answers = Array.isArray(q.answer) ? q.answer : [q.answer];
@@ -156,7 +156,7 @@ export function mountExercise($el, q, opts = {}) {
 
   let timer = null;
   const finish = (timedOut) => {
-    if (finished) return;
+    if (finished || opts.canSubmit && !opts.canSubmit()) return;
     finished = true;
     clearInterval(timer);
     const r = { ...getAnswer(), timedOut: !!timedOut, seconds: Math.round((Date.now() - started) / 1000) };
@@ -195,8 +195,11 @@ export function mountExercise($el, q, opts = {}) {
     }, 1000);
   }
   const first = $('.inp');
+  const draft = opts.draft;
+  if (first && typeof draft === 'string') { first.value = draft; first.dispatchEvent(new Event('input')); }
+  if (opts.onChange) $el.addEventListener('input', opts.onChange);
   if (first && q.type === 'input') first.focus({ preventScroll: true });
-  return { finish };
+  return { finish, cancel: () => clearInterval(timer), draft: () => first?.value ?? '' };
 }
 
 // Paverčia AI pateiktą (give_exercise) užduotį į vidinį formatą. Grąžina { q } arba { error }.

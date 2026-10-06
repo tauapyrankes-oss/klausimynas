@@ -34,12 +34,11 @@ function modelRank(id) {
 }
 
 export class LiveSession extends EventTarget {
-  constructor({ apiKey, model, systemInstruction, tools, voice }) {
+  constructor({ apiKey, model, systemInstruction, tools, voice, micMode = 'auto' }) {
     super();
-    Object.assign(this, { apiKey, model, systemInstruction, tools, voice });
+    Object.assign(this, { apiKey, model, systemInstruction, tools, voice, micMode });
     // 3.8 Live įrankius pagal nutylėjimą kviečia neblokuojančiai; mūsų pamokai reikia, kad Ema palauktų
-    // atsakymo (BLOCKING). „Extended thinking“ modelis palaiko tik NON_BLOCKING – tada atsakymui
-    // nurodome „scheduling“.
+    // atsakymo (BLOCKING). „Extended thinking“ modelis palaiko tik NON_BLOCKING ir neturi scheduling.
     this.nonBlocking = /extended-thinking/.test(model);
     this.blockingField = !this.nonBlocking && /gemini-3\.(8|9)|gemini-[4-9]/.test(model);
     this.ws = null;
@@ -54,8 +53,10 @@ export class LiveSession extends EventTarget {
   connect() {
     return new Promise((resolve, reject) => {
       let ready = false;
+      this.ready = false;
       const ws = new WebSocket(`${WS_URL}?key=${encodeURIComponent(this.apiKey)}`);
       this.ws = ws;
+      const timeout = setTimeout(() => { if (!ready) { reject(new Error('Prisijungimas užtruko. Pabandyk dar kartą.')); ws.close(); } }, 15000);
 
       ws.onopen = () => {
         const setup = {
@@ -67,6 +68,13 @@ export class LiveSession extends EventTarget {
           systemInstruction: { parts: [{ text: this.systemInstruction }] },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
+          realtimeInputConfig: {
+            automaticActivityDetection: this.micMode === 'tap' ? { disabled: true } : {
+              disabled: false, startOfSpeechSensitivity: 'START_SENSITIVITY_LOW',
+              endOfSpeechSensitivity: 'END_SENSITIVITY_LOW', prefixPaddingMs: 300, silenceDurationMs: 1400,
+            },
+            activityHandling: this.micMode === 'headphones' ? 'START_OF_ACTIVITY_INTERRUPTS' : 'NO_INTERRUPTION',
+          },
           contextWindowCompression: { slidingWindow: {} },
           sessionResumption: this.resumeHandle ? { handle: this.resumeHandle } : {},
         };
@@ -87,6 +95,8 @@ export class LiveSession extends EventTarget {
         }
         if (msg.setupComplete) {
           ready = true;
+          this.ready = true;
+          clearTimeout(timeout);
           resolve();
           return;
         }
@@ -94,11 +104,14 @@ export class LiveSession extends EventTarget {
       };
 
       ws.onerror = () => {
+        clearTimeout(timeout);
         if (!ready) reject(new Error('Nepavyko prisijungti prie Gemini Live.'));
       };
 
       ws.onclose = (e) => {
+        clearTimeout(timeout);
         if (this.ws !== ws) return; // senas ryšys po persijungimo
+        this.ready = false;
         const reason = e.reason || `kodas ${e.code}`;
         if (!ready) reject(new Error(reason));
         else this.emit('close', { code: e.code, reason, byUser: this.closedByUser });
@@ -123,6 +136,7 @@ export class LiveSession extends EventTarget {
     if (msg.toolCall && msg.toolCall.functionCalls) {
       for (const fc of msg.toolCall.functionCalls) this.emit('tool-call', fc);
     }
+    if (msg.toolCallCancellation?.ids) this.emit('tool-cancelled', msg.toolCallCancellation.ids);
     if (msg.sessionResumptionUpdate && msg.sessionResumptionUpdate.resumable && msg.sessionResumptionUpdate.newHandle) {
       this.resumeHandle = msg.sessionResumptionUpdate.newHandle;
     }
@@ -130,15 +144,20 @@ export class LiveSession extends EventTarget {
   }
 
   send(obj) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj));
+    if (this.ready && this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(obj));
   }
 
   sendAudio(pcmBuffer) {
+    if (!this.ready || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    if (this.micMode === 'tap' && !this.audioActive) this.send({ realtimeInput: { activityStart: {} } });
+    this.audioActive = true;
     this.send({ realtimeInput: { audio: { data: bytesToBase64(pcmBuffer), mimeType: 'audio/pcm;rate=16000' } } });
   }
 
   endAudio() {
-    this.send({ realtimeInput: { audioStreamEnd: true } });
+    if (!this.audioActive) return;
+    this.send({ realtimeInput: this.micMode === 'tap' ? { activityEnd: {} } : { audioStreamEnd: true } });
+    this.audioActive = false;
   }
 
   // realtimeInput.text – rekomenduojamas būdas; clientContent su turnComplete visada nutrauktų Emą.
@@ -146,16 +165,16 @@ export class LiveSession extends EventTarget {
     this.send({ realtimeInput: { text } });
   }
 
-  // scheduling: SILENT | WHEN_IDLE | INTERRUPT – naudojamas tik neblokuojančiam režimui.
-  sendToolResponse(functionResponses, scheduling = 'WHEN_IDLE') {
-    if (this.nonBlocking) {
-      functionResponses = functionResponses.map((r) => ({ ...r, response: { ...r.response, scheduling } }));
-    }
+  // Blocking calls resume only when their actual result arrives. Extended Thinking
+  // uses asynchronous calls and does not support function-response scheduling.
+  sendToolResponse(functionResponses) {
     this.send({ toolResponse: { functionResponses } });
   }
 
   // Persijungia į naują ryšį tęsiant tą patį pokalbį (pvz., gavus „goAway“).
   async reconnect() {
+    this.audioActive = false;
+    this.ready = false;
     const old = this.ws;
     this.ws = null;
     try { old && old.close(); } catch (_) {}
@@ -164,6 +183,7 @@ export class LiveSession extends EventTarget {
 
   close() {
     this.closedByUser = true;
+    this.ready = false;
     try { this.ws && this.ws.close(); } catch (_) {}
   }
 }
@@ -192,7 +212,7 @@ Judge independently from the transcript. Count every attempt by the learner to u
       score: { type: 'INTEGER' },
       target_attempts: { type: 'INTEGER' },
       target_correct: { type: 'INTEGER' },
-      criteria: { type: 'ARRAY', items: { type: 'OBJECT', properties: { criterion: { type: 'STRING' }, met: { type: 'BOOLEAN' }, evidence: { type: 'STRING' } }, required: ['criterion', 'met'] } },
+      criteria: { type: 'ARRAY', items: { type: 'OBJECT', properties: { criterion: { type: 'STRING' }, met: { type: 'BOOLEAN' }, evidence: { type: 'STRING' } }, required: ['criterion', 'met', 'evidence'] } },
       mistakes: { type: 'ARRAY', items: { type: 'OBJECT', properties: { wrong: { type: 'STRING' }, correct: { type: 'STRING' }, note_lt: { type: 'STRING' } }, required: ['wrong', 'correct'] } },
       summary_lt: { type: 'STRING' },
       advice_lt: { type: 'STRING' },
@@ -215,6 +235,13 @@ Judge independently from the transcript. Count every attempt by the learner to u
     const data = await res.json();
     const text = (data.candidates?.[0]?.content?.parts || []).filter((p) => p.text && !p.thought).map((p) => p.text).join('');
     const v = JSON.parse(text);
+    if (typeof v.passed !== 'boolean' || !Number.isFinite(v.score) ||
+        !Number.isFinite(v.target_attempts) || !Number.isFinite(v.target_correct) ||
+        !Array.isArray(v.criteria) || v.criteria.length < (s.successCriteria || []).length) {
+      throw new Error('Vertintojo atsakymas nepilnas');
+    }
+    if (v.passed && (v.score < 60 || v.target_attempts < 6 || v.target_correct > v.target_attempts ||
+        v.target_correct / v.target_attempts < 0.75 || v.criteria.some(c => c.met !== true || !String(c.evidence || '').trim()))) v.passed = false;
     v.model = model;
     return v;
   } finally {

@@ -582,7 +582,7 @@ function showResult(x, r) {
       <div class="score-row"><div class="score">${esc(r.score)}<span>/ 100</span></div>
         <div class="result-stars">${[0, 1, 2].map((i) => icon('star', i < stars ? 'on' : 'off')).join('')}<b>${stars === 3 ? 'Puikiai padirbėjai' : stars === 2 ? 'Labai gerai' : stars === 1 ? 'Išmokta' : 'Dar vienas bandymas'}</b></div></div>
       <div class="result-note">
-        ${r.judge ? `<p class="tiny muted">${r.judge.error ? 'Nepriklausomas vertinimas nepavyko – įskaitytas Emos vertinimas.' : `Nepriklausomas vertinimas (${esc(r.judge.model || 'Gemini')}): ${r.judge.passed ? 'išlaikyta' : 'dar ne'}.`}${r.attempts ? ` Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%).` : ''}</p>` : r.attempts ? `<p class="tiny muted">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
+        ${r.judge ? `<p class="tiny muted">${r.judge.error ? 'Nepriklausomas vertinimas nebuvo užbaigtas.' : `Nepriklausomas vertinimas (${esc(r.judge.model || 'Gemini')}): ${r.judge.passed ? 'išlaikyta' : 'dar ne'}.`}${r.attempts ? ` Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%).` : ''}</p>` : r.attempts ? `<p class="tiny muted">Tikslinė gramatika: ${r.correct}/${r.attempts} teisingai (${Math.round((r.correct / r.attempts) * 100)}%)</p>` : ''}
         ${(r.criteria || []).length ? `<div class="criteria">${r.criteria.map((c) => `<div class="crit ${c.met ? 'ok' : 'no'}">${icon(c.met ? 'check' : 'lock')}<div>${esc(c.criterion)}${c.evidence ? `<div class="tiny muted">„${esc(c.evidence)}“</div>` : ''}</div></div>`).join('')}</div>` : ''}
         ${(r.strengths_lt || []).length ? `<h3>${icon('check')} Kas pavyko</h3>${r.strengths_lt.map((t) => `<p>${esc(t)}</p>`).join('')}` : ''}
         ${(r.mistakes || []).length ? `<h3 class="fix">${icon('pen')} ${r.mistakes.length === 1 ? 'Viena pataisa kitam kartui' : 'Pataisos kitam kartui'}</h3>${r.mistakes
@@ -647,6 +647,7 @@ function viewPractice(x, kind) {
     lesson: l,
     prepared,
     mode: 'practice',
+    practiceKind: kind,
     minTurns: P.min,
     onResult: (r) => {
       store.recordPractice(l.id, kind, r);
@@ -667,21 +668,21 @@ function viewPractice(x, kind) {
   });
 }
 
-// Nutrūkusios pamokos būsena (kol programėlė atidaryta) – pratęsiama vietoj pradėjimo iš naujo.
-const resumeStates = {};
+// Session drafts survive app restarts and TestFlight updates, independently of completed progress.
+const resumeStates = store.sessions;
 function clearResume(id) {
-  if (id) delete resumeStates[id];
+  if (id) { delete resumeStates[id]; store.saveSessions(); }
 }
 function resumeFor(id) {
   const r = resumeStates[id];
-  return r && Date.now() - r.at < 2 * 60 * 60 * 1000 && (r.turns >= 2 || r.exDone >= 1) ? r : null;
+  return r && (r.turns >= 1 || r.exDone >= 1 || r.exercise || r.textDraft) ? r : null;
 }
 
 // ---------- Balso pokalbis (bendras pamokai ir laisvam pokalbiui) ----------
 function mountTalk($el, opts) {
   $el.innerHTML = `<div class="talk">
     <section class="ema-stage" id="stage">${ema('wave', 122)}
-      <div class="stage-label"><span class="status-dot" id="dot"></span><b id="status">Pasiruošusi pradėti</b></div>
+      <div class="stage-label"><span class="status-dot" id="dot"></span><b id="status">Pasiruošusi pradėti</b><select id="speech-rate" aria-label="Emos balso tempas"><option value="0.85">Lėčiau</option><option value="1">Įprastai</option><option value="1.15">Greičiau</option></select></div>
       <p id="hint">Paspausk „Pradėti“ – Ema pasisveikins.</p>
       <div class="waveform" id="wave" aria-hidden="true">${Array.from({ length: 12 }, () => '<i></i>').join('')}</div>
       <div class="row" style="margin-top:8px;gap:8px">${opts.minTurns ? `<span class="chip" id="turns">${icon('chat')}<span>0 / ${opts.minTurns}</span></span>` : ''}
@@ -702,16 +703,28 @@ function mountTalk($el, opts) {
   const $controls = $el.querySelector('#controls');
   const $turns = $el.querySelector('#turns');
   const $exs = $el.querySelector('#exs');
-  const prior = opts.lesson ? resumeFor(opts.lesson.id) : null;
+  const resumeID = opts.lesson && (opts.mode === 'practice' ? `practice:${opts.practiceKind}:${opts.lesson.id}` : opts.lesson.id);
+  const prior = resumeID ? resumeFor(resumeID) : null;
   let exDone = prior ? prior.exDone : 0;
   let exRight = prior ? prior.exRight : 0;
   let writingDone = prior ? prior.writingDone : false;
   let openExercise = null;
+  let pendingExerciseCall = null;
+  let exerciseState = prior?.exercise || null;
+  let textOpen = !!prior?.textDraft;
+  let textDraft = prior?.textDraft || "";
+  let awaitingEma = false;
+  let modelGenerating = false;
+  let assessing = false;
+  let lastSpeechAt = 0;
 
   let session = null;
   let mic = null;
   let player = null;
   let speakerMuted = false;
+  const $speechRate = $el.querySelector('#speech-rate');
+  $speechRate.value = String(settings.speechRate || 1);
+  $speechRate.onchange = () => { store.saveSettings({ speechRate: Number($speechRate.value) }); player?.setRate(settings.speechRate); };
   let micOn = settings.micMode !== 'tap';
   let turns = prior ? prior.turns : 0;
   let bubble = null;
@@ -720,9 +733,9 @@ function mountTalk($el, opts) {
   let resultShown = false;
   let userWantsStop = false;
   let lastPassed = false;
-  const transcriptLog = []; // paskutinės replikos – pamokai pratęsti nutrūkus ryšiui
-  const fullLog = []; // visas pokalbis – nepriklausomam vertintojui
-  const exLog = [];
+  const transcriptLog = prior?.transcriptLog || []; // paskutinės replikos – pamokai pratęsti nutrūkus ryšiui
+  const fullLog = prior?.fullLog || []; // visas pokalbis – nepriklausomam vertintojui
+  const exLog = prior?.exLog || [];
   let stopped = false;
   let reconnecting = false;
 
@@ -735,9 +748,10 @@ function mountTalk($el, opts) {
     setEma($ema, face || (kind === 'speaking' ? 'talking' : kind === 'live' ? 'listening' : 'idle'));
     const micBtn = $controls.querySelector('#mic');
     if (micBtn) {
+      micBtn.disabled = !!openExercise;
       micBtn.classList.toggle('wait', kind === 'speaking' || face === 'thinking');
       const cap = $controls.querySelector('.mic-caption');
-      if (cap) cap.textContent = kind === 'speaking' ? 'Palauk, kol Ema baigs' : !micOn ? (settings.micMode === 'tap' ? 'Paspausk ir kalbėk' : 'Mikrofonas išjungtas') : 'Kalbėk – Ema klauso';
+      if (cap) cap.textContent = kind === 'speaking' ? 'Palauk, kol Ema baigs' : openExercise ? 'Baik užduotį ekrane' : textOpen ? 'Rašant mikrofonas pristabdytas' : !micOn ? (settings.micMode === 'tap' ? 'Paspausk ir kalbėk' : 'Mikrofonas išjungtas') : 'Kalbėk – Ema klauso';
     }
   };
   // Garso bangos – iš tikro garso: Emos balso lygis (grotuvas) arba mikrofono lygis.
@@ -757,7 +771,7 @@ function mountTalk($el, opts) {
     followTranscript = $tr.scrollHeight - $tr.clientHeight - $tr.scrollTop < 56;
   }, { passive: true });
   const scroll = () => {
-    if (!followTranscript || scrollFrame) return;
+    if (!followTranscript || scrollFrame || $el.contains(document.activeElement) && document.activeElement.matches('input, textarea')) return;
     scrollFrame = requestAnimationFrame(() => {
       scrollFrame = 0;
       if (!$tr.isConnected) return;
@@ -778,7 +792,8 @@ function mountTalk($el, opts) {
     scroll();
   };
   const addText = (role, text) => {
-    if (bubbleRole !== role || !bubble) {
+    const newTurn = bubbleRole !== role || !bubble;
+    if (newTurn) {
       const wrap = document.createElement('div');
       wrap.className = `bubble ${role}`;
       wrap.innerHTML = `<span class="speaker">${role === 'me' ? 'Tu' : 'Ema'}</span><span class="text"></span>`;
@@ -796,24 +811,28 @@ function mountTalk($el, opts) {
     bubble.textContent += text;
     scroll();
     const last = transcriptLog[transcriptLog.length - 1];
-    if (last && last.role === role) last.text += text;
+    if (!newTurn && last && last.role === role) last.text += text;
     else transcriptLog.push({ role, text });
     const lastF = fullLog[fullLog.length - 1];
-    if (lastF && lastF.role === role) lastF.text += text;
+    if (!newTurn && lastF && lastF.role === role) lastF.text += text;
     else fullLog.push({ role, text });
     if (transcriptLog.length > 40) transcriptLog.shift();
     saveResume();
   };
   const saveResume = () => {
-    if (!opts.lesson) return;
-    resumeStates[opts.lesson.id] = {
+    if (!resumeID || lastPassed) return;
+    resumeStates[resumeID] = {
       turns,
       exDone,
       exRight,
       writingDone,
+      textDraft,
+      exercise: exerciseState ? { ...exerciseState, draft: openExercise?.draft() ?? exerciseState.draft ?? '' } : null,
+      transcriptLog, fullLog, exLog,
       transcript: transcriptLog.slice(-16).map((t) => `${t.role === 'me' ? 'Learner' : 'Ema'}: ${t.text.trim()}`).join('\n'),
       at: Date.now(),
     };
+    store.saveSessions();
   };
   const board = ({ title, lines }) => {
     const d = document.createElement('div');
@@ -825,7 +844,7 @@ function mountTalk($el, opts) {
     scroll();
   };
   const flushResult = () => {
-    if (pendingResult && !resultShown) {
+    if (!stopped && pendingResult && !resultShown) {
       resultShown = true;
       pendingResult();
     }
@@ -842,7 +861,9 @@ function mountTalk($el, opts) {
     passed,
   });
   const stop = () => {
+    saveResume();
     stopped = true;
+    openExercise?.cancel();
     clearInterval(tick);
     if (isNative && opts.lesson) activityEnd(actState(pendingResult && lastPassed ? 'completed' : 'ended', !!lastPassed));
     if (startedAt) {
@@ -864,13 +885,14 @@ function mountTalk($el, opts) {
         <span class="mic-caption">${tap ? (micOn ? 'Kalbėk… baigusi paspausk' : 'Paspausk ir kalbėk') : micOn ? 'Kalbėk – Ema klauso' : 'Mikrofonas išjungtas'}</span></div>
         <button class="icon-btn" id="speaker" aria-label="${speakerMuted ? 'Įjungti Emos garsą' : 'Nutildyti Emą'}" aria-pressed="${speakerMuted}">${icon(speakerMuted ? 'volume-off' : 'volume')}</button>
         <button class="icon-btn" id="end" aria-label="Baigti pokalbį">${icon('close')}</button></div>
-      <div class="textrow hidden" id="textrow"><input type="text" id="txt" placeholder="…arba parašyk" autocomplete="off" aria-label="Žinutė Emai">
+      <div class="textrow ${textOpen ? '' : 'hidden'}" id="textrow"><textarea id="txt" rows="2" placeholder="…arba parašyk" autocomplete="off" aria-label="Žinutė Emai">${esc(textDraft)}</textarea>
         <button class="btn" id="send" aria-label="Siųsti">${icon('send')}</button></div>
       ${opts.canAssess ? `<button class="text-link" id="assess">${icon('check')} Noriu įvertinimo</button>` : opts.mode === 'practice' ? `<button class="text-link" id="assess">${icon('check')} Baigti sesiją</button>` : ''}`;
     $controls.querySelector('#texttoggle').onclick = () => {
       const row = $controls.querySelector('#textrow');
-      row.classList.toggle('hidden');
-      if (!row.classList.contains('hidden')) row.querySelector('input').focus();
+      textOpen = !textOpen;
+      row.classList.toggle('hidden', !textOpen);
+      if (textOpen) { session?.endAudio(); row.querySelector('textarea').focus(); }
     };
     $controls.querySelector('#speaker').onclick = (event) => {
       speakerMuted = !speakerMuted;
@@ -882,9 +904,12 @@ function mountTalk($el, opts) {
     };
     $controls.querySelector('#mic').onclick = () => {
       if (player && player.ctx && player.ctx.state !== 'running') player.ctx.resume().catch(() => {});
-      micOn = !micOn;
+      if (textOpen) { textOpen = false; $controls.querySelector('#textrow').classList.add('hidden'); $controls.querySelector('#txt').blur(); micOn = true; }
+      else micOn = !micOn;
       if (!micOn && session) session.endAudio();
-      drawControls();
+      const button = $controls.querySelector('#mic');
+      button.classList.toggle('off', !micOn);
+      button.setAttribute('aria-pressed', String(micOn));
     };
     $controls.querySelector('#end').onclick = () => {
       stop();
@@ -894,16 +919,22 @@ function mountTalk($el, opts) {
       flushResult();
     };
     const $txt = $controls.querySelector('#txt');
+    $txt.oninput = () => { textDraft = $txt.value; saveResume(); };
     const send = () => {
       const t = $txt.value.trim();
-      if (!t || !session) return;
+      if (!t || !session?.ready) return;
       addText('me', t);
       bubble = null;
+      session.endAudio();
+      player?.stop();
+      awaitingEma = true;
       session.sendText(t);
+      textDraft = '';
       $txt.value = '';
+      saveResume();
     };
     $controls.querySelector('#send').onclick = send;
-    $txt.onkeydown = (e) => e.key === 'Enter' && send();
+    $txt.onkeydown = (e) => { if (e.key === 'Enter' && !e.isComposing && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } };
     const a = $controls.querySelector('#assess');
     if (a) a.onclick = () => {
       if (!session) return;
@@ -934,17 +965,27 @@ function mountTalk($el, opts) {
       if (isNative && opts.lesson) {
         activityUpdate(actState(reconnecting ? 'reconnecting' : speaking ? 'speaking' : openExercise ? 'exercise' : micOn || !mic ? 'listening' : 'thinking'));
       }
-      if (speaking) {
+      if (reconnecting) {
+        status('Atkuriamas ryšys – tekstas išsaugotas', '', 'thinking');
+      } else if (speaking) {
         listenSince = Date.now();
         status('Ema kalba', 'speaking');
       } else if (openExercise) {
         status('Užduotis ekrane', 'live', 'thinking');
+      } else if (textOpen) {
+        status('Rašyk – Ema palauks', '', 'listening');
+      } else if (micOn && Date.now() - lastSpeechAt < 1400) {
+        status('Klausau – neskubėk', 'live');
+      } else if (assessing) {
+        status('Vertinama…', '', 'thinking');
+      } else if (awaitingEma || modelGenerating) {
+        status('Ema ruošia atsakymą…', '', 'thinking');
       } else if (micOn) {
         status('Tavo eilė – kalbėk', 'live');
       } else {
         status(settings.micMode === 'tap' ? 'Paspausk mikrofoną ir kalbėk' : 'Mikrofonas išjungtas', 'live');
       }
-      if (mic && micOn && !speaking && !heardSound && !micWarned && Date.now() - listenSince > 10000) {
+      if (mic && micOn && !openExercise && !textOpen && !awaitingEma && !speaking && !heardSound && !micWarned && Date.now() - listenSince > 10000) {
         micWarned = true;
         sys('Negaunu garso iš mikrofono. Patikrink, ar programėlei leistas mikrofonas (iPhone: Nustatymai → Kalbėk!/Safari → Mikrofonas), arba rašyk tekstu.');
       }
@@ -959,6 +1000,7 @@ function mountTalk($el, opts) {
     }
     // Vienas garso kontekstas garsui ir mikrofonui – sukuriamas PASPAUDIMO metu (iPhone reikalavimas).
     player = new PcmPlayer();
+    player.setRate(settings.speechRate || 1);
     player.ensure();
     status('Jungiamasi…', '', 'thinking');
     $controls.innerHTML = '<button class="btn block" disabled>Jungiamasi…</button>';
@@ -967,12 +1009,12 @@ function mountTalk($el, opts) {
       try {
         mic = new MicRecorder({
           onChunk: (pcm) => {
-            if (!session || !micOn) return;
+            if (!session || !micOn || openExercise || textOpen || document.activeElement?.matches('input, textarea')) return;
             if (settings.micMode === 'auto' && player && player.playing) return; // kad Ema negirdėtų pati savęs
             session.sendAudio(pcm);
           },
           onLevel: (lvl) => {
-            if (lvl > 0.004) heardSound = true;
+            if (lvl > 0.004 && micOn && !player?.playing && !openExercise && !textOpen) { heardSound = true; lastSpeechAt = Date.now(); }
             micLevel = lvl;
             const ring = document.getElementById('ring');
             if (ring) {
@@ -999,6 +1041,7 @@ function mountTalk($el, opts) {
         // Egzaminams – modelis su gilesniu mąstymu (lėtesnis, bet tiksliau vertina).
         model: opts.lesson && opts.lesson.type === 'checkpoint' && settings.model === 'gemini-3.8-live' ? 'gemini-3.8-live-extended-thinking' : settings.model,
         voice: settings.voice,
+        micMode: settings.micMode,
         systemInstruction: opts.prompt(),
         tools: opts.tools,
       });
@@ -1031,19 +1074,79 @@ function mountTalk($el, opts) {
         actState('starting')
       );
     }
-    session.sendText('(The learner has just opened the lesson. Please start now.)');
+    if (exerciseState) {
+      presentExercise(exerciseState.q, exerciseState.secs, exerciseState.label, null, exerciseState.draft);
+      session.sendText('(The learner resumed with an unfinished on-screen exercise. Stay silent and wait for its result; do not start a new task.)');
+    } else session.sendText('(The learner has just opened the lesson. Please start now.)');
+  };
+
+  // Hold a blocking tool call until the learner submits. Never replace an active form.
+  const presentExercise = (q, secs, label, fc, draft = '') => {
+    session?.endAudio();
+    const d = document.createElement('div');
+    d.className = 'inline-exercise';
+    $tr.appendChild(d);
+    bubble = null; bubbleRole = '';
+    exerciseState = { q, secs, label, draft };
+    pendingExerciseCall = fc;
+    const deliver = (message) => {
+      awaitingEma = true;
+      const call = pendingExerciseCall;
+      pendingExerciseCall = null;
+      if (call) session?.sendToolResponse([{ id: call.id, name: call.name, response: { result: message } }]);
+      else session?.sendText(message); // Restored form belongs to an earlier connection.
+    };
+    openExercise = mountExercise(d, q, {
+      seconds: secs, draft, onChange: saveResume, canSubmit: () => !!session?.ready,
+      label: q.type === 'write' ? 'Rašymo užduotis' : 'Ema tau skyrė užduotį',
+      counter: q.type === 'write' ? 'Vertins Ema' : `${exDone + 1}`,
+      onDone: (r) => {
+        openExercise = null;
+        exerciseState = null;
+        if (q.type === 'write') {
+          writingDone = true;
+          fullLog.push({ role: 'app', text: `writing task "${q.q}" → learner wrote: ${r.given}` });
+          store.recordExercise(true);
+          saveResume();
+          deliver(
+              `[WRITING RESULT] Task: ${q.q} | learner wrote: «${r.given}» | Now correct it: call show_on_screen with the corrected text (keep the learner's ideas), praise what is good, explain the 1-2 most important mistakes very briefly (Lithuanian allowed), give a score 1-5, then continue the lesson.`
+            );
+          return;
+        }
+        exDone++;
+        if (r.ok) exRight++;
+        exLog.push({ ok: r.ok, label, given: r.given, right: r.right });
+        fullLog.push({ role: 'app', text: `exercise "${label}" → ${r.ok ? 'CORRECT' : 'WRONG'} (answered: ${r.given || '-'})` });
+        saveResume();
+        store.recordExercise(r.ok);
+        updateChips();
+        if ($exs) {
+          $exs.classList.remove('hidden');
+          $exs.querySelector('span').textContent = `${exRight}/${exDone}`;
+        }
+        const msg = `[EXERCISE RESULT] ${label} | learner answered: "${r.given || '(nothing)'}" | correct: "${r.right}" | ${
+          r.ok ? 'CORRECT' : r.timedOut ? 'WRONG (time ran out)' : 'WRONG'
+        } | ${r.seconds}s${secs ? ` of ${secs}s` : ''}. React briefly (praise or explain in 1-2 sentences, ask the learner to say the correct sentence aloud if wrong), then continue the lesson.`;
+        deliver(msg);
+      },
+    });
+    saveResume();
+    scroll();
   };
 
   const wire = (s) => {
-    s.addEventListener('audio', (e) => player && player.play(e.detail));
-    s.addEventListener('output-text', (e) => addText('tutor', e.detail));
-    s.addEventListener('input-text', (e) => addText('me', e.detail));
+    s.addEventListener('audio', (e) => { awaitingEma = false; modelGenerating = true; player?.play(e.detail); });
+    s.addEventListener('output-text', (e) => { modelGenerating = true; addText('tutor', e.detail); });
+    s.addEventListener('input-text', (e) => { if (!openExercise && !textOpen) { addText('me', e.detail); awaitingEma = true; } });
     s.addEventListener('interrupted', () => player && player.stop());
     s.addEventListener('turn-complete', () => {
+      modelGenerating = false;
+      awaitingEma = false;
       bubble = null;
       bubbleRole = '';
       if (pendingResult) setTimeout(flushResult, 1500);
     });
+    s.addEventListener('tool-cancelled', (e) => { if (e.detail.includes(pendingExerciseCall?.id)) pendingExerciseCall = null; });
     s.addEventListener('tool-call', async (e) => {
       const fc = e.detail;
       const args = fc.args || {};
@@ -1062,55 +1165,21 @@ function mountTalk($el, opts) {
         scroll();
         response = { result: 'shown on screen' };
       } else if (fc.name === 'give_exercise') {
-        const { q, error } = exerciseFromTool(args, opts.prepared || []);
-        if (error) {
-          response = { error: `Exercise not shown: ${error}. Fix the arguments and call give_exercise again.` };
+        if (openExercise) {
+          response = { error: 'The learner is still completing the current exercise. Keep it open and wait for its result. Do not reveal answers or assign another task.' };
         } else {
-          if (openExercise) openExercise.finish(true);
-          const d = document.createElement('div');
-          d.className = 'inline-exercise';
-          $tr.appendChild(d);
-          bubble = null;
-          bubbleRole = '';
-          const secs = Math.max(0, Math.min(120, Math.round(Number(args.seconds) || 0)));
-          const label = describeExercise(q, args.quiz_index || '').replace(/^#\S* /, '');
-          openExercise = mountExercise(d, q, {
-            seconds: secs,
-            label: q.type === 'write' ? 'Rašymo užduotis' : 'Ema tau skyrė užduotį',
-            counter: q.type === 'write' ? 'Vertins Ema' : `${exDone + 1}${opts.minTurns ? '' : ''}`,
-            onDone: (r) => {
-              openExercise = null;
-              if (q.type === 'write') {
-                writingDone = true;
-                fullLog.push({ role: 'app', text: `writing task "${q.q}" → learner wrote: ${r.given}` });
-                store.recordExercise(true);
-                saveResume();
-                session &&
-                  session.sendText(
-                    `[WRITING RESULT] Task: ${q.q} | learner wrote: «${r.given}» | Now correct it: call show_on_screen with the corrected text (keep the learner's ideas), praise what is good, explain the 1-2 most important mistakes very briefly (Lithuanian allowed), give a score 1-5, then continue the lesson.`
-                  );
-                return;
-              }
-              exDone++;
-              if (r.ok) exRight++;
-              exLog.push({ ok: r.ok, label, given: r.given, right: r.right });
-              fullLog.push({ role: 'app', text: `exercise "${label}" → ${r.ok ? 'CORRECT' : 'WRONG'} (answered: ${r.given || '-'})` });
-              saveResume();
-              store.recordExercise(r.ok);
-              updateChips();
-              if ($exs) {
-                $exs.classList.remove('hidden');
-                $exs.querySelector('span').textContent = `${exRight}/${exDone}`;
-              }
-              const msg = `[EXERCISE RESULT] ${label} | learner answered: "${r.given || '(nothing)'}" | correct: "${r.right}" | ${
-                r.ok ? 'CORRECT' : r.timedOut ? 'WRONG (time ran out)' : 'WRONG'
-              } | ${r.seconds}s${secs ? ` of ${secs}s` : ''}. React briefly (praise or explain in 1-2 sentences, ask the learner to say the correct sentence aloud if wrong), then continue the lesson.`;
-              session && session.sendText(msg);
-            },
-          });
-          scroll();
-          response = { result: 'Exercise is on the learner\'s screen. Say only a short encouragement now and wait silently for the [EXERCISE RESULT] message. Do not reveal the answer.' };
+          const { q, error } = exerciseFromTool(args, opts.prepared || []);
+          if (error) response = { error: `Exercise not shown: ${error}. Fix the arguments and try again.` };
+          else {
+            const secs = opts.lesson?.type === 'checkpoint' ? Math.max(0, Math.min(120, Number(args.seconds) || 0)) : 0;
+            presentExercise(q, secs, describeExercise(q, args.quiz_index || '').replace(/^#\S* /, ''), fc);
+            return; // This tool response is sent only after the learner submits the form.
+          }
         }
+      } else if (fc.name === 'complete_lesson' && assessing) {
+        response = { error: 'Assessment is already running. Wait for its result.' };
+      } else if (fc.name === 'complete_lesson' && openExercise) {
+        response = { error: 'An exercise is still open. Wait for the learner to submit it before assessing.' };
       } else if (fc.name === 'complete_lesson' && opts.onResult) {
         // Griežti saitai programoje (ne tik instrukcijose): Ema negali „padovanoti“ pamokos.
         const attempts = Math.max(0, Number(args.target_attempts) || 0);
@@ -1125,10 +1194,12 @@ function mountTalk($el, opts) {
           if (attempts < 6) missing.push(`only ${attempts} attempts at the target language counted (need at least 6)`);
           else if (acc < 0.75) missing.push(`accuracy ${(acc * 100).toFixed(0)}% is below 75%`);
           const crit = Array.isArray(args.criteria) ? args.criteria : [];
-          const unmet = crit.filter((c) => c && c.met === false).map((c) => c.criterion);
+          const requiredCriteria = opts.lesson?.speaking?.successCriteria?.length || 0;
+          if (crit.length < requiredCriteria) missing.push(`only ${crit.length} of ${requiredCriteria} success criteria assessed`);
+          const unmet = crit.filter((c) => !c || c.met !== true || !String(c.evidence || '').trim()).map((c) => c?.criterion || 'missing evidence');
           if (unmet.length) missing.push(`criteria not met: ${unmet.join('; ')}`);
         }
-        if (args.passed && opts.mode === 'practice' && turns < minTurns && !userWantsStop) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
+        if (args.passed && opts.mode === 'practice' && turns < minTurns) missing.push(`learner has spoken only ${turns} turns (minimum ${minTurns})`);
         if (args.passed && missing.length && !pendingResult && !userWantsStop) {
           sys(`Dar ne viskas: ${missing.length === 1 && /spoken only/.test(missing[0]) ? 'per mažai kalbėjai – Ema tęsia pamoką' : 'Ema tęsia pamoką, kad būtum tikrai pasiruošusi'}.`);
           response = { error: `Not accepted yet: ${missing.join('; ')}. Do not end the lesson. Continue practising the weak points for a few more turns, then call complete_lesson again.` };
@@ -1146,7 +1217,8 @@ function mountTalk($el, opts) {
           };
           if (r.passed && r.score < 60) r.passed = false;
           // Nepriklausomas vertintojas (Gemini 3.8 Flash per REST) – pamoka užskaitoma tik sutikus abiem.
-          if (opts.mode !== 'practice' && opts.lesson && apiKey()) {
+          if (r.passed && opts.mode !== 'practice' && opts.lesson && apiKey()) {
+            assessing = true;
             status('Vertinama…', '', 'thinking');
             sys('Nepriklausomas vertinimas – viso pokalbio peržiūra…');
             try {
@@ -1173,10 +1245,15 @@ function mountTalk($el, opts) {
               if (!r.advice_lt && v.advice_lt) r.advice_lt = v.advice_lt;
               if (!agreed && v.summary_lt) r.summary_lt = `${r.summary_lt} Vertintojas: ${v.summary_lt}`.trim();
             } catch (err) {
-              r.judge = { error: String(err.message || err) };
+              assessing = false;
+              saveResume();
+              sys('Vertinimo šiuo metu nepavyko užbaigti. Pokalbis išsaugotas. Spausk „Noriu įvertinimo“, kad bandytume dar kartą.');
+              s.sendToolResponse([{ id: fc.id, name: fc.name, response: { error: 'The independent assessment is temporarily unavailable. No result was saved. Tell the learner they can retry assessment; do not repeat the lesson or claim a pass.' } }]);
+              return;
             }
           }
-          if (r.passed) clearResume(opts.lesson && opts.lesson.id);
+          assessing = false;
+          if (r.passed) clearResume(resumeID);
           lastPassed = r.passed;
           if (isNative && opts.lesson) activityUpdate(actState(r.passed ? 'completed' : 'listening', r.passed));
           pendingResult = opts.onResult(r);
@@ -1227,6 +1304,9 @@ function mountTalk($el, opts) {
   };
 
   $controls.querySelector('#start').onclick = start;
+  if (prior?.transcriptLog) for (const entry of prior.transcriptLog.slice(-6)) {
+    const d = document.createElement('div'); d.className = `bubble ${entry.role === 'me' ? 'me' : 'tutor'}`; d.textContent = entry.text; $tr.appendChild(d);
+  }
   activeTalk = { stop };
 }
 

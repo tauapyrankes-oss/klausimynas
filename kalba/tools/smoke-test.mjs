@@ -45,18 +45,21 @@ let learnerTexts = 0;
 let prematureRejected = null;
 const PASS_ARGS = {
   passed: true, score: 88, target_attempts: 9, target_correct: 8,
-  criteria: [{ criterion: 'am/is/are', met: true, evidence: "I'm from Vilnius" }, { criterion: 'questions', met: true, evidence: 'Where are you from?' }],
+  criteria: ['identity', 'negative and short answer', 'questions', 'possessives', 'age and jobs'].map(criterion => ({ criterion, met: true, evidence: "I am a teacher. I am not from London. Yes, I am. Where are you from? What is your job? Are you married? Her name is Ona. Her job is interesting." })),
   summary_lt: 'Puikiai prisistatei!', strengths_lt: ['Teisingai vartoji am/is/are'],
   mistakes: [{ wrong: 'I from Lithuania', correct: "I'm from Lithuania", note_lt: 'Nepamiršk „am“.' }], advice_lt: 'Pakartok klausimus su „Are you…?“',
 };
 await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
+  let practiceSession = false;
   ws.onMessage((raw) => {
     const msg = JSON.parse(raw);
     sent.push(msg);
     const reply = (o) => ws.send(JSON.stringify(o));
-    if (msg.setup) return reply({ setupComplete: {} });
-    if (msg.realtimeInput && msg.realtimeInput.text) {
-      const text = msg.realtimeInput.text;
+    if (msg.setup) { practiceSession = /PRACTICE SESSION/.test(msg.setup.systemInstruction.parts[0].text); return reply({ setupComplete: {} }); }
+    const resultText = msg.toolResponse?.functionResponses?.find(f => f.name === 'give_exercise')?.response?.result;
+    if (msg.realtimeInput?.text || resultText) {
+      const text = msg.realtimeInput?.text || resultText;
+      if (/start now/i.test(text) && practiceSession) return reply({ serverContent: { outputTranscription: { text: 'Let us practise.' }, turnComplete: true } });
       if (/start now/i.test(text)) {
         reply({ serverContent: { modelTurn: { parts: [{ inlineData: { mimeType: 'audio/pcm;rate=24000', data: 'AAAAAAAAAAA=' } }] }, outputTranscription: { text: "Hi! I'm Ema. What's your name?" } } });
         reply({ toolCall: { functionCalls: [{ id: 'c1', name: 'show_on_screen', args: { title: 'Pattern', lines: ["I'm Ona — Aš esu Ona"] } }] } });
@@ -77,7 +80,7 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
         if (exResults === 2) reply({ toolCall: { functionCalls: [{ id: 'e3', name: 'give_exercise', args: { quiz_index: 2 } }] } });
         reply({ serverContent: { outputTranscription: { text: exResults === 2 ? 'One more!' : 'Super! Now tell me about you.' }, turnComplete: true } });
       } else if (/^FINAL$/.test(text)) {
-        reply({ toolCall: { functionCalls: [{ id: 'c4', name: 'complete_lesson', args: PASS_ARGS }] } });
+        reply({ toolCall: { functionCalls: [{ id: 'c4', name: 'complete_lesson', args: PASS_ARGS }, { id: 'c4-duplicate', name: 'complete_lesson', args: PASS_ARGS }] } });
         reply({ serverContent: { outputTranscription: { text: 'Well done!' }, turnComplete: true } });
       } else {
         learnerTexts++;
@@ -99,10 +102,11 @@ await ctx.routeWebSocket(/generativelanguage\.googleapis\.com/, (ws) => {
 let judgeCalls = 0;
 await page.route('**/models/gemini-3.8-flash:generateContent*', async (route) => {
   judgeCalls++;
+  if (judgeCalls === 1) return route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
   const body = JSON.parse(route.request().postData() || '{}');
   const promptText = body.contents[0].parts[0].text;
   if (!/Learner: /.test(promptText) || !/exercise "/.test(promptText)) fail('vertintojas negavo pokalbio ar užduočių');
-  await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ passed: true, score: 84, target_attempts: 10, target_correct: 8, criteria: [{ criterion: 'am/is/are', met: true, evidence: "I'm a teacher" }], mistakes: [{ wrong: 'I live Kaunas', correct: 'I live in Kaunas', note_lt: 'Reikia „in“.' }], summary_lt: 'Gerai.', advice_lt: 'Daugiau klausimų.' }) }] } }] }) });
+  await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify({ passed: true, score: 84, target_attempts: 10, target_correct: 8, criteria: PASS_ARGS.criteria, mistakes: [{ wrong: 'I live Kaunas', correct: 'I live in Kaunas', note_lt: 'Reikia „in“.' }], summary_lt: 'Gerai.', advice_lt: 'Daugiau klausimų.' }) }] } }] }) });
 });
 
 await page.goto(base);
@@ -176,7 +180,7 @@ await page.click('.inline-exercise .check');
 await page.waitForSelector('.inline-exercise .feedback.right');
 await page.waitForFunction(() => document.querySelectorAll('.bubble.tutor').length >= 2);
 await shot('4b-po-uzduoties');
-const exMsg = sent.find((m) => m.realtimeInput && /^\[EXERCISE RESULT\].*CORRECT/.test(m.realtimeInput.text || ''));
+const exMsg = sent.find((m) => m.toolResponse?.functionResponses?.some(f => /^\[EXERCISE RESULT\].*CORRECT/.test(f.response?.result || '')));
 if (!exMsg) fail('užduoties rezultatas nenusiųstas Emai');
 const errResp = sent.find((m) => m.toolResponse && m.toolResponse.functionResponses[0].id === 'e0');
 if (!errResp || !errResp.toolResponse.functionResponses[0].response.error) fail('klaidinga užduotis negrąžino klaidos');
@@ -185,7 +189,7 @@ await page.waitForSelector('.inline-exercise textarea');
 await page.fill('.inline-exercise textarea', 'I am Ona. I from Vilnius and I like coffee.');
 await page.click('.inline-exercise .check');
 await page.waitForFunction(() => [...document.querySelectorAll('.board')].some((b) => b.textContent.includes('Corrected')));
-if (!sent.some((m) => m.realtimeInput && /^\[WRITING RESULT\].*I from Vilnius/.test(m.realtimeInput.text || ''))) fail('rašymo rezultatas nenusiųstas');
+if (!sent.some((m) => m.toolResponse?.functionResponses?.some(f => /^\[WRITING RESULT\].*I from Vilnius/.test(f.response?.result || '')))) fail('rašymo rezultatas nenusiųstas');
 // Dar dvi užduotys ekrane (pasirenkame bet kurį atsakymą) – reikia ≥3 užduočių pamokai užskaityti.
 const solveNewest = async () => {
   await page.waitForFunction(() => { const e = [...document.querySelectorAll('.inline-exercise')].pop(); return e && !e.querySelector('.feedback') && (e.querySelector('.option, .inp, .bank .word')); });
@@ -213,6 +217,11 @@ for (let k = 1; k < need + 1; k++) {
 }
 await page.fill('#txt', 'FINAL');
 await page.click('#send');
+await page.waitForFunction(() => [...document.querySelectorAll('.bubble.sys')].some(b => b.textContent.includes('Vertinimo šiuo metu nepavyko')));
+if (await page.locator('.modal').count()) fail('nepasiekiamas vertintojas neturi užskaityti pamokos');
+const unfinished = await page.evaluate(id => JSON.parse(localStorage.getItem('kalba.progress.v1')).lessons[id], firstId);
+if (unfinished?.passed) fail('vertintojo klaida atrakino kitą pamoką');
+await page.fill('#txt', 'FINAL');await page.click('#send');
 await page.waitForSelector('.modal', { timeout: 12000 }).catch(async () => {
   console.log('SYS:', await page.locator('.bubble.sys').allInnerTexts(), 'judgeCalls', judgeCalls);
   throw new Error('modal timeout');
@@ -220,7 +229,9 @@ await page.waitForSelector('.modal', { timeout: 12000 }).catch(async () => {
 const modalTxt = await page.locator('.modal').innerText();
 if (!/8\/10 teisingai/.test(modalTxt)) fail('rezultate nėra vertintojo statistikos');
 if (!/Nepriklausomas vertinimas .*išlaikyta/.test(modalTxt)) fail('rezultate nėra nepriklausomo vertinimo');
-if (judgeCalls !== 1) fail(`vertintojas kviestas ${judgeCalls} k.`);
+const recorded = await page.evaluate(id => JSON.parse(localStorage.getItem('kalba.progress.v1')).lessons[id], firstId);
+if (recorded.attempts !== 1) fail('vertinimas įrašytas daugiau nei kartą');
+if (judgeCalls !== 2) fail(`vertintojas kviestas ${judgeCalls} k.`);
 if (!/I live in Kaunas/.test(modalTxt)) fail('vertintojo klaidos nesujungtos');
 await shot('4-rezultatas');
 const setup = sent.find((m) => m.setup);
