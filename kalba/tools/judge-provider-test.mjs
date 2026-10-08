@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {judgeLesson} from '../js/live.js';
+const args={apiKey:'gemini-test',lesson:{titleEn:'Introduction',grammar:{title:'to be'},speaking:{successCriteria:['Uses am/is/are']}},level:{name:'A1+'},transcript:'Learner: I am a teacher.',exercises:[],liveVerdict:{passed:true,score:88,attempts:8,correct:7},minTurns:8};
+const result={passed:true,score:88,target_attempts:8,target_correct:7,criteria:[{criterion:'Uses am/is/are',met:true,evidence:'I am a teacher.'}],mistakes:[],summary_lt:'Gerai.',advice_lt:'Pakartok klausimus.'};
+let calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,options,body:JSON.parse(options.body)});return {ok:true,json:async()=>({model:'nvidia/nemotron-3-super-120b-a12b:free',choices:[{message:{content:JSON.stringify(result)}}]})};};
+const verdict=await judgeLesson({...args,openRouterKey:'test-only-token'});
+assert.equal(verdict.passed,true);assert.match(verdict.model,/OpenRouter/);
+const call=calls[0];assert.equal(call.url,'https://openrouter.ai/api/v1/chat/completions');assert.equal(call.options.headers.Authorization,'Bearer test-only-token');assert(!call.url.includes('key='));
+assert.deepEqual(call.body.models,['nvidia/nemotron-3-super-120b-a12b:free','dots-studio/dots-3-note-preview:free']);assert.deepEqual(call.body.provider.max_price,{prompt:0,completion:0,request:0});assert(call.body.provider.require_parameters);
+const schema=call.body.response_format.json_schema;assert(schema.strict);assert.equal(schema.schema.additionalProperties,false);assert.equal(schema.schema.properties.criteria.items.additionalProperties,false);assert(schema.schema.required.includes('mistakes'));assert(schema.schema.required.includes('advice_lt'));
+const before=calls.length;await assert.rejects(()=>judgeLesson({...args,openRouterKey:'test',openRouterModel:'paid/model'}),/tik nemokami/);assert.equal(calls.length,before);
+globalThis.fetch=async()=>({ok:false,status:429,json:async()=>({error:{message:'rate limit'}})});await assert.rejects(()=>judgeLesson({...args,openRouterKey:'test'}),e=>e.status===429);
+globalThis.fetch=async()=>({ok:true,json:async()=>({error:{code:429}})});await assert.rejects(()=>judgeLesson({...args,openRouterKey:'test'}),e=>e.status===429);
+globalThis.fetch=async()=>({ok:true,json:async()=>({choices:[{message:{content:'{"passed":true}'}}]})});await assert.rejects(()=>judgeLesson({...args,openRouterKey:'test'}),/nepilnas/);
+globalThis.fetch=async()=>({ok:true,json:async()=>({choices:[{message:{content:JSON.stringify({...result,target_correct:1})}}]})});assert.equal((await judgeLesson({...args,openRouterKey:'test'})).passed,false);
+globalThis.fetch=async(url,options)=>{calls.push({url});return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:JSON.stringify(result)}]}}]})};};assert.equal((await judgeLesson(args)).model,'gemini-3.8-flash');assert(calls.at(-1).url.includes('generateContent'));
+console.log('OK: OpenRouter preferred, only free models with zero-price routing, strict schema, quota errors, fail-closed results and legacy Gemini path.');

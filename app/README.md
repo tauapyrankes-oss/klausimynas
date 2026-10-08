@@ -60,3 +60,9 @@ Rašymo laukeliai neturi laikmačio. `give_exercise` atsakomas tik pateikus tikr
 iOS balso tempą keičia `AVAudioUnitTimePitch` (0.85–1.15, išlaikomas balso aukštis). „Paspausk ir kalbėk“ siunčia rankines `activityStart` / `activityEnd` ribas; automatinis režimas toleruoja 1.4 s pauzę. Garsas siunčiamas tik po `setupComplete`.
 
 Papildomos regresijos iš saugyklos šaknies: `node kalba/tools/conversation-ux-test.mjs`, `BROWSER=webkit node kalba/tools/conversation-ux-test.mjs`, `node kalba/tools/live-turns-test.mjs`, `node kalba/tools/native-audio-test.mjs`, `node kalba/tools/talk-layout-test.mjs`. Naršyklių testuose Gemini imituotas; tikras Live API atskirai patikrintas laukiant 5 s prieš rašymo rezultato pateikimą.
+
+### Nemokamas nepriklausomas vertintojas
+
+Vietiniame `app/.env` įrašius `OPENROUTER_API_KEY` ir tik po aiškaus leidimo nustatant `EMBED_OPENROUTER_KEY=1`, `npm run sync` įdiegia raktą tik į ignoruojamą vietinio paketo `config.js`. Gemini raktas toliau naudojamas tik Live pokalbiui; vertinimui pirmiausia pasirenkamas `nvidia/nemotron-3-super-120b-a12b:free`, atsarginis – `dots-studio/dots-3-note-preview:free`. Prašomas griežtas JSON, tik jį palaikantys tiekėjai ir nulio kainos riba. Be OpenRouter rakto išlieka ankstesnis Gemini vertintojas. Užklausų ribos gali galioti ir nemokamiems modeliams; nepavykus vertinimui sesija išsaugoma, pamoka automatiškai neužskaitoma.
+
+Regresija: `node kalba/tools/judge-provider-test.mjs`. Raktų niekada nekomituoti ir neįtraukti į testų išvestį.

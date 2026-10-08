@@ -8,7 +8,7 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 - `curriculum/<lygis>.js` – kursas, schema: `docs/CURRICULUM_SCHEMA.md`. Pamokų tvarka = atrakinimo tvarka.
 - `js/app.js` – UI ir maršrutai (`#/path`, `#/lesson/<id>/<learn|quiz|talk>`, `#/talk`, `#/sprint`, `#/stats`, `#/settings`).
 - `js/live.js` – Gemini Live klientas, Live modelių radimas (`listLiveModels`) ir nepriklausomas vertintojas
-  `judgeLesson` (Gemini 3.8 Flash per REST peržiūri visą pokalbį; pamoka užskaitoma tik sutikus abiem). Egzaminams – `gemini-3.8-live-extended-thinking`.
+  `judgeLesson` (su `OPENROUTER_API_KEY` naudoja nemokamą OpenRouter vertintoją; be jo – seną Gemini Flash kelią. Pamoka užskaitoma tik sutikus abiem). Egzaminams – `gemini-3.8-live-extended-thinking`.
 - `js/audio.js`, `js/pcm-worklet.js` – mikrofonas 16 kHz PCM16 → API; grojimas 24 kHz PCM16.
 - `js/prompt.js` – Emos sistemos instrukcijos ir įrankiai: `complete_lesson` (vienintelis būdas
   pažymėti pamoką išmokta), `give_exercise` (užduotys ekrane, įskaitant rašymą), `show_theory`, `show_on_screen`.
@@ -34,3 +34,5 @@ Anglų kalbos kalbėjimo programėlė (PWA) lietuvei: A1+ → B1. Balso mokytoja
 - Pakeitus kursą: `node tools/validate.mjs` turi rodyti `OK`.
 - Testai naršyklėje: `node tools/smoke-test.mjs` (reikia `npm i playwright`; imituoja Gemini Live serverį).
 - Vartotojo tekstai – lietuviškai su diakritikais.
+
+- Native OpenRouter raktas: tik ignoruojamame `app/.env`; `copy-web.mjs` įdiegia į vietinį `config.js`. Vertinimui leidžiami tik `:free` arba `openrouter/free`, `provider.max_price` visada 0. Nemokamo vertintojo klaida negali atrakinti pamokos. Pokalbio Gemini Live ir baigtų pamokų pažangos nekeisti.

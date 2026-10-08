@@ -12,6 +12,7 @@ const { settings } = store;
 // Native programėlėje raktas įdiegiamas kompiliuojant (app/.env → www/js/config.js, į GitHub nepatenka).
 const BUILTIN_KEY = (window.KALBEK_CONFIG && window.KALBEK_CONFIG.geminiKey) || '';
 const apiKey = () => settings.apiKey || BUILTIN_KEY;
+const BUILTIN_OPENROUTER_KEY = window.KALBEK_CONFIG?.openRouterKey || '';
 // Gemini Live modeliai (2026 m. spalis): numatytasis – gemini-3.8-live.
 const KNOWN_LIVE = ['gemini-3.8-live', 'gemini-3.8-live-extended-thinking', 'gemini-3.1-flash-live-preview'];
 setSfx(settings.sfx !== 'off');
@@ -1216,7 +1217,7 @@ function mountTalk($el, opts) {
             criteria: Array.isArray(args.criteria) ? args.criteria : [],
           };
           if (r.passed && r.score < 60) r.passed = false;
-          // Nepriklausomas vertintojas (Gemini 3.8 Flash per REST) – pamoka užskaitoma tik sutikus abiem.
+          // Nepriklausomas tekstinis vertintojas – pamoka užskaitoma tik sutikus abiem.
           if (r.passed && opts.mode !== 'practice' && opts.lesson && apiKey()) {
             assessing = true;
             status('Vertinama…', '', 'thinking');
@@ -1224,6 +1225,7 @@ function mountTalk($el, opts) {
             try {
               const v = await judgeLesson({
                 apiKey: apiKey(),
+                openRouterKey: BUILTIN_OPENROUTER_KEY,
                 lesson: opts.lesson,
                 level: opts.level || { name: '' },
                 transcript: fullLog.map((t) => `${t.role === 'me' ? 'Learner' : t.role === 'app' ? '[app]' : 'Tutor'}: ${t.text.trim()}`).join('\n'),
@@ -1247,7 +1249,7 @@ function mountTalk($el, opts) {
             } catch (err) {
               assessing = false;
               saveResume();
-              sys('Vertinimo šiuo metu nepavyko užbaigti. Pokalbis išsaugotas. Spausk „Noriu įvertinimo“, kad bandytume dar kartą.');
+              sys(err.status === 429 ? 'Pasiekta nemokamo vertintojo užklausų riba. Pokalbis išsaugotas – galėsi pakartoti tik vertinimą vėliau.' : 'Vertinimo šiuo metu nepavyko užbaigti. Pokalbis išsaugotas. Spausk „Noriu įvertinimo“, kad bandytume dar kartą.');
               s.sendToolResponse([{ id: fc.id, name: fc.name, response: { error: 'The independent assessment is temporarily unavailable. No result was saved. Tell the learner they can retry assessment; do not repeat the lesson or claim a pass.' } }]);
               return;
             }
